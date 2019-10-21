@@ -39,6 +39,7 @@
     "testcafe": "^1.0.1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.3.4"
+    "@babel/runtime": "^7.3.4",
+    "uuid": "3.3.3"
   }
 }
