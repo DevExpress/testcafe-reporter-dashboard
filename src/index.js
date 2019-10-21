@@ -1,25 +1,28 @@
-module.exports = function () {
+const uuid = require('uuid');
+const sendCommand = require('./send-resove-command');
+
+export default function () {
+    const id = uuid();
+
     return {
-        noColors: true,
-        
-        reportTaskStart (/* startTime, userAgents, testCount */) {
-            throw new Error('Not implemented');
+        async reportTaskStart (startTime, userAgents, testCount) {
+            await sendCommand(id, 'reportTaskStart', { startTime, userAgents, testCount });
         },
 
-        reportFixtureStart (/* name, path */) {
-            throw new Error('Not implemented');
+        async reportFixtureStart (name, path, meta) {
+            await sendCommand(id, 'reportFixtureStart', { name, path, meta });
         },
 
-        reportTestStart (/* name, testMeta */) {
-            // NOTE: This method is optional.
+        async reportTestStart (name, meta) {
+            await sendCommand(id, 'reportTestStart', { name, meta });
         },
 
-        reportTestDone (/* name, testRunInfo */) {
-            throw new Error('Not implemented');
+        async reportTestDone (name, testRunInfo, meta) {
+            await sendCommand(id, 'reportTestDone', { name, testRunInfo, meta });
         },
 
-        reportTaskDone (/* endTime, passed, warnings */) {
-            throw new Error('Not implemented');
+        async reportTaskDone (endTime, passed, warnings, result) {
+            await sendCommand(id, 'reportTaskDone', { endTime, passed, warnings, result });
         }
     };
-};
+}
