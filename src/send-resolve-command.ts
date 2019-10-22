@@ -27,8 +27,7 @@ export default function sendResolveCommand (id, commandType, payload) {
             aggregateId:   id,
             aggregateName: 'Report',
 
-            payload,
-            ownerId: AUTHORIZATION_TOKEN
+            payload: { ownerId: AUTHORIZATION_TOKEN, ...payload },
         }));
 
         setTimeout(resolve, 100);
