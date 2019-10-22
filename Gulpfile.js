@@ -1,8 +1,9 @@
 var gulp    = require('gulp');
 var eslint  = require('gulp-eslint');
-var babel   = require('gulp-babel');
 var mocha   = require('gulp-mocha');
 var del     = require('del');
+
+var gulpTypeScript = require('gulp-typescript');
 
 function clean (cb) {
     del('lib', cb);
@@ -21,9 +22,11 @@ function lint () {
 }
 
 function build () {
+    const tsConfig = gulpTypeScript.createProject('tsconfig.json');
+
     return gulp
-        .src('src/**/*.js')
-        .pipe(babel())
+        .src('src/**/*.ts')
+        .pipe(tsConfig())
         .pipe(gulp.dest('lib'));
 }
 
@@ -55,5 +58,5 @@ function preview () {
 exports.clean = clean;
 exports.lint = lint;
 exports.test = gulp.series(clean, lint, build, test);
-exports.build = gulp.series(clean, lint, build);
+exports.build = gulp.series(clean, build);
 exports.preview = gulp.series(clean, lint, build, preview);

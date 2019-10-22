@@ -1,0 +1,14 @@
+{
+  "include": [ "./src"],
+  "compilerOptions": {
+    "outDir": "./lib",
+    "target": "esnext",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "allowSyntheticDefaultImports": true
+  }
+}

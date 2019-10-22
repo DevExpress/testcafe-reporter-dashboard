@@ -1,7 +1,7 @@
-const uuid = require('uuid');
-const sendCommand = require('./send-resove-command');
+import uuid from 'uuid';
+import sendCommand from './send-resolve-command';
 
-export default function () {
+module.exports = function plaginFactory () {
     const id = uuid();
 
     return {
