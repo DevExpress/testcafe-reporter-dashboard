@@ -18,7 +18,7 @@ export default async function sendResolveCommand (id, commandType, payload) {
         return;
 
     return new Promise(async (resolve) => {
-        fetch(`http://localhost:3000/api/commands/`, {
+        fetch(`${DASHBOARD_LOCATION}/api/commands/`, {
             method: 'POST',
             headers: {
             'Content-Type': 'application/json'
