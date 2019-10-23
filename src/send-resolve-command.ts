@@ -7,7 +7,7 @@ let   DASHBOARD_LOCATION  = process.env.TESTCAFE_DASHBOARD_URL;
 if (!DASHBOARD_LOCATION) {
     DASHBOARD_LOCATION = 'http://localhost:3000';
 
-    console.warn(`The 'TESTCAFE_DASHBOARD_URL' enviromente variable is not defined. The ${DASHBOARD_LOCATION} url will be used by default.`)
+    console.warn(`The 'TESTCAFE_DASHBOARD_URL' environment variable is not defined. The ${DASHBOARD_LOCATION} url will be used by default.`)
 }
 
 if (!AUTHORIZATION_TOKEN)
@@ -18,7 +18,7 @@ export default async function sendResolveCommand (id, commandType, payload) {
         return;
 
     return new Promise(async (resolve) => {
-        fetch(`${DASHBOARD_LOCATION}/api/commands/`, {
+        fetch(`http://localhost:3000/api/commands/`, {
             method: 'POST',
             headers: {
             'Content-Type': 'application/json'
