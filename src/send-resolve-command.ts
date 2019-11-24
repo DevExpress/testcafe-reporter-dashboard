@@ -21,14 +21,14 @@ export default async function sendResolveCommand (id, commandType, payload) {
         fetch(`${DASHBOARD_LOCATION}/api/commands/`, {
             method: 'POST',
             headers: {
-            'Content-Type': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 type:          commandType,
                 aggregateId:   id,
                 aggregateName: 'Report',
 
-                payload: { ownerId: AUTHORIZATION_TOKEN, ...payload },
+                payload: { authorizationToken: AUTHORIZATION_TOKEN, ...payload },
             })
         })
         .then(function(response) {
