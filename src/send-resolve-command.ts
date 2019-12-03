@@ -19,16 +19,17 @@ export default async function sendResolveCommand (id, commandType, payload) {
 
     return new Promise(async (resolve) => {
         fetch(`${DASHBOARD_LOCATION}/api/commands/`, {
-            method: 'POST',
+            method:  'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
             },
+
             body: JSON.stringify({
                 type:          commandType,
                 aggregateId:   id,
                 aggregateName: 'Report',
-
-                payload: { authorizationToken: AUTHORIZATION_TOKEN, ...payload },
+                payload:       payload
             })
         })
         .then(function(response) {
