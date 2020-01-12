@@ -1,38 +1,39 @@
-const http  = require('http');
-const fetch = require('isomorphic-fetch');
+import fetch from 'isomorphic-fetch';
+import {
+    ENABLE_LOG,
+    TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
+    TESTCAFE_DASHBOARD_URL
+} from './env-variables';
 
 const CONCURRENT_ERROR_CODE = 408;
+const SUCCESS_STATUS_CODE   = 200;
+const MAX_RETRY_COUNT       = 5;
 
-const MAX_RETRY_COUNT     = 5;
-const ENABLE_LOG          = process.env.ENABLE_LOG;
-const AUTHORIZATION_TOKEN = process.env.TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN;
-let   DASHBOARD_LOCATION  = process.env.TESTCAFE_DASHBOARD_URL;
+let dashboardLocation = TESTCAFE_DASHBOARD_URL;
 
-if (!DASHBOARD_LOCATION) {
-    DASHBOARD_LOCATION = 'http://localhost:3000';
+if (!dashboardLocation) {
+    dashboardLocation = 'http://localhost:3000';
 
-    console.warn(`The 'TESTCAFE_DASHBOARD_URL' environment variable is not defined. The ${DASHBOARD_LOCATION} url will be used by default.`)
+    console.warn(`The 'TESTCAFE_DASHBOARD_URL' environment variable is not defined. The ${dashboardLocation} url will be used by default.`)
 }
 
 if (!AUTHORIZATION_TOKEN)
     console.error('\'TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN\' is not defined');
 
 async function sendCommand (id, commandType, payload) {
-    return new Promise(async (resolve) => {
-        fetch(`${DASHBOARD_LOCATION}/api/commands/`, {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
-            },
+    return fetch(`${dashboardLocation}/api/commands/`, {
+        method:  'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
+        },
 
-            body: JSON.stringify({
-                type:          commandType,
-                aggregateId:   id,
-                aggregateName: 'Report',
-                payload:       payload
-            })
-        });
+        body: JSON.stringify({
+            type:          commandType,
+            aggregateId:   id,
+            aggregateName: 'Report',
+            payload:       payload
+        })
     });
 }
 
@@ -57,7 +58,7 @@ export default async function sendResolveCommand (id, commandType, payload) {
 
         const message = `${commandType} ${retryCount}: ${response.status} ${response.statusText}`;
 
-        if (response.status !== 200)
+        if (response.status !== SUCCESS_STATUS_CODE)
             console.error(message);
         else if (ENABLE_LOG)
             console.log(message);

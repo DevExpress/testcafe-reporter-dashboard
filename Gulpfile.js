@@ -32,7 +32,7 @@ function build () {
 
 function test () {
     return gulp
-        .src('test/test.js')
+        .src('test/*.js')
         .pipe(mocha({
             ui:       'bdd',
             reporter: 'spec',
