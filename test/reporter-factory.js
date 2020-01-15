@@ -13,7 +13,7 @@ describe('reportTaskStart', () => {
         mock.stopAll();
     });
 
-    it('Show reporter ulr message', async () => {
+    it('Show reporter URL message', async () => {
         const logs = [];
 
         let reportId = null;
@@ -35,7 +35,7 @@ describe('reportTaskStart', () => {
         await reporter.reportTaskStart(1, {}, 1);
 
         assert.equal(logs.length, 1);
-        assert.equal(logs[0], `Task execution report is available by the following URL: http://localhost/details/${reportId}`);
+        assert.equal(logs[0], `Task execution report: http://localhost/details/${reportId}`);
     
         mock.stop('../lib/logger');
         mock.stop('isomorphic-fetch');
