@@ -5,6 +5,7 @@ import {
     TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
+import { ResolveCommand } from './types';
 
 const CONCURRENT_ERROR_CODE = 408;
 const SUCCESS_STATUS_CODE   = 200;
@@ -15,13 +16,13 @@ let dashboardLocation = TESTCAFE_DASHBOARD_URL;
 if (!dashboardLocation) {
     dashboardLocation = 'http://localhost:3000';
 
-    logger.warn(`The 'TESTCAFE_DASHBOARD_URL' environment variable is not defined. The ${dashboardLocation} url will be used by default.`)
+    logger.warn(`The 'TESTCAFE_DASHBOARD_URL' environment variable is not defined. The ${dashboardLocation} url will be used by default.`);
 }
 
 if (!AUTHORIZATION_TOKEN)
     logger.error('\'TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN\' is not defined');
 
-async function sendCommand (id, commandType, payload) {
+async function sendCommand (command: ResolveCommand) {
     return fetch(`${dashboardLocation}/api/commands/`, {
         method:  'POST',
         headers: {
@@ -29,16 +30,13 @@ async function sendCommand (id, commandType, payload) {
             'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
         },
 
-        body: JSON.stringify({
-            type:          commandType,
-            aggregateId:   id,
-            aggregateName: 'Report',
-            payload:       payload
-        })
+        body: JSON.stringify(command)
     });
 }
 
-export default async function sendResolveCommand (id, commandType, payload) {
+export default async function sendResolveCommand (command: ResolveCommand): Promise<void> {
+    const { aggregateId, type: commandType } = command;
+
     if (!AUTHORIZATION_TOKEN)
         return;
 
@@ -47,10 +45,10 @@ export default async function sendResolveCommand (id, commandType, payload) {
 
     do {
         try {
-            response = await sendCommand(id, commandType, payload);
+            response = await sendCommand(command);
         }
         catch (e) {
-            logger.error(`${id}, ${commandType}, ${retryCount}, ${e.message}`);
+            logger.error(`${aggregateId}, ${commandType}, ${retryCount}, ${e.message}`);
 
             return;
         }
