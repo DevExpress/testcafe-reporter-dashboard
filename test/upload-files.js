@@ -87,6 +87,7 @@ describe('reportTestDone', () => {
         const reporter = mock.reRequire('../lib/index')();
 
         await reporter.reportTestDone('Test 1', { screenshots });
+        await reporter.reportTaskDone('', 1, [], {});
 
         assert.equal(uploadInfos.length, 2);
         assert.equal(uploadedUrls.length, 2);
