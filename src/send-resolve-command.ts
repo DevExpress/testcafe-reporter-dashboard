@@ -8,7 +8,6 @@ import {
 import { ResolveCommand } from './types';
 
 const CONCURRENT_ERROR_CODE = 408;
-const SUCCESS_STATUS_CODE   = 200;
 const MAX_RETRY_COUNT       = 5;
 
 let dashboardLocation = TESTCAFE_DASHBOARD_URL;
@@ -57,7 +56,7 @@ export default async function sendResolveCommand (command: ResolveCommand): Prom
 
         const message = `${commandType} ${retryCount}: ${response.status} ${response.statusText}`;
 
-        if (response.status !== SUCCESS_STATUS_CODE)
+        if (!response.ok)
             logger.error(message);
         else if (ENABLE_LOG)
             logger.log(message);

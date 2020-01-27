@@ -36,8 +36,6 @@ module.exports = function plaginFactory () {
         },
 
         async reportTestDone (name, testRunInfo, meta) {
-            const uploadIdList = [];
-
             if (testRunInfo.screenshots.length) {
                 for (const screenshotInfo of testRunInfo.screenshots) {
                     const { screenshotPath } = screenshotInfo;
@@ -49,7 +47,7 @@ module.exports = function plaginFactory () {
                         continue;
                     }
 
-                    uploadIdList.push(uploadInfo.uploadId);
+                    screenshotInfo.uploadId = uploadInfo.uploadId;
 
                     uploads.push(uploadFile(screenshotPath, uploadInfo));
                 }
