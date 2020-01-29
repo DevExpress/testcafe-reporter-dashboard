@@ -4,7 +4,7 @@ const uuid   = require('uuid');
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
-describe('reportTestDone', () => {
+describe('Upload files', () => {
     before(() => {
         mock('../lib/env-variables', {
             TESTCAFE_DASHBOARD_URL,
@@ -13,10 +13,10 @@ describe('reportTestDone', () => {
     });
 
     after(() => {
-        mock.stopAll();
+        mock.stop('../lib/env-variables');
     });
 
-    it.only('Upload files', async () => {
+    it('Smoke test', async () => {
         const uploadUrlPrefix   = 'http://upload_url/';
         const uploadInfos       = [];
         const aggregateCommands = [];
@@ -84,6 +84,9 @@ describe('reportTestDone', () => {
             }
         });
 
+        mock.reRequire('../lib/fetch');
+        mock.reRequire('../lib/upload');
+        
         const reporter = mock.reRequire('../lib/index')();
 
         await reporter.reportTestDone('Test 1', { screenshots });

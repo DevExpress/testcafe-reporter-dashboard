@@ -10,7 +10,7 @@ describe('reportTaskStart', () => {
     });
 
     after(() => {
-        mock.stopAll();
+        mock.stop('../lib/env-variables');
     });
 
     it('Show reporter URL message', async () => {

@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { promisify } from 'util';
-import fetch from 'isomorphic-fetch';
 import sendResolveCommand from './send-resolve-command';
 import {
     TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
@@ -8,81 +7,65 @@ import {
 } from './env-variables';
 import { CommandTypes, AggregateNames } from './consts';
 import { UploadInfo } from './types';
+import logger from './logger';
+import { createGetUploadInfoError, createFileUploadError } from './texts';
+import fetch from './fetch';
 
 const readFile = promisify(fs.readFile);
 
-function getErrorFromResponse (response) {
-    return  new Error(`${response.status} ${response.statusText}`);
-}
-
-export async function getUploadInfo (reportId: string): Promise<UploadInfo> {
-    return new Promise((resolve, reject) => {
-        fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${reportId}`, {
-            method: 'GET',
-            headers: {
-                authorization: `Bearer ${AUTHORIZATION_TOKEN}`
-            }
-        })
-        .then(response => {
-            if (!response.ok)
-                reject({ error: getErrorFromResponse(response) });
-
-            resolve(response.json());
-        })
-        .catch(error => {
-            reject({ error });
-        });
+export async function getUploadInfo (reportId: string, filePath: string): Promise<UploadInfo> {
+    const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${reportId}`, {
+        method: 'GET',
+        headers: {
+            authorization: `Bearer ${AUTHORIZATION_TOKEN}`
+        }
     });
+
+    if (response.ok)
+        return await response.json();
+
+    logger.error(createGetUploadInfoError(filePath, response.toString()));
+
+    return null;
 }
 
-export async function uploadFile (filePath: string, uploadInfo: UploadInfo) {
+export async function uploadFile (filePath: string, uploadInfo: UploadInfo, reportId: string) {
     const { uploadUrl, uploadId } = uploadInfo;
-
-    await sendResolveCommand({
-        aggregateId: uploadId,
-        aggregateName: AggregateNames.File,
-        type: CommandTypes.fileNotLoaded
-    });
 
     const file            = await readFile(filePath);
     const fileSizeInBytes = file.length;
 
-    try {
-        await sendResolveCommand({
-            aggregateId: uploadId,
-            aggregateName: AggregateNames.File,
-            type: CommandTypes.startLoadingFile
-        });
+    await sendResolveCommand({
+        aggregateId: uploadId,
+        aggregateName: AggregateNames.Upload,
+        type: CommandTypes.startUpload,
 
-        await new Promise((resolve, reject) => {
-            fetch(uploadUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Length': fileSizeInBytes
-                },
-                body: file
-            })
-            .then(response => {
-                if (!response.ok)
-                    throw getErrorFromResponse(response);
-    
-                resolve();
-            });
-        });
-    } catch (error) {
+        payload: { reportId }
+    });
+
+    const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+            'Content-Length': fileSizeInBytes
+        },
+        body: file
+    });
+
+    if (response.ok) {
         await sendResolveCommand({
             aggregateId: uploadId,
-            aggregateName: AggregateNames.File,
-            type: CommandTypes.failureLoadingFile,
-            payload: { error: error.message }
+            aggregateName: AggregateNames.Upload,
+            type: CommandTypes.completeUpload
         });
 
         return;
     }
 
+    logger.error(createFileUploadError(uploadId, filePath, response.toString()));
+
     await sendResolveCommand({
         aggregateId: uploadId,
-        aggregateName: AggregateNames.File,
-        type: CommandTypes.successLoadingFile
+        aggregateName: AggregateNames.Upload,
+        type: CommandTypes.failUpload
     });
 }

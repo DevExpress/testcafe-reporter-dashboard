@@ -17,11 +17,15 @@ describe('sendResolveCommand', () => {
     it('Retry command test', async () => {
         let sendCommandCount = 0;
 
-        mock('isomorphic-fetch', () => {
+        mock('isomorphic-fetch', function retryCommandTest () {
             sendCommandCount++;
 
-            return Promise.resolve({ status: sendCommandCount === 1 ? 408 : 200 });
+            const response = sendCommandCount === 1 ? { status: 408, ok: false } : { status: 200, ok: true };
+
+            return Promise.resolve(response);
         });
+
+        mock.reRequire('../lib/fetch');
 
         const sendResolveCommand = mock.reRequire('../lib/send-resolve-command').default;
 

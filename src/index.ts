@@ -39,17 +39,13 @@ module.exports = function plaginFactory () {
             if (testRunInfo.screenshots.length) {
                 for (const screenshotInfo of testRunInfo.screenshots) {
                     const { screenshotPath } = screenshotInfo;
-                    const uploadInfo         = await getUploadInfo(id);
+                    const uploadInfo         = await getUploadInfo(id, screenshotPath);
 
-                    if (uploadInfo.error) {
-                        logger.error(`Failed to get upload info for ${screenshotPath}. ${uploadInfo.error.message}`);
-
-                        continue;
-                    }
+                    if (!uploadInfo) continue;
 
                     screenshotInfo.uploadId = uploadInfo.uploadId;
 
-                    uploads.push(uploadFile(screenshotPath, uploadInfo));
+                    uploads.push(uploadFile(screenshotPath, uploadInfo, id));
                 }
             }
 

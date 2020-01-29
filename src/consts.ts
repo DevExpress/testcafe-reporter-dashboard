@@ -5,13 +5,12 @@ export enum CommandTypes {
     reportTestDone     = 'reportTestDone',
     reportTaskDone     = 'reportTaskDone',
 
-    fileNotLoaded      = 'fileNotLoaded',
-    startLoadingFile   = 'startLoadingFile',
-    failureLoadingFile = 'failureLoadingFile',
-    successLoadingFile = 'successLoadingFile'
+    startUpload    = 'startUpload',
+    failUpload     = 'failUpload',
+    completeUpload = 'completeUpload'
 };
 
 export enum AggregateNames {
     Report = 'Report',
-    File   = 'File'
+    Upload = 'Upload'
 };

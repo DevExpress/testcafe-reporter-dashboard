@@ -9,6 +9,5 @@ export type ResolveCommand<TPayload = Record<string, any>> = {
 
 export type UploadInfo = {
     uploadUrl: string,
-    uploadId:  string,
-    error?:    any
+    uploadId:  string
 }
