@@ -1,44 +1,38 @@
-import fetch from 'isomorphic-fetch';
-import logger from './logger';
+import { DASHBOARD_LOCATION_NOT_DEFINED, AUTHORIZATION_TOKEN_NOT_DEFINED } from './texts';
 import {
-    ENABLE_LOG,
     TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
-    TESTCAFE_DASHBOARD_URL
+    TESTCAFE_DASHBOARD_URL,
+    ENABLE_LOG
 } from './env-variables';
+import { ResolveCommand } from './types';
+
+import fetch from './fetch';
+import logger from './logger';
 
 const CONCURRENT_ERROR_CODE = 408;
-const SUCCESS_STATUS_CODE   = 200;
 const MAX_RETRY_COUNT       = 5;
 
-let dashboardLocation = TESTCAFE_DASHBOARD_URL;
-
-if (!dashboardLocation) {
-    dashboardLocation = 'http://localhost:3000';
-
-    logger.warn(`The 'TESTCAFE_DASHBOARD_URL' environment variable is not defined. The ${dashboardLocation} url will be used by default.`)
-}
+if (!TESTCAFE_DASHBOARD_URL)
+    logger.error(DASHBOARD_LOCATION_NOT_DEFINED);
 
 if (!AUTHORIZATION_TOKEN)
-    logger.error('\'TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN\' is not defined');
+    logger.error(AUTHORIZATION_TOKEN_NOT_DEFINED);
 
-async function sendCommand (id, commandType, payload) {
-    return fetch(`${dashboardLocation}/api/commands/`, {
+async function sendCommand (command: ResolveCommand) {
+    return fetch(`${TESTCAFE_DASHBOARD_URL}/api/commands/`, {
         method:  'POST',
         headers: {
             'Content-Type': 'application/json',
             'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
         },
 
-        body: JSON.stringify({
-            type:          commandType,
-            aggregateId:   id,
-            aggregateName: 'Report',
-            payload:       payload
-        })
+        body: JSON.stringify(command)
     });
 }
 
-export default async function sendResolveCommand (id, commandType, payload) {
+export default async function sendResolveCommand (command: ResolveCommand): Promise<void> {
+    const { aggregateId, type: commandType } = command;
+
     if (!AUTHORIZATION_TOKEN)
         return;
 
@@ -46,23 +40,14 @@ export default async function sendResolveCommand (id, commandType, payload) {
     let retryCount = 0;
 
     do {
-        try {
-            response = await sendCommand(id, commandType, payload);
-        }
-        catch (e) {
-            logger.error(`${id}, ${commandType}, ${retryCount}, ${e.message}`);
-
-            return;
-        }
+        response = await sendCommand(command);
 
         retryCount++;
 
-        const message = `${commandType} ${retryCount}: ${response.status} ${response.statusText}`;
-
-        if (response.status !== SUCCESS_STATUS_CODE)
-            logger.error(message);
+        if (!response.ok)
+            logger.error(`${aggregateId} ${commandType} ${response}`);
         else if (ENABLE_LOG)
-            logger.log(message);
+            logger.log(response);
 
     } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= MAX_RETRY_COUNT)
 }

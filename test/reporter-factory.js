@@ -10,7 +10,7 @@ describe('reportTaskStart', () => {
     });
 
     after(() => {
-        mock.stopAll();
+        mock.stop('../lib/env-variables');
     });
 
     it('Show reporter URL message', async () => {
@@ -21,7 +21,7 @@ describe('reportTaskStart', () => {
         mock('isomorphic-fetch', (_, request) => {
             reportId = JSON.parse(request.body).aggregateId;
 
-            return Promise.resolve({ status: 200, statusText: 'OK' });
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
         });
 
         mock('../lib/logger', {
