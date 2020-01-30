@@ -104,6 +104,10 @@ describe('Upload files', () => {
         assert.equal(uploadedFiles[0], 'take_screenshot_action');
         assert.equal(uploadedFiles[1], 'screenshot_on_fail');
 
+        assert.equal(screenshotPaths.length, 2);
+        assert.equal(screenshotPaths[0], 'C:\\screenshots\\1.png');
+        assert.equal(screenshotPaths[1], 'C:\\screenshots\\errors\\1.png');
+
         mock.stop('isomorphic-fetch');
         mock.stop('fs');
     });
