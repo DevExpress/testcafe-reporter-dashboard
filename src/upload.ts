@@ -66,6 +66,6 @@ export async function uploadFile (filePath: string, uploadInfo: UploadInfo, repo
     await sendResolveCommand({
         aggregateId: uploadId,
         aggregateName: AggregateNames.Upload,
-        type: CommandTypes.failUpload
+        type: CommandTypes.markUploadFailed
     });
 }

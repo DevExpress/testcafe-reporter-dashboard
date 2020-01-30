@@ -5,9 +5,9 @@ export enum CommandTypes {
     reportTestDone     = 'reportTestDone',
     reportTaskDone     = 'reportTaskDone',
 
-    startUpload    = 'startUpload',
-    failUpload     = 'failUpload',
-    completeUpload = 'completeUpload'
+    startUpload      = 'startUpload',
+    markUploadFailed = 'markUploadFailed',
+    completeUpload   = 'completeUpload'
 };
 
 export enum AggregateNames {
