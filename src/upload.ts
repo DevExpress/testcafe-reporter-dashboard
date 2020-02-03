@@ -5,8 +5,8 @@ import {
     TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
-import { CommandTypes, AggregateNames } from './consts';
-import { UploadInfo } from './types';
+import { CommandTypes, AggregateNames } from './types/dashboard';
+import { UploadInfo } from './types/resolve';
 import logger from './logger';
 import { createGetUploadInfoError, createFileUploadError } from './texts';
 import fetch from './fetch';

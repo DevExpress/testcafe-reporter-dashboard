@@ -3,10 +3,11 @@ import logger from './logger';
 
 import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
-import { CommandTypes, AggregateNames } from './consts'
+import { CommandTypes, AggregateNames } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
+import { ReporterPluginObject } from './types/testcafe';
 
-module.exports = function plaginFactory () {
+module.exports = function plaginFactory (): ReporterPluginObject {
     const id      = uuid() as string;
     const uploads = [];
 
@@ -22,6 +23,7 @@ module.exports = function plaginFactory () {
 
     return {
         async reportTaskStart (startTime, userAgents, testCount) {
+            debugger
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
 
             logger.log(createReportUrlMessage(id));
@@ -33,6 +35,14 @@ module.exports = function plaginFactory () {
 
         async reportTestStart (name, meta) {
             await sendReportCommand(CommandTypes.reportTestStart, { name, meta });
+        },
+
+        async reportTestActionStart (apiActionName, actionInfo) {
+
+        },
+
+        async reportTestActionDone (apiActionName, actionInfo) {
+
         },
 
         async reportTestDone (name, testRunInfo, meta) {

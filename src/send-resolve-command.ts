@@ -4,7 +4,7 @@ import {
     TESTCAFE_DASHBOARD_URL,
     ENABLE_LOG
 } from './env-variables';
-import { ResolveCommand } from './types';
+import { ResolveCommand } from './types/resolve';
 
 import fetch from './fetch';
 import logger from './logger';

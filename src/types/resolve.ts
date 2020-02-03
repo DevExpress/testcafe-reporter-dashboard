@@ -1,4 +1,4 @@
-import { CommandTypes, AggregateNames } from "./consts";
+import { AggregateNames, CommandTypes } from './dashboard'
 
 export type ResolveCommand<TPayload = Record<string, any>> = {
     aggregateId: string,
