@@ -14,7 +14,8 @@
   "scripts": {
     "test": "gulp test",
     "publish-please": "publish-please",
-    "prepublish": "publish-please guard"
+    "prepublish": "publish-please guard",
+    "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\""
   },
   "keywords": [
     "testcafe",
@@ -35,7 +36,7 @@
     "normalize-newline": "^1.0.2",
     "publish-please": "^5.4.3",
     "read-file-relative": "^1.2.0",
-    "testcafe": "^1.0.1"
+    "testcafe": "^1.8.1"
   },
   "dependencies": {
     "es6-promise": "^4.2.8",
