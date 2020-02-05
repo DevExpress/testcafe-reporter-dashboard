@@ -4,9 +4,13 @@ fixture `Fixture 1`
     .page `https://devexpress.github.io/testcafe/example`;
 
 test('Test 1', async t => {
-    const header = Selector('h1').withText('Example');
-
     await t
-        .takeScreenshot()
-        .expect(header.textContent).eql('Example1');
+        .click(Selector('#developer-name'))
+        .typeText(Selector('#developer-name'), 'Peter')
+        .click(Selector('#tried-test-cafe'))
+        .drag(Selector('.ui-slider-handle.ui-corner-all.ui-state-default'), 94, -2, {
+            offsetX: 8,
+            offsetY: 12
+        })
+        .expect(Selector('#developer-name').value).eql('Peter1');
 });

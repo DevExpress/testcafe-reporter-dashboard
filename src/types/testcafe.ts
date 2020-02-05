@@ -65,25 +65,30 @@ type Error = {
         lineNum:  number,
         callsiteFrameIdx: number,
         stackFrames: any[],
-        isV8Frames: boolean}
+        isV8Frames: boolean
+    },
+    message: string,
+    stack: string
 };
 
+type BrowserInfo = {
+    alias: string;
+    engine: { name: string; version: string; }
+    headless: boolean;
+    name: string;
+    os: { name: string; version: string; }
+    platform: string;
+    prettyUserAgent: string;
+    userAgent: string;
+    version: string;
+}
+
 type ActionInfo = {
-    browser: {
-        alias: string;
-        engine: { name: string; version: string; }
-        headless: boolean;
-        name: string;
-        os: { name: string; version: string; }
-        platform: string;
-        prettyUserAgent: string;
-        userAgent: string;
-        version: string;
-    }
+    browser: BrowserInfo
     command: Record<string, any> & { type: CommandType },
     test: {
         name: string;
-        pahse: TestPhase;
+        phase: TestPhase;
     },
     errors?: Error[]
 };
@@ -120,6 +125,17 @@ type TestRunInfo = {
     screenshots: Screenshot[];
     quarantine: Quarantine;
     skipped: boolean;
+    browserRuns: Record<string, BrowserRunInfo>;
+}
+
+export type BrowserRunInfo = {
+    browser: BrowserInfo,
+    actions: {
+        apiName: string,
+        testPhase: TestPhase,
+        command: Record<string, any> & { type: CommandType },
+        errors: Error[]
+    }[]
 }
 
 type TestResult = {
@@ -129,11 +145,11 @@ type TestResult = {
 }
 
 export type ReporterPluginObject = {
-    reportTaskStart: (startTime: Date, userAgents: string[], testCount: number) => Promise<void>;
-    reportFixtureStart: (name: string, path: string, meta: Meta) => Promise<void>;
-    reportTestStart: (name: string, meta: Meta) => Promise<void>;
-    reportTestActionStart: (apiActionName: string, actionInfo: ActionInfo) => Promise<void>;
-    reportTestActionDone: (apiActionName: string, actionInfo: ActionInfo) => Promise<void>;
-    reportTestDone: (name: string, testRunInfo: TestRunInfo, meta: Meta) => Promise<void>;
-    reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
+    reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number) => Promise<void>;
+    reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
+    reportTestStart?: (name: string, meta: Meta) => Promise<void>;
+    reportTestActionStart?: (apiActionName: string, actionInfo: ActionInfo) => Promise<void>;
+    reportTestActionDone?: (apiActionName: string, actionInfo: ActionInfo) => Promise<void>;
+    reportTestDone?: (name: string, testRunInfo: TestRunInfo, meta: Meta) => Promise<void>;
+    reportTaskDone?: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
 };

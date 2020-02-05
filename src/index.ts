@@ -5,11 +5,13 @@ import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
 import { CommandTypes, AggregateNames } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
-import { ReporterPluginObject } from './types/testcafe';
+import { ReporterPluginObject, BrowserRunInfo } from './types/testcafe';
 
 module.exports = function plaginFactory (): ReporterPluginObject {
-    const id      = uuid() as string;
-    const uploads = [];
+    const id       = uuid() as string;
+    const uploads  = [];
+
+    const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
 
     async function sendReportCommand (type: CommandTypes, payload: Record<string, any>) {
         return sendResolveCommand({
@@ -23,13 +25,13 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
     return {
         async reportTaskStart (startTime, userAgents, testCount) {
-            debugger
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
 
             logger.log(createReportUrlMessage(id));
         },
 
         async reportFixtureStart (name, path, meta) {
+
             await sendReportCommand(CommandTypes.reportFixtureStart, { name, path, meta });
         },
 
@@ -37,12 +39,22 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             await sendReportCommand(CommandTypes.reportTestStart, { name, meta });
         },
 
-        async reportTestActionStart (apiActionName, actionInfo) {
-
-        },
-
         async reportTestActionDone (apiActionName, actionInfo) {
+            const { browser, test: { name, phase }, command, errors } = actionInfo;
 
+            if (!testRuns[name])
+                testRuns[name] = {};
+
+            if (!testRuns[name][actionInfo.browser.alias])
+                testRuns[name][actionInfo.browser.alias] = { browser, actions: [] }
+
+            testRuns[name][actionInfo.browser.alias].actions.push({
+                apiName:   apiActionName,
+                testPhase: phase,
+
+                command,
+                errors
+            });
         },
 
         async reportTestDone (name, testRunInfo, meta) {
@@ -59,7 +71,11 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 }
             }
 
+            testRunInfo.browserRuns = testRuns[name];
+
             await sendReportCommand(CommandTypes.reportTestDone, { name, testRunInfo, meta });
+
+            delete testRuns[name];
         },
 
         async reportTaskDone (endTime, passed, warnings, result) {
