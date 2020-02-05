@@ -30,16 +30,6 @@ function build () {
         .pipe(gulp.dest('lib'));
 }
 
-function test () {
-    return gulp
-        .src('test/*.js')
-        .pipe(mocha({
-            ui:       'bdd',
-            reporter: 'spec',
-            timeout:  typeof v8debug === 'undefined' ? 20000 : Infinity // NOTE: disable timeouts in debug
-        }));
-}
-
 function preview () {
     var buildReporterPlugin = require('testcafe').embeddingUtils.buildReporterPlugin;
     var pluginFactory       = require('./lib');
@@ -57,6 +47,6 @@ function preview () {
 
 exports.clean = clean;
 exports.lint = lint;
-exports.test = gulp.series(clean, lint, build, test);
+exports.test = gulp.series(clean, lint, build);
 exports.build = gulp.series(clean, build);
 exports.preview = gulp.series(clean, lint, build, preview);

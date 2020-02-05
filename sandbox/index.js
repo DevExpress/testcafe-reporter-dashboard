@@ -22,7 +22,7 @@ createTestCafe()
 
         return runner
             .src(['C:/testcafe-reporter-dashboard/sandbox/test.js'])
-            .browsers(['chrome'])
+            .browsers(['chrome', 'firefox', 'chrome:headless'])
             .reporter('dashboard-sandbox')
             .run();
     })
