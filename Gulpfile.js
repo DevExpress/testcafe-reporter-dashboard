@@ -1,6 +1,5 @@
 var gulp    = require('gulp');
 var eslint  = require('gulp-eslint');
-var mocha   = require('gulp-mocha');
 var del     = require('del');
 
 var gulpTypeScript = require('gulp-typescript');
