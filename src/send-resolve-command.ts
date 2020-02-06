@@ -4,7 +4,7 @@ import {
     TESTCAFE_DASHBOARD_URL,
     ENABLE_LOG
 } from './env-variables';
-import { ResolveCommand } from './types';
+import { ResolveCommand } from './types/resolve';
 
 import fetch from './fetch';
 import logger from './logger';
@@ -18,6 +18,10 @@ if (!TESTCAFE_DASHBOARD_URL)
 if (!AUTHORIZATION_TOKEN)
     logger.error(AUTHORIZATION_TOKEN_NOT_DEFINED);
 
+function removeNullValues (key, value) {
+    if (value !== null) return value;
+}
+
 async function sendCommand (command: ResolveCommand) {
     return fetch(`${TESTCAFE_DASHBOARD_URL}/api/commands/`, {
         method:  'POST',
@@ -26,7 +30,7 @@ async function sendCommand (command: ResolveCommand) {
             'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
         },
 
-        body: JSON.stringify(command)
+        body: JSON.stringify(command, removeNullValues)
     });
 }
 
