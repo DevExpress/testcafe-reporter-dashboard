@@ -1,6 +1,8 @@
 import uuid from 'uuid';
 import logger from './logger';
 
+import { ENABLE_SCREENSHOTS_UPLOAD } from './env-variables';
+
 import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
 import { CommandTypes, AggregateNames } from './types/dashboard';
@@ -58,7 +60,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestDone (name, testRunInfo, meta) {
-            if (testRunInfo.screenshots.length) {
+            if (ENABLE_SCREENSHOTS_UPLOAD && testRunInfo.screenshots.length) {
                 for (const screenshotInfo of testRunInfo.screenshots) {
                     const { screenshotPath } = screenshotInfo;
                     const uploadInfo         = await getUploadInfo(id, screenshotPath);
