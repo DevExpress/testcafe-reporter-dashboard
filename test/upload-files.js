@@ -9,7 +9,7 @@ describe('Upload files', () => {
         mock('../lib/env-variables', {
             TESTCAFE_DASHBOARD_URL,
             TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-            ENABLE_SCREENSHOTS_UPLOAD:              true
+            ENABLE_SCREENSHOTS_UPLOAD:               true
         });
     });
 
