@@ -2,7 +2,7 @@ import fs from 'fs';
 import { promisify } from 'util';
 import sendResolveCommand from './send-resolve-command';
 import {
-    TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
+    TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
 import { CommandTypes, AggregateNames } from './types/dashboard';
@@ -17,7 +17,7 @@ export async function getUploadInfo (reportId: string, filePath: string): Promis
     const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${reportId}`, {
         method: 'GET',
         headers: {
-            authorization: `Bearer ${AUTHORIZATION_TOKEN}`
+            authorization: `Bearer ${AUTHENTICATION_TOKEN}`
         }
     });
 

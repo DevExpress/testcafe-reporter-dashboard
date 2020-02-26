@@ -8,7 +8,7 @@ describe('Upload files', () => {
     before(() => {
         mock('../lib/env-variables', {
             TESTCAFE_DASHBOARD_URL,
-            TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN: 'authorization_token',
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
             ENABLE_SCREENSHOTS_UPLOAD:              true
         });
     });

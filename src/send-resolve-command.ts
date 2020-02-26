@@ -1,6 +1,6 @@
-import { DASHBOARD_LOCATION_NOT_DEFINED, AUTHORIZATION_TOKEN_NOT_DEFINED } from './texts';
+import { DASHBOARD_LOCATION_NOT_DEFINED, AUTHENTICATION_TOKEN_NOT_DEFINED } from './texts';
 import {
-    TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN as AUTHORIZATION_TOKEN,
+    TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_URL,
     ENABLE_LOG
 } from './env-variables';
@@ -15,8 +15,8 @@ const MAX_RETRY_COUNT       = 5;
 if (!TESTCAFE_DASHBOARD_URL)
     logger.error(DASHBOARD_LOCATION_NOT_DEFINED);
 
-if (!AUTHORIZATION_TOKEN)
-    logger.error(AUTHORIZATION_TOKEN_NOT_DEFINED);
+if (!AUTHENTICATION_TOKEN)
+    logger.error(AUTHENTICATION_TOKEN_NOT_DEFINED);
 
 function removeNullValues (key, value) {
     if (value !== null) return value;
@@ -27,7 +27,7 @@ async function sendCommand (command: ResolveCommand) {
         method:  'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Cookie':       `tc-dashboard-jwt=${AUTHORIZATION_TOKEN}`
+            'Cookie':       `tc-dashboard-jwt=${AUTHENTICATION_TOKEN}`
         },
 
         body: JSON.stringify(command, removeNullValues)
@@ -37,7 +37,7 @@ async function sendCommand (command: ResolveCommand) {
 export default async function sendResolveCommand (command: ResolveCommand): Promise<void> {
     const { aggregateId, type: commandType } = command;
 
-    if (!AUTHORIZATION_TOKEN)
+    if (!AUTHENTICATION_TOKEN)
         return;
 
     let response   = null;
