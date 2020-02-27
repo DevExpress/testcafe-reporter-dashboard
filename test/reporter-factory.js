@@ -6,7 +6,7 @@ const read   = require('read-file-relative').readSync;
 describe('reportTaskStart', () => {
     before(() => {
         mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL:                 'http://localhost',
+            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
             TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
         });
     });
@@ -47,7 +47,7 @@ describe('reportTaskStart', () => {
 describe('reportTestActionDone', () => {
     before(() => {
         mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL:                 'http://localhost',
+            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
             TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
         });
     });
