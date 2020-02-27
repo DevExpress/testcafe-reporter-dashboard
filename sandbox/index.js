@@ -21,9 +21,8 @@ createTestCafe()
         const runner = tc.createRunner();
 
         return runner
-            .src(['C:/Projects/ReportServer.TestCafe/tests/dashboard-designer/',
-            'C:/Projects/ReportServer.TestCafe/tests/dashboard-designer-01/'])
-            .browsers(['chrome'])
+            .src(['./sandbox/test.js'])
+            .browsers(['chrome', 'firefox', 'chrome:headless'])
             .reporter('dashboard-sandbox')
             .run();
     })
