@@ -2,7 +2,7 @@ import { format } from 'util';
 import  { TESTCAFE_DASHBOARD_URL } from './env-variables';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
-export const AUTHORIZATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHORIZATION_TOKEN\' environment variable is not defined.';
+export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable is not defined.';
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
 const REPORT_URL_TEMPLATE             = `Task execution report: ${TESTCAFE_DASHBOARD_URL}/details/%s`;
