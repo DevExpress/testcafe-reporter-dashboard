@@ -144,7 +144,12 @@ type TestResult = {
     skippedCount: number;
 }
 
+interface DecoratorType {
+    [key: string]:(str: string) => string;
+}
+
 export type ReporterPluginObject = {
+    createErrorDecorator: () => DecoratorType;
     reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number) => Promise<void>;
     reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta) => Promise<void>;
