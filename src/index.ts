@@ -8,6 +8,7 @@ import { createReportUrlMessage } from './texts';
 import { CommandTypes, AggregateNames } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject, BrowserRunInfo } from './types/testcafe';
+import { errorDecorator, removeTrailingComma } from './error-decorator';
 
 module.exports = function plaginFactory (): ReporterPluginObject {
     const id       = uuid() as string;
@@ -27,6 +28,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
     return {
         async reportTaskStart (startTime, userAgents, testCount) {
+        createErrorDecorator: errorDecorator,
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
 
             logger.log(createReportUrlMessage(id));
@@ -71,6 +73,17 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
                     uploads.push(uploadFile(screenshotPath, uploadInfo, id));
                 }
+            }
+            if(testRunInfo.errs) {
+                for(const errorIndex in testRunInfo.errs) {
+                    const err = testRunInfo.errs[errorIndex]
+                    for(const recordIndex in testRuns[name]) {
+                        if(testRuns[name][recordIndex].browser.prettyUserAgent === err.userAgent) {
+                            const actions = testRuns[name][recordIndex].actions;                            
+                            actions[actions.length - 1].errors[errorIndex].message = `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`;//.replace(/\n/g, '<br/>');
+                        }
+                    }
+                };
             }
 
             testRunInfo.browserRuns = testRuns[name];
