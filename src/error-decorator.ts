@@ -1,19 +1,14 @@
 import { decoratorFn } from "./types/testcafe";
 
-
 const empty = (str: string) => '';
 const raw = (str: string) => str;
 const syntax = (type: string) => raw;
-
-
-
 
 const curly = (str: string) => `{${removeTrailingComma(str)}}`
 const squared = (str: string) => `[${removeTrailingComma(str)}]`
 const quoted = (str: string) => `"${str.replace(/"/g,'&quot').replace(/\\/g,`\\\\`)}"`;
 
 const comma = (modifier: decoratorFn) => (str: string) => `${modifier(str)}, `
-
 const element = (modifier: decoratorFn) => (name: string) => comma((str: string) => `${quoted(name)}: ${modifier(str)}`);
 
 const quotedElement = element(quoted);
@@ -23,7 +18,6 @@ export const removeTrailingComma: decoratorFn = (str) => {
     str = str.trimEnd();
     return str.endsWith(',') ? str.substring(0, str.length - 1) : str;
 }
-
 
 export function errorDecorator() {
     return {
