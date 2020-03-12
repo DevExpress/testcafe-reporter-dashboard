@@ -10,13 +10,14 @@ import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject, BrowserRunInfo } from './types/testcafe';
 import { errorDecorator, removeTrailingComma } from './error-decorator';
 
-module.exports = function plaginFactory (): ReporterPluginObject {
-    const id       = uuid() as string;
-    const uploads  = [];
+
+module.exports = function pluginFactory(): ReporterPluginObject {
+    const id = uuid() as string;
+    const uploads = [];
 
     const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
 
-    async function sendReportCommand (type: CommandTypes, payload: Record<string, any>) {
+    async function sendReportCommand(type: CommandTypes, payload: Record<string, any>) {
         return sendResolveCommand({
             aggregateId: id,
             aggregateName: AggregateNames.Report,
@@ -27,47 +28,46 @@ module.exports = function plaginFactory (): ReporterPluginObject {
     }
 
     return {
-        async reportTaskStart (startTime, userAgents, testCount) {
         createErrorDecorator: errorDecorator,
+        async reportTaskStart(startTime, userAgents, testCount) {
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
 
             logger.log(createReportUrlMessage(id));
         },
 
-        async reportFixtureStart (name, path, meta) {
+        async reportFixtureStart(name, path, meta) {
 
             await sendReportCommand(CommandTypes.reportFixtureStart, { name, path, meta });
         },
 
-        async reportTestStart (name, meta) {
+        async reportTestStart(name, meta) {
             await sendReportCommand(CommandTypes.reportTestStart, { name, meta });
         },
 
-        async reportTestActionDone (apiActionName, actionInfo) {
+        async reportTestActionDone(apiActionName, actionInfo) {
             const { browser, test: { name, phase }, command, errors } = actionInfo;
 
-            if (!testRuns[name])
+            if(!testRuns[name])
                 testRuns[name] = {};
 
-            if (!testRuns[name][actionInfo.browser.alias])
+            if(!testRuns[name][actionInfo.browser.alias])
                 testRuns[name][actionInfo.browser.alias] = { browser, actions: [] }
 
             testRuns[name][actionInfo.browser.alias].actions.push({
-                apiName:   apiActionName,
+                apiName: apiActionName,
                 testPhase: phase,
-
                 command,
                 errors
             });
         },
 
-        async reportTestDone (name, testRunInfo, meta) {
-            if (ENABLE_SCREENSHOTS_UPLOAD && testRunInfo.screenshots.length) {
-                for (const screenshotInfo of testRunInfo.screenshots) {
+        async reportTestDone(name, testRunInfo, meta) {
+            if(ENABLE_SCREENSHOTS_UPLOAD && testRunInfo.screenshots.length) {
+                for(const screenshotInfo of testRunInfo.screenshots) {
                     const { screenshotPath } = screenshotInfo;
-                    const uploadInfo         = await getUploadInfo(id, screenshotPath);
+                    const uploadInfo = await getUploadInfo(id, screenshotPath);
 
-                    if (!uploadInfo) continue;
+                    if(!uploadInfo) continue;
 
                     screenshotInfo.uploadId = uploadInfo.uploadId;
 
@@ -93,7 +93,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             delete testRuns[name];
         },
 
-        async reportTaskDone (endTime, passed, warnings, result) {
+        async reportTaskDone(endTime, passed, warnings, result) {
             await Promise.all(uploads);
             await sendReportCommand(CommandTypes.reportTaskDone, { endTime, passed, warnings, result });
         }
