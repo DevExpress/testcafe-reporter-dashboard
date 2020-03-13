@@ -1,4 +1,4 @@
-enum CommandType {
+export enum CommandType {
     click                      = 'click',
     rightClick                 = 'right-click',
     doubleClick                = 'double-click',
@@ -44,7 +44,7 @@ enum CommandType {
     recorder                   = 'recorder'
 };
 
-enum TestPhase {
+export enum TestPhase {
     initial                 = 'initial',
     inFixtureBeforeHook     = 'inFixtureBeforeHook',
     inFixtureBeforeEachHook = 'inFixtureBeforeEachHook',
@@ -57,7 +57,7 @@ enum TestPhase {
     inBookmarkRestore       = 'inBookmarkRestore'
 };
 
-type Error = {
+export type Error = {
     code: string;
     data: any,
     callsite: {
@@ -68,10 +68,11 @@ type Error = {
         isV8Frames: boolean
     },
     message: string,
-    stack: string
+    stack: string,
+    userAgent: string
 };
 
-type BrowserInfo = {
+export type BrowserInfo = {
     alias: string;
     engine: { name: string; version: string; }
     headless: boolean;
@@ -95,13 +96,13 @@ type ActionInfo = {
 
 type Meta = Record<string, string>;
 
-type Quarantine = {
+export type Quarantine = {
     [key: number]: {
         passed: boolean;
     };
 }
 
-type Screenshot = {
+export type Screenshot = {
     screenshotPath: string;
     thumbnailPath: string;
     userAgent: string;
@@ -110,14 +111,9 @@ type Screenshot = {
     uploadId?: string;
 }
 
-type TestError = {
-    callsite: string;
-    errMsg: string;
-    userAgent: string;
-}
 
-type TestRunInfo = {
-    errs: TestError[];
+export type TestRunInfo = {
+    errs: Error[];
     warnings: string[];
     durationMs: number;
     unstable: boolean;
@@ -125,10 +121,11 @@ type TestRunInfo = {
     screenshots: Screenshot[];
     quarantine: Quarantine;
     skipped: boolean;
-    browserRuns: Record<string, BrowserRunInfo>;
 }
 
-export type BrowserRunInfo = {
+
+
+export type DashboardBrowserRunInfo = {
     browser: BrowserInfo,
     actions: {
         apiName: string,
@@ -138,14 +135,17 @@ export type BrowserRunInfo = {
     }[]
 }
 
+
 type TestResult = {
     failedCount: number;
     passedCount: number;
     skippedCount: number;
 }
 
+export type decoratorFn = (str: string) => string;
+
 interface DecoratorType {
-    [key: string]:(str: string) => string;
+    [key: string]: decoratorFn
 }
 
 export type ReporterPluginObject = {

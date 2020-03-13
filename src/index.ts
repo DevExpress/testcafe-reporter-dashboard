@@ -5,9 +5,12 @@ import { ENABLE_SCREENSHOTS_UPLOAD } from './env-variables';
 
 import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
-import { CommandTypes, AggregateNames } from './types/dashboard';
+import {
+    CommandTypes, AggregateNames, BrowserRunInfo,
+    DashboardTestRunInfo, createDashboardTestRunInfo, createTestError, TestAction
+} from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
-import { ReporterPluginObject, BrowserRunInfo } from './types/testcafe';
+import { ReporterPluginObject } from './types/testcafe';
 import { errorDecorator, removeTrailingComma } from './error-decorator';
 
 
@@ -53,12 +56,15 @@ module.exports = function pluginFactory(): ReporterPluginObject {
             if(!testRuns[name][actionInfo.browser.alias])
                 testRuns[name][actionInfo.browser.alias] = { browser, actions: [] }
 
-            testRuns[name][actionInfo.browser.alias].actions.push({
+            const action: TestAction = {
                 apiName: apiActionName,
                 testPhase: phase,
                 command,
-                errors
-            });
+            };
+            if(errors)
+                action.errors = [...errors.map(createTestError)];
+
+            testRuns[name][actionInfo.browser.alias].actions.push(action);
         },
 
         async reportTestDone(name, testRunInfo, meta) {
@@ -79,16 +85,19 @@ module.exports = function pluginFactory(): ReporterPluginObject {
                     const err = testRunInfo.errs[errorIndex]
                     for(const recordIndex in testRuns[name]) {
                         if(testRuns[name][recordIndex].browser.prettyUserAgent === err.userAgent) {
-                            const actions = testRuns[name][recordIndex].actions;                            
-                            actions[actions.length - 1].errors[errorIndex].message = `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`;//.replace(/\n/g, '<br/>');
+                            const actions = testRuns[name][recordIndex].actions;
+                            if(!actions[actions.length - 1].errors)
+                                actions[actions.length - 1].errors = [createTestError(err)];
+                            actions[actions.length - 1].errors[errorIndex].errorModel = `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`;//.replace(/\n/g, '<br/>');
                         }
                     }
                 };
             }
+            const dashboardTestRunIfno: DashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo);
 
-            testRunInfo.browserRuns = testRuns[name];
+            dashboardTestRunIfno.browserRuns = testRuns[name];
 
-            await sendReportCommand(CommandTypes.reportTestDone, { name, testRunInfo, meta });
+            await sendReportCommand(CommandTypes.reportTestDone, { name, dashboardTestRunIfno, meta });
 
             delete testRuns[name];
         },
