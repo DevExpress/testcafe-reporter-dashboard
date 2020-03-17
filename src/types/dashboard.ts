@@ -27,10 +27,10 @@ export enum AggregateNames {
 
 export type BrowserRunInfo = {
     browser: BrowserInfo,
-    actions: TestAction[]
+    actions: ActionInfo[]
 }
 
-export type TestAction = {
+export type ActionInfo = {
     apiName: string,
     testPhase: TestPhase,
     command: Record<string, any> & { type: CommandType },
@@ -46,6 +46,17 @@ export type TestError = {
     errorModel: string;
 }
 
+export type DashboardTestRunInfo = {
+    warnings: string[];
+    durationMs: number;
+    unstable: boolean;
+    screenshotPath: string;
+    screenshots: Screenshot[];
+    quarantine: Quarantine;
+    skipped: boolean;
+    browserRuns: Record<string, BrowserRunInfo>;
+}
+
 export const createTestError = (error: Error): TestError => ({
     code: error.code,
     errorModel: '',
@@ -55,16 +66,6 @@ export const createTestError = (error: Error): TestError => ({
     userAgent: error.userAgent
 });
 
-export type DashboardTestRunInfo = {
-    warnings: string[];
-    durationMs: number;
-    unstable: boolean;
-    screenshotPath: string;
-    screenshots: Screenshot[];
-    quarantine: Quarantine;
-    skipped: boolean;
-    browserRuns?: Record<string, BrowserRunInfo>;
-}
 
 export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo): DashboardTestRunInfo => ({
     durationMs: testRunInfo.durationMs,
@@ -73,5 +74,6 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo): DashboardT
     screenshots: [...testRunInfo.screenshots],
     skipped: testRunInfo.skipped,
     unstable: testRunInfo.unstable,
-    warnings: testRunInfo.warnings
+    warnings: testRunInfo.warnings,
+    browserRuns:{}
 })

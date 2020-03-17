@@ -6,7 +6,7 @@ const syntax = (type: string) => raw;
 
 const curly = (str: string) => `{${removeTrailingComma(str)}}`
 const squared = (str: string) => `[${removeTrailingComma(str)}]`
-const quoted = (str: string) => `"${str.replace(/"/g,'&quot').replace(/\\/g,`\\\\`)}"`;
+const quoted = (str: string) => `"${str.replace(/"/g,'&quot').replace(/\\/g,`\\\\`).replace(/\t/g,"\\t")}"`;
 
 const comma = (modifier: decoratorFn) => (str: string) => `${modifier(str)}, `
 const element = (modifier: decoratorFn) => (name: string) => comma((str: string) => `${quoted(name)}: ${modifier(str)}`);
@@ -39,11 +39,11 @@ export function errorDecorator() {
         'span syntax-comment': syntax('comment'),
         'span syntax-invalid': syntax('invalid'),
 
-        'div code-frame': squaredElement('code-frame'),
+        'div code-frame': squaredElement('codeframe'),
         'div code-line': comma(curly),
         'div code-line-last': comma(curly),
-        'div code-line-num': element((str: string) => curly(quotedElement('num')(str)))('code'),
-        'div code-line-num-base': element((str: string) => curly(`${quotedElement('num')(str)}"base": "True"`))('code'),
+        'div code-line-num': element((str: string) => curly(quotedElement('num')(str)))('line'),
+        'div code-line-num-base': element((str: string) => curly(`${quotedElement('num')(str)}"base": "True"`))('line'),
         'div code-line-src': quotedElement('code'),
 
         'div stack': squaredElement('callstack'),

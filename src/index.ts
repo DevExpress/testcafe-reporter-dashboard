@@ -7,7 +7,7 @@ import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
 import {
     CommandTypes, AggregateNames, BrowserRunInfo,
-    DashboardTestRunInfo, createDashboardTestRunInfo, createTestError, TestAction
+    DashboardTestRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo
 } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject } from './types/testcafe';
@@ -24,7 +24,6 @@ module.exports = function pluginFactory(): ReporterPluginObject {
         return sendResolveCommand({
             aggregateId: id,
             aggregateName: AggregateNames.Report,
-
             type,
             payload
         });
@@ -56,7 +55,7 @@ module.exports = function pluginFactory(): ReporterPluginObject {
             if(!testRuns[name][actionInfo.browser.alias])
                 testRuns[name][actionInfo.browser.alias] = { browser, actions: [] }
 
-            const action: TestAction = {
+            const action: ActionInfo = {
                 apiName: apiActionName,
                 testPhase: phase,
                 command,
@@ -84,20 +83,20 @@ module.exports = function pluginFactory(): ReporterPluginObject {
                 for(const errorIndex in testRunInfo.errs) {
                     const err = testRunInfo.errs[errorIndex]
                     for(const recordIndex in testRuns[name]) {
-                        if(testRuns[name][recordIndex].browser.prettyUserAgent === err.userAgent) {
+                            if(testRuns[name][recordIndex].browser.prettyUserAgent === err.userAgent) {
                             const actions = testRuns[name][recordIndex].actions;
                             if(!actions[actions.length - 1].errors)
                                 actions[actions.length - 1].errors = [createTestError(err)];
                             actions[actions.length - 1].errors[errorIndex].errorModel = `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`;//.replace(/\n/g, '<br/>');
                         }
                     }
-                };
+                }
             }
-            const dashboardTestRunIfno: DashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo);
+            const dashboardTestRunInfo: DashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo);
 
-            dashboardTestRunIfno.browserRuns = testRuns[name];
-
-            await sendReportCommand(CommandTypes.reportTestDone, { name, dashboardTestRunIfno, meta });
+            dashboardTestRunInfo.browserRuns = testRuns[name];
+            const payload = { name, testRunInfo: dashboardTestRunInfo, meta };
+            await sendReportCommand(CommandTypes.reportTestDone, payload );
 
             delete testRuns[name];
         },
