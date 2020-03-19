@@ -6,12 +6,18 @@ const syntax = (type: string) => raw;
 
 const curly = (str: string) => `{${removeTrailingComma(str)}}`
 const squared = (str: string) => `[${removeTrailingComma(str)}]`
-const quoted = (str: string) => `"${str.replace(/"/g,'&quot').replace(/\\/g,`\\\\`).replace(/\t/g,"\\t")}"`;
+const escaped = (str: string) => `"${str.replace(/\//g,`\/`)
+                                        .replace(/\\/g,`\\\\`)
+                                        .replace(/\t/g,"\\t")
+                                        .replace(/[\b]/g,"\\b")
+                                        .replace(/\r/g,"\\r")
+                                        .replace(/\n/g, '\\n')
+                                        .replace(/\"/g,`\\"`)}"`;
 
 const comma = (modifier: decoratorFn) => (str: string) => `${modifier(str)}, `
-const element = (modifier: decoratorFn) => (name: string) => comma((str: string) => `${quoted(name)}: ${modifier(str)}`);
+const element = (modifier: decoratorFn) => (name: string) => comma((str: string) => `"${(name)}": ${modifier(str)}`);
 
-const quotedElement = element(quoted);
+const escapedElement = element(escaped);
 const squaredElement = element(squared);
 
 export const removeTrailingComma: decoratorFn = (str) => {
@@ -21,15 +27,15 @@ export const removeTrailingComma: decoratorFn = (str) => {
 
 export function errorDecorator() {
     return {
-        'span user-agent': quotedElement('user-agent'),
+        'span user-agent': escapedElement('user-agent'),
 
-        'span subtitle': quotedElement('subtitle'),
-        'div message': element((str: string) => quoted(str.replace(/\n/g, '<br/>')))('message'),
+        'span subtitle': escapedElement('subtitle'),
+        'div message':escapedElement('message'),
 
-        'div screenshot-info': quotedElement('screenshot-info'),
-        'a screenshot-path': quotedElement('screenshot-path'),
+        'div screenshot-info': escapedElement('screenshot-info'),
+        'a screenshot-path': escapedElement('screenshot-path'),
 
-        'code': quotedElement('code'),
+        'code': escapedElement('code'),
 
         'span syntax-string': syntax('string'),
         'span syntax-punctuator': syntax('punctuator'),
@@ -42,15 +48,15 @@ export function errorDecorator() {
         'div code-frame': squaredElement('codeframe'),
         'div code-line': comma(curly),
         'div code-line-last': comma(curly),
-        'div code-line-num': element((str: string) => curly(quotedElement('num')(str)))('line'),
-        'div code-line-num-base': element((str: string) => curly(`${quotedElement('num')(str)}"base": "True"`))('line'),
-        'div code-line-src': quotedElement('code'),
+        'div code-line-num': element((str: string) => curly(escapedElement('num')(str)))('line'),
+        'div code-line-num-base': element((str: string) => curly(`${escapedElement('num')(str)}"base": "True"`))('line'),
+        'div code-line-src': escapedElement('code'),
 
         'div stack': squaredElement('callstack'),
         'div stack-line': comma(curly),
         'div stack-line-last': comma(curly),
-        'div stack-line-name': quotedElement('name'),
-        'div stack-line-location': quotedElement('location'),
+        'div stack-line-name': escapedElement('name'),
+        'div stack-line-location': escapedElement('location'),
 
         'strong': empty,
         'a': raw
