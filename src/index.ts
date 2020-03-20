@@ -33,7 +33,6 @@ module.exports = function pluginFactory(): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
         async reportTaskStart(startTime, userAgents, testCount) {
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
-
             logger.log(createReportUrlMessage(id));
         },
 
@@ -80,14 +79,14 @@ module.exports = function pluginFactory(): ReporterPluginObject {
                 }
             }
             if(testRunInfo.errs) {
-                for(const errorIndex in testRunInfo.errs) {
-                    const err = testRunInfo.errs[errorIndex]
+                for (const err of testRunInfo.errs) {
                     for(const recordIndex in testRuns[name]) {
                             if(testRuns[name][recordIndex].browser.prettyUserAgent === err.userAgent) {
-                            const actions = testRuns[name][recordIndex].actions;
-                            if(!actions[actions.length - 1].errors)
-                                actions[actions.length - 1].errors = [createTestError(err)];
-                            actions[actions.length - 1].errors[errorIndex].errorModel = `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`;//.replace(/\n/g, '<br/>');
+                            const actions = testRuns[name][recordIndex].actions;                            
+                                actions[actions.length - 1].errors = [
+                                     { ...createTestError(err),
+                                        errorModel:`{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`
+                                     }];
                         }
                     }
                 }
