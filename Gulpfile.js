@@ -1,5 +1,4 @@
 var gulp    = require('gulp');
-var eslint  = require('gulp-eslint');
 var del     = require('del');
 
 var gulpTypeScript = require('gulp-typescript');
