@@ -7,27 +7,16 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Debug sandbox",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\sandbox\\index",            
         },
         {
-            "type": "node",
-            "request": "launch",
-            "name": "debug tests",
-            "runtimeExecutable": "c:\\Program Files\\nodejs\\npm", //change this to your npm path
-            "runtimeArgs": [
-                "run-script",
-                "test-debug",                
-            ],
-             "port": 9229
-        },
-        {
               "type": "node",
               "request": "launch",
-              "name": "Mocha All",
+              "name": "Debug tests",
               "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
               "args": [
                   "-r",
