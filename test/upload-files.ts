@@ -1,4 +1,3 @@
-
 import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
@@ -32,14 +31,14 @@ describe('Upload files', () => {
                 thumbnailPath:  'C:\\screenshots\\thumbnails\\1.png',
                 userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
                 takenOnFail:    false,
-                uploadId:       undefined,
+                uploadId:       null,
             },
             {
                 screenshotPath: 'C:\\screenshots\\errors\\1.png',
                 thumbnailPath:  'C:\\screenshots\\errors\\thumbnails\\1.png',
                 userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
                 takenOnFail:    true,
-                uploadId:       undefined,
+                uploadId:       null,
             }
         ];
 
@@ -90,7 +89,7 @@ describe('Upload files', () => {
 
         mock.reRequire('../lib/fetch');
         mock.reRequire('../lib/upload');
-        
+
         const reporter = mock.reRequire('../lib/index')();
 
         await reporter.reportTestDone('Test 1', { screenshots });

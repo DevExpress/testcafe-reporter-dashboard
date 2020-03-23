@@ -12,10 +12,11 @@
     "lib"
   ],
   "scripts": {
+    "lint": "eslint --ext .ts src test",
     "publish-please": "publish-please",
     "prepublish": "publish-please guard",
     "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
-    "test": "gulp build && ts-node ./node_modules/mocha/lib/cli/cli.js test/**/*.ts",
+    "test": "npm run lint && gulp build && ts-node ./node_modules/mocha/lib/cli/cli.js test/**/*.ts",
     "test-debug": "gulp build && ts-node --inspect-brk ./node_modules/mocha/lib/cli/cli.js test/**/*.ts"
   },
   "keywords": [
@@ -26,26 +27,35 @@
   "license": "MIT",
   "devDependencies": {
     "@types/isomorphic-fetch": "0.0.35",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.9.2",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
     "babel-eslint": "^10.0.1",
     "callsite-record": "^3.2.0",
     "del": "^1.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-import-resolver-ts": "^0.4.2",
+    "eslint-plugin-filenames": "^1.3.2",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "gulp": "^4.0.0",
-    "gulp-eslint": "^5.0.0",
     "gulp-typescript": "^5.0.1",
     "mocha": "^7.0.1",
     "mock-require": "^3.0.3",
     "normalize-newline": "^1.0.2",
     "publish-please": "^5.4.3",
     "read-file-relative": "^1.2.0",
-    "testcafe": "^1.8.3"
+    "testcafe": "^1.8.3",
+    "ts-node": "^8.7.0",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^13.9.2",
     "es6-promise": "^4.2.8",
     "isomorphic-fetch": "^2.2.1",
-    "ts-node": "^8.7.0",
-    "typescript": "^3.8.3",
     "uuid": "3.3.3"
   }
 }

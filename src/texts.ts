@@ -1,5 +1,5 @@
 import { format } from 'util';
-import  { TESTCAFE_DASHBOARD_URL } from './env-variables';
+import { TESTCAFE_DASHBOARD_URL } from './env-variables';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
 export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable is not defined.';
@@ -9,7 +9,7 @@ const REPORT_URL_TEMPLATE             = `Task execution report: ${TESTCAFE_DASHB
 const FILE_UPLOAD_ERROR_TEMPLATE      = 'Upload failed. Upload id: %s, file path: %s. Response: %s';
 const GET_UPLOAD_INFO_ERROR_TEMPLATE  = 'Cannot get an upload URL. File path: %s. Response: %s';
 
-export function createReportUrlMessage (reportId: string) : string {
+export function createReportUrlMessage (reportId: string): string {
     return format(REPORT_URL_TEMPLATE, reportId);
 }
 

@@ -11,11 +11,10 @@ function clean (cb) {
 function lint () {
     return gulp
         .src([
-            'src/**/*.js',
-            'test/**/*.js',
+            'src/**/*.ts',
+            'test/**/*.ts',
             'Gulpfile.js'
         ])
-        .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
 }
@@ -45,7 +44,6 @@ function preview () {
 }
 
 exports.clean = clean;
-exports.lint = lint;
-exports.test = gulp.series(clean, lint, build);
+exports.test = gulp.series(clean, build);
 exports.build = gulp.series(clean, build);
-exports.preview = gulp.series(clean, lint, build, preview);
+exports.preview = gulp.series(clean, build, preview);

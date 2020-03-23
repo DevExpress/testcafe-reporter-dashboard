@@ -22,7 +22,7 @@ createTestCafe()
 
         return runner
             .src(['./sandbox/test.ts'])
-            .browsers(['chrome'])
+            .browsers(['chrome', 'firefox'])
             .reporter('dashboard-sandbox')
             .run();
     })

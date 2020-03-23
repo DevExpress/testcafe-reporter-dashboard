@@ -1,7 +1,7 @@
 import isomorphicFetch from 'isomorphic-fetch';
 import { FETCH_NETWORK_CONNECTION_ERROR } from './texts';
 
-class FetchResponse {
+export class FetchResponse {
     ok = false;
     status = 0;
     statusText: string;
@@ -22,7 +22,7 @@ class FetchResponse {
         this._response = response;
     }
 
-    toString () {
+    toString (): string {
         let result = `${this.status}: ${this.statusText}`;
 
         if (this._error && this._error.hasOwnProperty('toString'))
@@ -31,7 +31,7 @@ class FetchResponse {
         return result;
     }
 
-    async json () {
+    async json (): Promise<any> {
         if (this._response)
             return await this._response.json();
 

@@ -1,9 +1,8 @@
 import { DashboardTestRunInfo } from './../src/types/dashboard';
 import mock from 'mock-require';
 import assert from 'assert';
-import { reportTestActionDoneCalls } from "./data/report-test-action-done-calls";
-import { testDoneInfo, twoErrorsTestActionDone  } from "./data/";
-
+import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
+import { testDoneInfo, twoErrorsTestActionDone } from './data/';
 
 describe('reportTaskStart', () => {
     before(() => {
@@ -35,12 +34,13 @@ describe('reportTaskStart', () => {
         });
 
         const reporter = mock.reRequire('../lib/index')();
+
         await reporter.reportTaskStart(1, {}, 1);
-        
+
 
         assert.equal(logs.length, 1);
         assert.equal(logs[0], `Task execution report: http://localhost/details/${reportId}`);
-    
+
         mock.stop('../lib/logger');
         mock.stop('isomorphic-fetch');
     });
@@ -114,7 +114,7 @@ describe('reportTestActionDone', () => {
         mock.reRequire('../lib/send-resolve-command');
 
         const reporter            = mock.reRequire('../lib/index')();
-        
+
 
         for (const { apiActionName, actionInfo } of reportTestActionDoneCalls)
             await reporter.reportTestActionDone(apiActionName, actionInfo);
@@ -129,8 +129,8 @@ describe('reportTestActionDone', () => {
     });
 
     it('Format error on test done', async () => {
-        let testRunInfo:DashboardTestRunInfo = null;
-        
+        let testRunInfo: DashboardTestRunInfo = null;
+
         mock('isomorphic-fetch', (_, request) => {
             testRunInfo = JSON.parse(request.body).payload.testRunInfo;
 
@@ -141,17 +141,19 @@ describe('reportTestActionDone', () => {
         mock.reRequire('../lib/send-resolve-command');
 
         const reporter            = mock.reRequire('../lib/index')();
-        reporter.useWordWrap = (param)=> reporter;
-        reporter.setIndent = ()=> reporter;
+
+        reporter.useWordWrap = () => reporter;
+        reporter.setIndent = () => reporter;
 
         let index = 0;
+
         reporter.formatError = (error) => {
-            assert.equal(error,testDoneInfo.errs[index]);
+            assert.equal(error, testDoneInfo.errs[index]);
             return `model${index++}`;
-        } 
+        };
 
         for (const actionInfo of twoErrorsTestActionDone)
-            await reporter.reportTestActionDone("name", actionInfo);        
+            await reporter.reportTestActionDone('name', actionInfo);
 
         await reporter.reportTestDone('Test 1', testDoneInfo);
         assert.equal(testRunInfo.browserRuns['chrome'].actions[0].errors[0].errorModel, '{model0}');

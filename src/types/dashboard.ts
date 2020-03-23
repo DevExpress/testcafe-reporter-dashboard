@@ -5,7 +5,7 @@ import {
     Screenshot,
     Quarantine,
     Error, TestRunInfo
-} from "./testcafe"
+} from './testcafe';
 
 export enum CommandTypes {
     reportTaskStart = 'reportTaskStart',
@@ -26,15 +26,15 @@ export enum AggregateNames {
 
 
 export type BrowserRunInfo = {
-    browser: BrowserInfo,
-    actions: ActionInfo[]
+    browser: BrowserInfo;
+    actions: ActionInfo[];
 }
 
 export type ActionInfo = {
-    apiName: string,
-    testPhase: TestPhase,
-    command: Record<string, any> & { type: CommandType },
-    errors?: TestError[]
+    apiName: string;
+    testPhase: TestPhase;
+    command: Record<string, any> & { type: CommandType };
+    errors?: TestError[];
 }
 
 export type TestError = {
@@ -58,22 +58,22 @@ export type DashboardTestRunInfo = {
 }
 
 export const createTestError = (error: Error): TestError => ({
-    code: error.code,
-    errorModel: '',
+    code:           error.code,
+    errorModel:     '',
     screenshotPath: '',
-    testRunPhase: '',
-    url: '',
-    userAgent: error.userAgent
+    testRunPhase:   '',
+    url:            '',
+    userAgent:      error.userAgent
 });
 
 
 export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo): DashboardTestRunInfo => ({
-    durationMs: testRunInfo.durationMs,
-    quarantine: testRunInfo.quarantine,
+    durationMs:     testRunInfo.durationMs,
+    quarantine:     testRunInfo.quarantine,
     screenshotPath: testRunInfo.screenshotPath,
-    screenshots: [...testRunInfo.screenshots],
-    skipped: testRunInfo.skipped,
-    unstable: testRunInfo.unstable,
-    warnings: testRunInfo.warnings,
-    browserRuns:{}
-})
+    screenshots:    [...testRunInfo.screenshots],
+    skipped:        testRunInfo.skipped,
+    unstable:       testRunInfo.unstable,
+    warnings:       testRunInfo.warnings,
+    browserRuns:    {}
+});
