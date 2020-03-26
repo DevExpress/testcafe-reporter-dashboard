@@ -1,6 +1,6 @@
-const assert = require('assert');
-const uuid   = require('uuid');
-const mock   = require('mock-require');
+import mock from 'mock-require';
+import uuid from 'uuid';
+import assert from 'assert';
 
 describe('sendResolveCommand', () => {
     before(() => {

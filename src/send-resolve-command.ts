@@ -6,7 +6,7 @@ import {
 } from './env-variables';
 import { ResolveCommand } from './types/resolve';
 
-import fetch from './fetch';
+import fetch, { FetchResponse } from './fetch';
 import logger from './logger';
 
 const CONCURRENT_ERROR_CODE = 408;
@@ -20,9 +20,10 @@ if (!AUTHENTICATION_TOKEN)
 
 function removeNullValues (key, value) {
     if (value !== null) return value;
+    return void 0;
 }
 
-async function sendCommand (command: ResolveCommand) {
+async function sendCommand (command: ResolveCommand): Promise<FetchResponse> {
     return fetch(`${TESTCAFE_DASHBOARD_URL}/api/commands/`, {
         method:  'POST',
         headers: {
@@ -41,6 +42,7 @@ export default async function sendResolveCommand (command: ResolveCommand): Prom
         return;
 
     let response   = null;
+
     let retryCount = 0;
 
     do {
@@ -53,5 +55,5 @@ export default async function sendResolveCommand (command: ResolveCommand): Prom
         else if (ENABLE_LOG)
             logger.log(response);
 
-    } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= MAX_RETRY_COUNT)
+    } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= MAX_RETRY_COUNT);
 }

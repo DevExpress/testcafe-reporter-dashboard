@@ -1,13 +1,13 @@
-function log (...params) {
-    return console.log.apply(console, arguments);
+function log (...params): void {
+    console.log(...params);
 }
 
-function error (...params) {
-    return console.error.apply(console, arguments);
+function error (...params): void {
+    console.error(...params);
 }
 
-function warn (...params) {
-    return console.warn.apply(console, arguments);
+function warn (...params): void {
+    console.warn(...params);
 }
 
 export default { log, error, warn };

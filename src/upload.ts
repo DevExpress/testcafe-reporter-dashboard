@@ -15,7 +15,7 @@ const readFile = promisify(fs.readFile);
 
 export async function getUploadInfo (reportId: string, filePath: string): Promise<UploadInfo> {
     const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${reportId}`, {
-        method: 'GET',
+        method:  'GET',
         headers: {
             authorization: `Bearer ${AUTHENTICATION_TOKEN}`
         }
@@ -36,15 +36,15 @@ export async function uploadFile (filePath: string, uploadInfo: UploadInfo, repo
     const fileSizeInBytes = file.length;
 
     await sendResolveCommand({
-        aggregateId: uploadId,
+        aggregateId:   uploadId,
         aggregateName: AggregateNames.Upload,
-        type: CommandTypes.startUpload,
+        type:          CommandTypes.startUpload,
 
         payload: { reportId }
     });
 
     const response = await fetch(uploadUrl, {
-        method: 'PUT',
+        method:  'PUT',
         headers: {
             'Content-Length': fileSizeInBytes
         },
@@ -53,9 +53,9 @@ export async function uploadFile (filePath: string, uploadInfo: UploadInfo, repo
 
     if (response.ok) {
         await sendResolveCommand({
-            aggregateId: uploadId,
+            aggregateId:   uploadId,
             aggregateName: AggregateNames.Upload,
-            type: CommandTypes.completeUpload
+            type:          CommandTypes.completeUpload
         });
 
         return;
@@ -64,8 +64,8 @@ export async function uploadFile (filePath: string, uploadInfo: UploadInfo, repo
     logger.error(createFileUploadError(uploadId, filePath, response.toString()));
 
     await sendResolveCommand({
-        aggregateId: uploadId,
+        aggregateId:   uploadId,
         aggregateName: AggregateNames.Upload,
-        type: CommandTypes.markUploadFailed
+        type:          CommandTypes.markUploadFailed
     });
 }

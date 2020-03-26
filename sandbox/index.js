@@ -21,8 +21,8 @@ createTestCafe()
         const runner = tc.createRunner();
 
         return runner
-            .src(['./sandbox/test.js'])
-            .browsers(['chrome', 'firefox', 'chrome:headless'])
+            .src(['./sandbox/test.ts'])
+            .browsers(['chrome', 'firefox'])
             .reporter('dashboard-sandbox')
             .run();
     })
