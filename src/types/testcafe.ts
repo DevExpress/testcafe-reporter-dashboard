@@ -114,8 +114,14 @@ export type Screenshot = {
 }
 
 
-export type TestRunInfo = {
-    errs: Error[];
+interface Video {
+    uploadId: string;
+    userAgent: string;
+    quarantineAttempt: number;
+}
+
+type TestRunInfo = {
+    errs: TestError[];
     warnings: string[];
     durationMs: number;
     unstable: boolean;
@@ -123,6 +129,8 @@ export type TestRunInfo = {
     screenshots: Screenshot[];
     quarantine: Quarantine;
     skipped: boolean;
+    browserRuns: Record<string, BrowserRunInfo>;
+    videos: Video[];
 }
 
 
