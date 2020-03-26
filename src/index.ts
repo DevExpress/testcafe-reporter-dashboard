@@ -14,14 +14,14 @@ import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject } from './types/testcafe';
 import { errorDecorator, removeTrailingComma } from './error-decorator';
 
-const WROKING_DIR = process.cwd();
+const WORKING_DIR = process.cwd();
 
 function formatUserAgent (prettyUserAgent: string) {
     return prettyUserAgent.replace(' / ', '_').replace(/\s/g, '_');
 }
 
 function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: string) {
-    return pathJoin(WROKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
+    return pathJoin(WORKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
 }
 
 module.exports = function plaginFactory (): ReporterPluginObject {
