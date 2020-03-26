@@ -67,7 +67,7 @@ export const createTestError = (error: Error): TestError => ({
 });
 
 
-export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo): DashboardTestRunInfo => ({
+export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns: Record<string, BrowserRunInfo>): DashboardTestRunInfo => ({
     durationMs:     testRunInfo.durationMs,
     quarantine:     testRunInfo.quarantine,
     screenshotPath: testRunInfo.screenshotPath,
@@ -75,5 +75,5 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo): DashboardT
     skipped:        testRunInfo.skipped,
     unstable:       testRunInfo.unstable,
     warnings:       testRunInfo.warnings,
-    browserRuns:    {}
+    browserRuns:    browserRuns
 });

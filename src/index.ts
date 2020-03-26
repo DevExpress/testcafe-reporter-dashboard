@@ -81,9 +81,9 @@ module.exports = function pluginFactory (): ReporterPluginObject {
             }
             if (testRunInfo.errs) {
                 for (const err of testRunInfo.errs) {
-                    for (const recordIndex in testRuns[name]) {
-                        if (testRuns[name][recordIndex].browser.prettyUserAgent === err.userAgent) {
-                            const actions = testRuns[name][recordIndex].actions;
+                    for (const browserName in testRuns[name]) {
+                        if (testRuns[name][browserName].browser.prettyUserAgent === err.userAgent) {
+                            const actions = testRuns[name][browserName].actions;
 
                             actions[actions.length - 1].errors = [
                                 { ...createTestError(err),
@@ -93,9 +93,8 @@ module.exports = function pluginFactory (): ReporterPluginObject {
                     }
                 }
             }
-            const dashboardTestRunInfo: DashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo);
+            const dashboardTestRunInfo: DashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, testRuns[name]);
 
-            dashboardTestRunInfo.browserRuns = testRuns[name];
             const payload = { name, testRunInfo: dashboardTestRunInfo, meta };
 
             await sendReportCommand(CommandTypes.reportTestDone, payload );
