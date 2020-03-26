@@ -70,8 +70,8 @@ export type Error = {
     message: string;
     stack: string;
     userAgent: string;
-    screenshotPath: string,
-    testRunPhase: string,
+    screenshotPath: string;
+    testRunPhase: string;
 };
 
 export type BrowserInfo = {

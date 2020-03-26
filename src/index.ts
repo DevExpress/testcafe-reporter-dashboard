@@ -46,7 +46,7 @@ module.exports = function pluginFactory (): ReporterPluginObject {
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            const { browser, test: { name, phase }, command, errors } = actionInfo;
+            const { browser, test: { name, phase }, command } = actionInfo;
 
             if (!testRuns[name])
                 testRuns[name] = {};
@@ -59,9 +59,6 @@ module.exports = function pluginFactory (): ReporterPluginObject {
                 testPhase: phase,
                 command,
             };
-
-            if (errors)
-                action.errors = [...errors.map(createTestError)];
 
             testRuns[name][actionInfo.browser.alias].actions.push(action);
         },

@@ -98,7 +98,6 @@ describe('reportTestActionDone', () => {
         assert.equal(actions[4].command.assertionType, 'eql');
         assert.equal(actions[4].command.actual, 'Peter');
         assert.equal(actions[4].command.expected, 'Peter1');
-        assert.equal(actions[4].errors.length, 1);
     }
 
     it('Should add test actions info to reportTestDone command', async () => {
