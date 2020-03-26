@@ -3,6 +3,8 @@ import mock from 'mock-require';
 import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { testDoneInfo, twoErrorsTestActionDone } from './data/';
+import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
+import pluginFactory = require('../src/index');
 
 describe('reportTaskStart', () => {
     before(() => {
@@ -98,7 +100,6 @@ describe('reportTestActionDone', () => {
         assert.equal(actions[4].command.actual, 'Peter');
         assert.equal(actions[4].command.expected, 'Peter1');
         assert.equal(actions[4].errors.length, 1);
-        //assert.equal(actions[4].errors[0].errorModel, 'AssertionError: expected \'Peter\' to deeply equal \'Peter1\'');
     }
 
     it('Should add test actions info to reportTestDone command', async () => {
@@ -140,23 +141,25 @@ describe('reportTestActionDone', () => {
         mock.reRequire('../lib/fetch');
         mock.reRequire('../lib/send-resolve-command');
 
-        const reporter            = mock.reRequire('../lib/index')();
-
-        reporter.useWordWrap = () => reporter;
-        reporter.setIndent = () => reporter;
-
-        let index = 0;
-
-        reporter.formatError = (error) => {
-            assert.equal(error, testDoneInfo.errs[index]);
-            return `model${index++}`;
-        };
+        const reporter  = buildReporterPlugin(mock.reRequire('../lib/index'), process.stdout);
 
         for (const actionInfo of twoErrorsTestActionDone)
             await reporter.reportTestActionDone('name', actionInfo);
 
+        const meta = {
+            userAgent: 'chrome',
+            screenshotPath: '',
+            testRunPhase: '',
+        };
+
+        testDoneInfo.errs = testDoneInfo.errs.map(err => new TestRunErrorFormattableAdapter(err, meta));
+
         await reporter.reportTestDone('Test 1', testDoneInfo);
-        assert.equal(testRunInfo.browserRuns['chrome'].actions[0].errors[0].errorModel, '{model0}');
-        assert.equal(testRunInfo.browserRuns['firefox'].actions[0].errors[0].errorModel, '{model1}');
+
+        assert.equal(testRunInfo.browserRuns['chrome'].actions[0].errors[0].errorModel,
+                     '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Chrome 80.0.3987.132 / Windows 10\"}');
+
+        assert.equal(testRunInfo.browserRuns['firefox'].actions[0].errors[0].errorModel,
+                    '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Firefox 73.0 / Windows 10\"}');
     });
 });
