@@ -4,7 +4,6 @@ import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { testDoneInfo, twoErrorsTestActionDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import pluginFactory = require('../src/index');
 
 describe('reportTaskStart', () => {
     before(() => {
@@ -147,9 +146,9 @@ describe('reportTestActionDone', () => {
             await reporter.reportTestActionDone('name', actionInfo);
 
         const meta = {
-            userAgent: 'chrome',
+            userAgent:      'chrome',
             screenshotPath: '',
-            testRunPhase: '',
+            testRunPhase:   '',
         };
 
         testDoneInfo.errs = testDoneInfo.errs.map(err => new TestRunErrorFormattableAdapter(err, meta));
