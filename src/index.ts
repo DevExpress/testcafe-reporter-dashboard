@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 import logger from './logger';
-import path from 'path';
+import { join as pathJoin } from 'path';
 
 import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER } from './env-variables';
 
@@ -21,7 +21,7 @@ function formatUserAgent (prettyUserAgent: string) {
 }
 
 function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: string) {
-    return path.join(WROKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
+    return pathJoin(WROKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
 }
 
 module.exports = function plaginFactory (): ReporterPluginObject {

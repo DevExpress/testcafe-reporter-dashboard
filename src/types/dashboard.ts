@@ -4,7 +4,9 @@ import {
     BrowserInfo,
     Screenshot,
     Quarantine,
-    Error, TestRunInfo
+    Error,
+    Video,
+    TestRunInfo
 } from './testcafe';
 
 export enum CommandTypes {
@@ -54,6 +56,7 @@ export type DashboardTestRunInfo = {
     quarantine: Quarantine;
     skipped: boolean;
     browserRuns: Record<string, BrowserRunInfo>;
+    videos: Video[];
 }
 
 export const createTestError = (error: Error, errorModel: string): TestError => ({
@@ -73,5 +76,6 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns
     skipped:        testRunInfo.skipped,
     unstable:       testRunInfo.unstable,
     warnings:       testRunInfo.warnings,
-    browserRuns:    browserRuns
+    browserRuns:    browserRuns,
+    videos:         testRunInfo.videos
 });

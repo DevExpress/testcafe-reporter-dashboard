@@ -10,8 +10,6 @@ function mockFetchAndFs (readFile) {
     const aggregateCommands = [];
     const uploadedUrls      = [];
     const uploadedFiles     = [];
-                uploadId:       null,
-                uploadId:       null,
 
     mock('isomorphic-fetch', (url, request) => {
         if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=`)) {
@@ -83,7 +81,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            function readFile (path, readFileCallback) {
+            function readFile (path, readFileCallback): void {
                 screenshotPaths.push(path);
 
                 let fileContent = '';
@@ -141,7 +139,7 @@ describe('Uploads', () => {
             const prettyUserAgents = ['Chrome 80.0.3987.149 \\ Windows 10', 'Firefox 73.0 \\ Windows 10'];
             const videoPaths = [];
 
-            function readFile (path, readFileCallback) {
+            function readFile (path, readFileCallback): void {
                 videoPaths.push(path);
 
                 readFileCallback(null, 'fileContent');
@@ -154,8 +152,11 @@ describe('Uploads', () => {
             await reporter.reportTaskStart('timeStamp', prettyUserAgents, 2);
             await reporter.reportTestStart('testName1', {});
             await reporter.reportTestStart('testName2', {});
-            await reporter.reportTestDone('testName1', {}, {});
-            await reporter.reportTestDone('testName2', { quarantine: { '1': false, '2': true } }, {});
+            await reporter.reportTestDone('testName1', { screenshots: [] }, {});
+            await reporter.reportTestDone('testName2', {
+                quarantine:  { '1': false, '2': true },
+                screenshots: []
+            }, {});
             await reporter.reportTaskDone('', 1, [], {});
 
             assert.equal(videoPaths.length, 6);
