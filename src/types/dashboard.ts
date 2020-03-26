@@ -42,7 +42,6 @@ export type TestError = {
     screenshotPath: string;
     testRunPhase: string;
     code: string;
-    url: string;
     errorModel: string;
 }
 
@@ -57,13 +56,12 @@ export type DashboardTestRunInfo = {
     browserRuns: Record<string, BrowserRunInfo>;
 }
 
-export const createTestError = (error: Error): TestError => ({
+export const createTestError = (error: Error, errorModel: string): TestError => ({
     code:           error.code,
-    errorModel:     '',
-    screenshotPath: '',
-    testRunPhase:   '',
-    url:            '',
-    userAgent:      error.userAgent
+    screenshotPath: error.screenshotPath,
+    testRunPhase:   error.testRunPhase,
+    userAgent:      error.userAgent,
+    errorModel:     errorModel,
 });
 
 

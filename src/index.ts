@@ -20,7 +20,7 @@ module.exports = function pluginFactory (): ReporterPluginObject {
 
     const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
 
-    async function sendReportCommand (type: CommandTypes, payload: Record<string, any>) {
+    async function sendReportCommand (type: CommandTypes, payload: Record<string, any>): Promise<void> {
         return sendResolveCommand({
             aggregateId:   id,
             aggregateName: AggregateNames.Report,
@@ -31,21 +31,21 @@ module.exports = function pluginFactory (): ReporterPluginObject {
 
     return {
         createErrorDecorator: errorDecorator,
-        async reportTaskStart (startTime, userAgents, testCount) {
+        async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
             logger.log(createReportUrlMessage(id));
         },
 
-        async reportFixtureStart (name, path, meta) {
+        async reportFixtureStart (name, path, meta): Promise<void> {
 
             await sendReportCommand(CommandTypes.reportFixtureStart, { name, path, meta });
         },
 
-        async reportTestStart (name, meta) {
+        async reportTestStart (name, meta): Promise<void> {
             await sendReportCommand(CommandTypes.reportTestStart, { name, meta });
         },
 
-        async reportTestActionDone (apiActionName, actionInfo) {
+        async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
             const { browser, test: { name, phase }, command, errors } = actionInfo;
 
             if (!testRuns[name])
@@ -66,7 +66,7 @@ module.exports = function pluginFactory (): ReporterPluginObject {
             testRuns[name][actionInfo.browser.alias].actions.push(action);
         },
 
-        async reportTestDone (name, testRunInfo, meta) {
+        async reportTestDone (name, testRunInfo, meta): Promise<void> {
             if (ENABLE_SCREENSHOTS_UPLOAD && testRunInfo.screenshots.length) {
                 for (const screenshotInfo of testRunInfo.screenshots) {
                     const { screenshotPath } = screenshotInfo;
@@ -86,9 +86,7 @@ module.exports = function pluginFactory (): ReporterPluginObject {
                             const actions = testRuns[name][browserName].actions;
 
                             actions[actions.length - 1].errors = [
-                                { ...createTestError(err),
-                                    errorModel: `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`
-                                }];
+                                createTestError(err, `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`)];
                         }
                     }
                 }
@@ -102,7 +100,7 @@ module.exports = function pluginFactory (): ReporterPluginObject {
             delete testRuns[name];
         },
 
-        async reportTaskDone (endTime, passed, warnings, result) {
+        async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await Promise.all(uploads);
             await sendReportCommand(CommandTypes.reportTaskDone, { endTime, passed, warnings, result });
         }
