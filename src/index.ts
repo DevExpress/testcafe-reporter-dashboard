@@ -8,7 +8,7 @@ import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
 import {
     CommandTypes, AggregateNames, BrowserRunInfo,
-    DashboardTestRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo
+    createDashboardTestRunInfo, createTestError, ActionInfo
 } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject } from './types/testcafe';
@@ -124,7 +124,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                     }
                 }
             }
-            const dashboardTestRunInfo: DashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, testRuns[name]);
+            const dashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, testRuns[name]);
 
             const payload = { name, testRunInfo: dashboardTestRunInfo, meta };
 
