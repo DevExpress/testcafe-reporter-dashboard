@@ -1,7 +1,7 @@
 import { decoratorFn } from './types/testcafe';
 
-const empty = () => '';
-const raw = (str: string) => str;
+const empty = (): string => '';
+const raw = (str: string): string => str;
 
 export const removeTrailingComma: decoratorFn = (str) => {
     str = str.trimEnd();
@@ -9,8 +9,8 @@ export const removeTrailingComma: decoratorFn = (str) => {
 };
 
 const curly = (str: string): string => `{${removeTrailingComma(str)}}`;
-const squared = (str: string) => `[${removeTrailingComma(str)}]`;
-const escaped = (str: string) => `"${str.replace(/\//g, '\/')
+const squared = (str: string): string => `[${removeTrailingComma(str)}]`;
+const escaped = (str: string): string => `"${str.replace(/\//g, '\/')
     .replace(/\\/g, '\\\\')
     .replace(/\t/g, '\\t')
     .replace(/[\b]/g, '\\b')
@@ -18,8 +18,8 @@ const escaped = (str: string) => `"${str.replace(/\//g, '\/')
     .replace(/\n/g, '\\n')
     .replace(/\"/g, '\\"')}"`;
 
-const comma = (modifier: decoratorFn) => (str: string) => `${modifier(str)}, `;
-const element = (modifier: decoratorFn) => (name: string) => comma((str: string) => `"${name}": ${modifier(str)}`);
+const comma = (modifier: decoratorFn) => (str: string): string => `${modifier(str)}, `;
+const element = (modifier: decoratorFn) => (name: string): decoratorFn => comma((str: string) => `"${name}": ${modifier(str)}`);
 
 const escapedElement = element(escaped);
 const squaredElement = element(squared);
