@@ -1,7 +1,8 @@
 import uuid from 'uuid';
 import logger from './logger';
+import path from 'path';
 
-import { ENABLE_SCREENSHOTS_UPLOAD } from './env-variables';
+import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER } from './env-variables';
 
 import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
@@ -13,10 +14,21 @@ import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject } from './types/testcafe';
 import { errorDecorator, removeTrailingComma } from './error-decorator';
 
+const WROKING_DIR = process.cwd();
 
-module.exports = function pluginFactory (): ReporterPluginObject {
+function formatUserAgent (prettyUserAgent: string) {
+    return prettyUserAgent.replace(' / ', '_').replace(/\s/g, '_');
+}
+
+function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: string) {
+    return path.join(WROKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
+}
+
+module.exports = function plaginFactory (): ReporterPluginObject {
     const id = uuid() as string;
-    const uploads = [];
+    const uploads: Promise<void>[]  = [];
+    let formattedUserAgents: string[] = [];
+    let testIndex = 0;
 
     const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
 
@@ -32,16 +44,17 @@ module.exports = function pluginFactory (): ReporterPluginObject {
     return {
         createErrorDecorator: errorDecorator,
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
+            formattedUserAgents = userAgents.map(formatUserAgent);
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
             logger.log(createReportUrlMessage(id));
         },
 
         async reportFixtureStart (name, path, meta): Promise<void> {
-
             await sendReportCommand(CommandTypes.reportFixtureStart, { name, path, meta });
         },
 
         async reportTestStart (name, meta): Promise<void> {
+            testIndex += 1;
             await sendReportCommand(CommandTypes.reportTestStart, { name, meta });
         },
 
@@ -74,6 +87,29 @@ module.exports = function pluginFactory (): ReporterPluginObject {
                     screenshotInfo.uploadId = uploadInfo.uploadId;
 
                     uploads.push(uploadFile(screenshotPath, uploadInfo, id));
+                }
+            }
+
+            if (VIDEO_FOLDER) {
+                testRunInfo.videos = [];
+
+                for (const userAgent of formattedUserAgents) {
+                    const quarantineAttempts = testRunInfo.quarantine ? Object.keys(testRunInfo.quarantine) : ['1'];
+
+                    for (const attempt of quarantineAttempts) {
+                        const videoPath  = getVideoPath(testIndex, userAgent, attempt);
+                        const uploadInfo = await getUploadInfo(id, videoPath);
+
+                        if (!uploadInfo) continue;
+
+                        testRunInfo.videos.push({
+                            uploadId:          uploadInfo.uploadId,
+                            userAgent:         userAgent,
+                            quarantineAttempt: parseInt(attempt, 10)
+                        });
+
+                        uploads.push(uploadFile(videoPath, uploadInfo, id));
+                    }
                 }
             }
             if (testRunInfo.errs) {
