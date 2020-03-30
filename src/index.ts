@@ -28,7 +28,6 @@ function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: st
 module.exports = function plaginFactory (): ReporterPluginObject {
     const id = uuid() as string;
     const uploads: Promise<void>[]  = [];
-    let formattedUserAgents: string[] = [];
     let testIndex = 0;
 
     const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
@@ -46,7 +45,8 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            formattedUserAgents = userAgents;
+            this.userAgents = userAgents;
+
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
             logger.log(createReportUrlMessage(id));
         },
@@ -97,7 +97,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 const { quarantine } = testRunInfo;
                 const quarantineAttempts = quarantine ? Object.keys(quarantine) : ['1'];
 
-                for (const userAgent of formattedUserAgents) {
+                for (const userAgent of this.userAgents) {
                     for (const attempt of quarantineAttempts) {
                         const videoPath  = getVideoPath(testIndex, formatUserAgent(userAgent), attempt);
 
