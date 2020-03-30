@@ -3,12 +3,12 @@ import { decoratorFn } from './types/testcafe';
 const empty = (): string => '';
 const raw = (str: string): string => str;
 
-export const removeTrailingComma: decoratorFn = (str) => {
+const removeTrailingComma: decoratorFn = (str) => {
     str = str.trimEnd();
     return str.endsWith(',') ? str.substring(0, str.length - 1) : str;
 };
 
-const curly = (str: string): string => `{${removeTrailingComma(str)}}`;
+export const curly = (str: string): string => `{${removeTrailingComma(str)}}`;
 const squared = (str: string): string => `[${removeTrailingComma(str)}]`;
 const escaped = (str: string): string => `"${str.replace(/\//g, '\/')
     .replace(/\\/g, '\\\\')
@@ -24,7 +24,7 @@ const element = (modifier: decoratorFn) => (name: string): decoratorFn => comma(
 const escapedElement = element(escaped);
 const squaredElement = element(squared);
 
-export function errorDecorator () {
+export function errorDecorator (): { [key: string]: decoratorFn } {
     return {
         'span user-agent': escapedElement('user-agent'),
 

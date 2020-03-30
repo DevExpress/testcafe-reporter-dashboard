@@ -12,7 +12,7 @@ import {
 } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject } from './types/testcafe';
-import { errorDecorator, removeTrailingComma } from './error-decorator';
+import { errorDecorator, curly } from './error-decorator';
 
 const WORKING_DIR = process.cwd();
 
@@ -117,9 +117,11 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                     for (const browserName in testRuns[name]) {
                         if (testRuns[name][browserName].browser.prettyUserAgent === err.userAgent) {
                             const actions = testRuns[name][browserName].actions;
+                            const testError = curly(this.useWordWrap(false).setIndent(0).formatError(err));
 
                             actions[actions.length - 1].errors = [
-                                createTestError(err, `{${removeTrailingComma(this.useWordWrap(false).setIndent(0).formatError(err))}}`)];
+                                createTestError(err, testError)
+                            ];
                         }
                     }
                 }
