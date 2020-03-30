@@ -4,7 +4,7 @@ import assert from 'assert';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
-function mockFetchAndFs (readFile) {
+function mockFetchAndFs (fsObject) {
     const uploadUrlPrefix   = 'http://upload_url/';
     const uploadInfos       = [];
     const aggregateCommands = [];
@@ -39,7 +39,7 @@ function mockFetchAndFs (readFile) {
         throw new Error('Unknown request');
     });
 
-    mock('fs', { readFile });
+    mock('fs', fsObject);
 
     mock.reRequire('../lib/fetch');
     mock.reRequire('../lib/upload');
@@ -96,7 +96,7 @@ describe('Uploads', () => {
                 readFileCallback(null, fileContent);
             }
 
-            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs(readFile);
+            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile });
 
             const reporter = mock.reRequire('../lib/index')();
 
@@ -145,23 +145,27 @@ describe('Uploads', () => {
                 readFileCallback(null, 'fileContent');
             }
 
-            const { uploadInfos, uploadedUrls } = mockFetchAndFs(readFile);
+            function existsSync (path: string): boolean {
+                return !path.includes('1_Chrome');
+            }
+
+            const { uploadInfos, uploadedUrls } = mockFetchAndFs({ readFile, existsSync });
 
             const reporter = mock.reRequire('../lib/index')();
 
             await reporter.reportTaskStart('timeStamp', prettyUserAgents, 2);
             await reporter.reportTestStart('testName1', {});
-            await reporter.reportTestStart('testName2', {});
             await reporter.reportTestDone('testName1', { screenshots: [] }, {});
+            await reporter.reportTestStart('testName2', {});
             await reporter.reportTestDone('testName2', {
-                quarantine:  { '1': false, '2': true },
+                quarantine:  { '1': {}, '2': {} },
                 screenshots: []
             }, {});
             await reporter.reportTaskDone('', 1, [], {});
 
-            assert.equal(videoPaths.length, 6);
-            assert.equal(uploadInfos.length, 6);
-            assert.equal(uploadedUrls.length, 6);
+            assert.equal(videoPaths.length, 5);
+            assert.equal(uploadInfos.length, 5);
+            assert.equal(uploadedUrls.length, 5);
 
             for (const index of [...Array(5).keys()])
                 assert.equal(uploadedUrls[index], uploadInfos[index].uploadUrl);

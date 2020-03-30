@@ -1,6 +1,7 @@
 import uuid from 'uuid';
 import logger from './logger';
 import { join as pathJoin } from 'path';
+import fs from 'fs';
 
 import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER } from './env-variables';
 
@@ -43,6 +44,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
     return {
         createErrorDecorator: errorDecorator,
+
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
             formattedUserAgents = userAgents.map(formatUserAgent);
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
@@ -92,12 +94,15 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
             if (VIDEO_FOLDER) {
                 testRunInfo.videos = [];
+                const { quarantine } = testRunInfo;
+                const quarantineAttempts = quarantine ? Object.keys(quarantine) : ['1'];
 
                 for (const userAgent of formattedUserAgents) {
-                    const quarantineAttempts = testRunInfo.quarantine ? Object.keys(testRunInfo.quarantine) : ['1'];
-
                     for (const attempt of quarantineAttempts) {
                         const videoPath  = getVideoPath(testIndex, userAgent, attempt);
+
+                        if (!fs.existsSync(videoPath)) continue;
+
                         const uploadInfo = await getUploadInfo(id, videoPath);
 
                         if (!uploadInfo) continue;
@@ -112,6 +117,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                     }
                 }
             }
+
             if (testRunInfo.errs) {
                 for (const err of testRunInfo.errs) {
                     for (const browserName in testRuns[name]) {
@@ -126,6 +132,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                     }
                 }
             }
+
             const dashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, testRuns[name]);
 
             const payload = { name, testRunInfo: dashboardTestRunInfo, meta };
