@@ -1,6 +1,7 @@
 import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
+import { CommandTypes } from '../src/types/dashboard';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
@@ -43,13 +44,19 @@ function mockFetchAndFs (fsObject) {
 
     mock.reRequire('../lib/fetch');
     mock.reRequire('../lib/upload');
+    mock.reRequire('../lib/send-resolve-command');
 
     return { uploadInfos, aggregateCommands, uploadedUrls, uploadedFiles };
 }
 
 describe('Uploads', () => {
-    after(() => {
+    afterEach(() => {
         mock.stop('../lib/env-variables');
+        mock.stop('isomorphic-fetch');
+        mock.stop('fs');
+        mock.reRequire('../lib/fetch');
+        mock.reRequire('../lib/upload');
+        mock.reRequire('../lib/send-resolve-command');
     });
 
     describe('Screenshots', () => {
@@ -118,9 +125,6 @@ describe('Uploads', () => {
             assert.equal(screenshotPaths.length, 2);
             assert.equal(screenshotPaths[0], 'C:\\screenshots\\1.png');
             assert.equal(screenshotPaths[1], 'C:\\screenshots\\errors\\1.png');
-
-            mock.stop('isomorphic-fetch');
-            mock.stop('fs');
         });
     });
 
@@ -149,7 +153,7 @@ describe('Uploads', () => {
                 return !path.includes('1_Chrome');
             }
 
-            const { uploadInfos, uploadedUrls } = mockFetchAndFs({ readFile, existsSync });
+            const { uploadInfos, uploadedUrls, aggregateCommands } = mockFetchAndFs({ readFile, existsSync });
 
             const reporter = mock.reRequire('../lib/index')();
 
@@ -166,6 +170,15 @@ describe('Uploads', () => {
             assert.equal(videoPaths.length, 5);
             assert.equal(uploadInfos.length, 5);
             assert.equal(uploadedUrls.length, 5);
+
+            const isReportTestDone = cmd => cmd.type === CommandTypes.reportTestDone;
+
+            assert.equal(aggregateCommands.filter(isReportTestDone).length, 2);
+
+            for (const command of aggregateCommands.filter(isReportTestDone)) {
+                for (const videoInfo of command.payload.testRunInfo.videos)
+                    assert.equal(prettyUserAgents.includes(videoInfo.userAgent), true);
+            }
 
             for (const index of [...Array(5).keys()])
                 assert.equal(uploadedUrls[index], uploadInfos[index].uploadUrl);

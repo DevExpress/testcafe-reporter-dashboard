@@ -46,7 +46,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            formattedUserAgents = userAgents.map(formatUserAgent);
+            formattedUserAgents = userAgents;
             await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
             logger.log(createReportUrlMessage(id));
         },
@@ -99,7 +99,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
                 for (const userAgent of formattedUserAgents) {
                     for (const attempt of quarantineAttempts) {
-                        const videoPath  = getVideoPath(testIndex, userAgent, attempt);
+                        const videoPath  = getVideoPath(testIndex, formatUserAgent(userAgent), attempt);
 
                         if (!fs.existsSync(videoPath)) continue;
 
