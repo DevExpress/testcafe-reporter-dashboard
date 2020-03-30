@@ -16,11 +16,11 @@ import { errorDecorator, curly } from './error-decorator';
 
 const WORKING_DIR = process.cwd();
 
-function formatUserAgent (prettyUserAgent: string) {
+function formatUserAgent (prettyUserAgent: string): string {
     return prettyUserAgent.replace(' / ', '_').replace(/\s/g, '_');
 }
 
-function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: string) {
+function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: string): string {
     return pathJoin(WORKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
 }
 
