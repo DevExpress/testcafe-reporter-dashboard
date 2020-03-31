@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "dashboard TestCafe reporter plugin.",
   "repository": "https://github.com/aleks-pro/testcafe-reporter-dashboard",
   "author": {
