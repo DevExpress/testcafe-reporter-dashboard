@@ -29,7 +29,7 @@ export async function getUploadInfo (reportId: string, filePath: string): Promis
     return null;
 }
 
-export async function uploadFile (filePath: string, uploadInfo: UploadInfo, reportId: string) {
+export async function uploadFile (filePath: string, uploadInfo: UploadInfo, reportId: string): Promise<void> {
     const { uploadUrl, uploadId } = uploadInfo;
 
     const file            = await readFile(filePath);

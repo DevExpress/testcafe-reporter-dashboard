@@ -36,7 +36,7 @@ describe('reportTaskStart', () => {
 
         const reporter = mock.reRequire('../lib/index')();
 
-        await reporter.reportTaskStart(1, {}, 1);
+        await reporter.reportTaskStart(1, [], 1);
 
 
         assert.equal(logs.length, 1);
