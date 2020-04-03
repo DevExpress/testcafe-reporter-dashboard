@@ -6,7 +6,8 @@ import {
     Quarantine,
     Error,
     Video,
-    TestRunInfo
+    TestRunInfo,
+    TestResult
 } from './testcafe';
 
 export enum CommandTypes {
@@ -79,3 +80,31 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns
     browserRuns:    browserRuns,
     videos:         testRunInfo.videos
 });
+
+export type TaskStartArgs = {
+    startTime: Date;
+    userAgents: string[];
+    testCount: number;
+    buildId: string;
+};
+
+export type FixtureStartArgs = {
+    name: string;
+};
+
+export type TestStartArgs = {
+    name: string;
+};
+
+export type TestDoneArgs = {
+    name: string;
+    testRunInfo: DashboardTestRunInfo;
+};
+
+export type TaskDoneArgs = {
+     endTime: Date;
+     passed: number;
+     warnings: string[];
+     result: TestResult;
+}
+

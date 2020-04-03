@@ -45,6 +45,7 @@ function mockFetchAndFs (fsObject) {
     mock.reRequire('../lib/fetch');
     mock.reRequire('../lib/upload');
     mock.reRequire('../lib/send-resolve-command');
+    mock.reRequire('../lib/commands');
 
     return { uploadInfos, aggregateCommands, uploadedUrls, uploadedFiles };
 }
@@ -57,6 +58,7 @@ describe('Uploads', () => {
         mock.reRequire('../lib/fetch');
         mock.reRequire('../lib/upload');
         mock.reRequire('../lib/send-resolve-command');
+        mock.reRequire('../lib/commands');
     });
 
     describe('Screenshots', () => {

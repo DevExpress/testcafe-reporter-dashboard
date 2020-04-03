@@ -3,17 +3,14 @@ import logger from './logger';
 import { join as pathJoin } from 'path';
 import fs from 'fs';
 
-import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER } from './env-variables';
+import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER, BUILD_ID } from './env-variables';
 
-import sendResolveCommand from './send-resolve-command';
 import { createReportUrlMessage } from './texts';
-import {
-    CommandTypes, AggregateNames, BrowserRunInfo,
-    createDashboardTestRunInfo, createTestError, ActionInfo
-} from './types/dashboard';
+import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
+import { sendTaskStartCommand, sendFixtureStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
 
 const WORKING_DIR = process.cwd();
 
@@ -32,32 +29,23 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
     const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
 
-    async function sendReportCommand (type: CommandTypes, payload: Record<string, any>): Promise<void> {
-        return sendResolveCommand({
-            aggregateId:   id,
-            aggregateName: AggregateNames.Report,
-            type,
-            payload
-        });
-    }
-
     return {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
             this.userAgents = userAgents;
 
-            await sendReportCommand(CommandTypes.reportTaskStart, { startTime, userAgents, testCount });
+            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: BUILD_ID });
             logger.log(createReportUrlMessage(id));
         },
 
-        async reportFixtureStart (name, path, meta): Promise<void> {
-            await sendReportCommand(CommandTypes.reportFixtureStart, { name, path, meta });
+        async reportFixtureStart (name): Promise<void> {
+            await sendFixtureStartCommand(id, { name });
         },
 
-        async reportTestStart (name, meta): Promise<void> {
+        async reportTestStart (name): Promise<void> {
             testIndex += 1;
-            await sendReportCommand(CommandTypes.reportTestStart, { name, meta });
+            await sendTestStartCommand(id, { name });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
@@ -78,7 +66,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             testRuns[name][actionInfo.browser.alias].actions.push(action);
         },
 
-        async reportTestDone (name, testRunInfo, meta): Promise<void> {
+        async reportTestDone (name, testRunInfo): Promise<void> {
             if (ENABLE_SCREENSHOTS_UPLOAD && testRunInfo.screenshots.length) {
                 for (const screenshotInfo of testRunInfo.screenshots) {
                     const { screenshotPath } = screenshotInfo;
@@ -102,7 +90,6 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                         const videoPath  = getVideoPath(testIndex, formatUserAgent(userAgent), attempt);
 
                         if (!fs.existsSync(videoPath)) continue;
-
                         const uploadInfo = await getUploadInfo(id, videoPath);
 
                         if (!uploadInfo) continue;
@@ -135,16 +122,16 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
             const dashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, testRuns[name]);
 
-            const payload = { name, testRunInfo: dashboardTestRunInfo, meta };
+            const payload = { name, testRunInfo: dashboardTestRunInfo };
 
-            await sendReportCommand(CommandTypes.reportTestDone, payload );
+            await sendTestDoneCommand(id, payload );
 
             delete testRuns[name];
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await Promise.all(uploads);
-            await sendReportCommand(CommandTypes.reportTaskDone, { endTime, passed, warnings, result });
+            await sendTaskDoneCommand(id, { endTime, passed, warnings, result });
         }
     };
 };
