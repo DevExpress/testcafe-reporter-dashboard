@@ -143,7 +143,7 @@ export type DashboardBrowserRunInfo = {
 }
 
 
-type TestResult = {
+export type TestResult = {
     failedCount: number;
     passedCount: number;
     skippedCount: number;

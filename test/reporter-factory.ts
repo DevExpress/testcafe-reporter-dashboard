@@ -111,6 +111,7 @@ describe('reportTestActionDone', () => {
 
         mock.reRequire('../lib/fetch');
         mock.reRequire('../lib/send-resolve-command');
+        mock.reRequire('../lib/commands');
 
         const reporter            = mock.reRequire('../lib/index')();
 
@@ -138,6 +139,7 @@ describe('reportTestActionDone', () => {
 
         mock.reRequire('../lib/fetch');
         mock.reRequire('../lib/send-resolve-command');
+        mock.reRequire('../lib/commands');
 
         const reporter  = buildReporterPlugin(mock.reRequire('../lib/index'), process.stdout);
 
