@@ -23,7 +23,7 @@ export enum CommandTypes {
 };
 
 export enum AggregateNames {
-    Report = 'Report',
+    Run = 'Run',
     Upload = 'Upload'
 };
 
@@ -106,5 +106,6 @@ export type TaskDoneArgs = {
      passed: number;
      warnings: string[];
      result: TestResult;
+     buildId: string;
 }
 
