@@ -131,7 +131,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await Promise.all(uploads);
-            await sendTaskDoneCommand(id, { endTime, passed, warnings, result });
+            await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: BUILD_ID });
         }
     };
 };

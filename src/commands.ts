@@ -4,7 +4,7 @@ import sendResolveCommand from './send-resolve-command';
 async function sendReportCommand (id: string, type: CommandTypes, payload: Record<string, any>): Promise<void> {
     return sendResolveCommand({
         aggregateId:   id,
-        aggregateName: AggregateNames.Report,
+        aggregateName: AggregateNames.Run,
         type,
         payload
     });
