@@ -2,7 +2,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'click',
         'actionInfo':    {
-            'test': {
+            'testRunId': '1',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -44,7 +45,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'typeText',
         'actionInfo':    {
-            'test': {
+            'testRunId': '1',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -89,7 +91,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'click',
         'actionInfo':    {
-            'test': {
+            'testRunId': '1',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -131,7 +134,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'drag',
         'actionInfo':    {
-            'test': {
+            'testRunId': '1',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -174,7 +178,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'click',
         'actionInfo':    {
-            'test': {
+            'testRunId': '2',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -216,7 +221,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'typeText',
         'actionInfo':    {
-            'test': {
+            'testRunId': '2',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -261,7 +267,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'click',
         'actionInfo':    {
-            'test': {
+            'testRunId': '2',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -303,7 +310,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'drag',
         'actionInfo':    {
-            'test': {
+            'testRunId': '2',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -346,7 +354,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'click',
         'actionInfo':    {
-            'test': {
+            'testRunId': '3',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -388,7 +397,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'typeText',
         'actionInfo':    {
-            'test': {
+            'testRunId': '3',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -433,7 +443,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'click',
         'actionInfo':    {
-            'test': {
+            'testRunId': '3',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -475,7 +486,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'drag',
         'actionInfo':    {
-            'test': {
+            'testRunId': '3',
+            'test':      {
                 'name':  'Test 1',
                 'phase': 'inTest'
             },
@@ -518,7 +530,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'eql',
         'actionInfo':    {
-            'errors': [
+            'testRunId': '1',
+            'errors':    [
                 {
                     'code':            'E53',
                     'isTestCafeError': true,
@@ -588,7 +601,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'eql',
         'actionInfo':    {
-            'errors': [
+            'testRunId': '2',
+            'errors':    [
                 {
                     'code':            'E53',
                     'isTestCafeError': true,
@@ -658,7 +672,8 @@ export const reportTestActionDoneCalls = [
     {
         'apiActionName': 'eql',
         'actionInfo':    {
-            'errors': [
+            'testRunId': '3',
+            'errors':    [
                 {
                     'code':            'E53',
                     'isTestCafeError': true,

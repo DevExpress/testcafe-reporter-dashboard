@@ -2,7 +2,7 @@ import { DashboardTestRunInfo } from './../src/types/dashboard';
 import mock from 'mock-require';
 import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
-import { testDoneInfo, twoErrorsTestActionDone } from './data/';
+import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
 
 describe('reportTaskStart', () => {
@@ -47,6 +47,16 @@ describe('reportTaskStart', () => {
     });
 });
 
+function mockReporter (fetchHandler): () => any {
+    mock('isomorphic-fetch', fetchHandler);
+
+    mock.reRequire('../lib/fetch');
+    mock.reRequire('../lib/send-resolve-command');
+    mock.reRequire('../lib/commands');
+
+    return mock.reRequire('../lib/index');
+}
+
 describe('reportTestActionDone', () => {
     before(() => {
         mock('../lib/env-variables', {
@@ -59,7 +69,7 @@ describe('reportTestActionDone', () => {
         mock.stop('../lib/env-variables');
     });
 
-    function checkBrowserRun (browserRun, prettyUserAgent) {
+    function checkBrowserRun (browserRun, prettyUserAgent): void {
         const { browser, actions } = browserRun;
 
         assert.equal(browser.prettyUserAgent, prettyUserAgent);
@@ -103,23 +113,20 @@ describe('reportTestActionDone', () => {
     it('Should add test actions info to reportTestDone command', async () => {
         let testRunInfo = null;
 
-        mock('isomorphic-fetch', (_, request) => {
+        const reporter = mockReporter((_, request) => {
             testRunInfo = JSON.parse(request.body).payload.testRunInfo;
 
             return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
-        });
+        })();
 
-        mock.reRequire('../lib/fetch');
-        mock.reRequire('../lib/send-resolve-command');
-        mock.reRequire('../lib/commands');
+        const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
 
-        const reporter            = mock.reRequire('../lib/index')();
-
+        await reporter.reportTestStart('Test 1', {}, { testRunIds: [...testRunIds] });
 
         for (const { apiActionName, actionInfo } of reportTestActionDoneCalls)
             await reporter.reportTestActionDone(apiActionName, actionInfo);
 
-        await reporter.reportTestDone('Test 1', { screenshots: [] });
+        await reporter.reportTestDone('Test 1', { screenshots: [], errs: [] }, {});
 
         checkBrowserRun(testRunInfo.browserRuns['chrome'], 'Chrome 79.0.3945.130 / Windows 8.1');
         checkBrowserRun(testRunInfo.browserRuns['firefox'], 'Firefox 59.0 / Windows 8.1');
@@ -131,35 +138,73 @@ describe('reportTestActionDone', () => {
     it('Format error on test done', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
-        mock('isomorphic-fetch', (_, request) => {
+        const reporter = buildReporterPlugin(mockReporter((_, request) => {
             testRunInfo = JSON.parse(request.body).payload.testRunInfo;
 
             return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
-        });
+        }), process.stdout);
 
-        mock.reRequire('../lib/fetch');
-        mock.reRequire('../lib/send-resolve-command');
-        mock.reRequire('../lib/commands');
+        const testRunIds = new Set(twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId));
 
-        const reporter  = buildReporterPlugin(mock.reRequire('../lib/index'), process.stdout);
+        await reporter.reportTestStart('Test 1', {}, { testRunIds: [...testRunIds] });
 
-        for (const actionInfo of twoErrorsTestActionDone)
+        for (const actionInfo of twoErrorsTestActionDone) {
+            actionInfo.err = new TestRunErrorFormattableAdapter(actionInfo.err, {
+                screenshotPath: '',
+                testRunPhase:   'inTest',
+                testRunId:      actionInfo.testRunId,
+                userAgent:      actionInfo.browser.prettyUserAgent
+            });
             await reporter.reportTestActionDone('name', actionInfo);
+        }
 
-        const meta = {
-            userAgent:      'chrome',
-            screenshotPath: '',
-            testRunPhase:   '',
-        };
+        await reporter.reportTestDone('Test 1', testDoneInfo, {});
 
-        testDoneInfo.errs = testDoneInfo.errs.map(err => new TestRunErrorFormattableAdapter(err, meta));
-
-        await reporter.reportTestDone('Test 1', testDoneInfo);
-
-        assert.equal(testRunInfo.browserRuns['chrome'].actions[0].errors[0].errorModel,
+        assert.equal(testRunInfo.browserRuns['chrome'].actions[0].error.errorModel,
                      '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Chrome 80.0.3987.132 / Windows 10\"}');
 
-        assert.equal(testRunInfo.browserRuns['firefox'].actions[0].errors[0].errorModel,
+        assert.equal(testRunInfo.browserRuns['firefox'].actions[0].error.errorModel,
                     '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Firefox 73.0 / Windows 10\"}');
+
+        mock.stop('isomorphic-fetch');
+    });
+});
+
+describe('reportTestDone', () => {
+    before(() => {
+        mock('../lib/env-variables', {
+            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
+        });
+    });
+
+    after(() => {
+        mock.stop('../lib/env-variables');
+    });
+
+    it('Should process errors originated not form actions', async () => {
+        let testRunInfo: DashboardTestRunInfo = null;
+
+        const reporter = buildReporterPlugin(mockReporter((_, request) => {
+            testRunInfo = JSON.parse(request.body).payload.testRunInfo;
+
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
+        }), process.stdout);
+
+        await reporter.reportTestStart('Test 1', {}, { testRunIds: [thirdPartyTestDone.errs[0].testRunId] });
+        await reporter.reportTestDone('Test 1', thirdPartyTestDone);
+
+        const { thirdPartyError, actions, browser } = testRunInfo.browserRuns['chrome'];
+
+        assert.ok(thirdPartyError);
+        assert.deepEqual(actions, []);
+        assert.ok(browser);
+        assert.equal(browser.alias, 'chrome');
+        assert.equal(browser.name, 'Chrome');
+        assert.equal(browser.prettyUserAgent, thirdPartyTestDone.errs[0].userAgent);
+        assert.ok(browser.version);
+        assert.ok(browser.os);
+        assert.ok(browser.os.name);
+        assert.ok(browser.os.version);
     });
 });

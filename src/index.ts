@@ -8,7 +8,7 @@ import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER, BUILD_ID } from './env-variabl
 import { createReportUrlMessage } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
 import { getUploadInfo, uploadFile } from './upload';
-import { ReporterPluginObject } from './types/testcafe';
+import { ReporterPluginObject, Error, BrowserInfo } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import { sendTaskStartCommand, sendFixtureStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
 
@@ -22,12 +22,46 @@ function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: st
     return pathJoin(WORKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
 }
 
+const browserNameMap = {
+    'chrome':        'Chrome',
+    'chrome-canary': 'Chrome Canary',
+    'ie':            'Explorer',
+    'edge':          'Edge',
+    'Opera':         'Opera',
+    'firefox':       'Firefox',
+};
+
+function isThirdPartyError (error: Error): boolean {
+    return error.code === 'E2';
+}
+
+function getBrowserAlias (error: Error): string {
+    const { userAgent } = error;
+    let alias = 'chrome';
+
+    if (userAgent.includes('Canary'))
+        alias = 'chrome-canary';
+    else if (userAgent.includes('Chrome'))
+        alias = 'chrome';
+    else if (userAgent.includes('Explorer'))
+        alias = 'ie';
+    else if (userAgent.includes('Edge'))
+        alias = 'edge';
+    else if (userAgent.includes('Firefox'))
+        alias = 'firefox';
+    else if (userAgent.includes('Opera'))
+        alias = 'opera';
+
+    return alias;
+}
+
 module.exports = function plaginFactory (): ReporterPluginObject {
     const id = uuid() as string;
     const uploads: Promise<void>[]  = [];
     let testIndex = 0;
 
-    const testRuns: Record<string, Record<string, BrowserRunInfo>> = {};
+    const testRuns: Record<string, BrowserRunInfo> = {};
+    let testRunIds: string[] = [];
 
     return {
         createErrorDecorator: errorDecorator,
@@ -43,32 +77,41 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             await sendFixtureStartCommand(id, { name });
         },
 
-        async reportTestStart (name): Promise<void> {
+        async reportTestStart (name, meta, testStartInfo): Promise<void> {
             testIndex += 1;
+            testRunIds = testStartInfo.testRunIds;
+
             await sendTestStartCommand(id, { name });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            const { browser, test: { name, phase }, command } = actionInfo;
+            const { browser, test: { phase }, command, testRunId, err, duration } = actionInfo;
 
-            if (!testRuns[name])
-                testRuns[name] = {};
-
-            if (!testRuns[name][actionInfo.browser.alias])
-                testRuns[name][actionInfo.browser.alias] = { browser, actions: [] };
+            if (!testRuns[testRunId])
+                testRuns[testRunId] = { browser, actions: [] };
 
             const action: ActionInfo = {
+                testRunId,
+                duration,
                 apiName:   apiActionName,
                 testPhase: phase,
                 command,
             };
 
-            testRuns[name][actionInfo.browser.alias].actions.push(action);
+            if (err) {
+                action.error = createTestError(err,
+                    curly(this.useWordWrap(false).setIndent(0).formatError(err))
+                );
+            }
+
+            testRuns[testRunId].actions.push(action);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            if (ENABLE_SCREENSHOTS_UPLOAD && testRunInfo.screenshots.length) {
-                for (const screenshotInfo of testRunInfo.screenshots) {
+            const { screenshots, errs } = testRunInfo;
+
+            if (ENABLE_SCREENSHOTS_UPLOAD) {
+                for (const screenshotInfo of screenshots) {
                     const { screenshotPath } = screenshotInfo;
                     const uploadInfo = await getUploadInfo(id, screenshotPath);
 
@@ -105,28 +148,51 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 }
             }
 
-            if (testRunInfo.errs) {
-                for (const err of testRunInfo.errs) {
-                    for (const browserName in testRuns[name]) {
-                        if (testRuns[name][browserName].browser.prettyUserAgent === err.userAgent) {
-                            const actions = testRuns[name][browserName].actions;
-                            const testError = curly(this.useWordWrap(false).setIndent(0).formatError(err));
-
-                            actions[actions.length - 1].errors = [
-                                createTestError(err, testError)
-                            ];
+            for (const err of errs) {
+                const { testRunId } = err;
+                const browserAlias = getBrowserAlias(err);
+                const runInfo = testRuns[testRunId] || {
+                    browser: {
+                        alias:           browserAlias,
+                        name:            browserNameMap[browserAlias],
+                        userAgent:       err.userAgent,
+                        prettyUserAgent: err.userAgent,
+                        version:         'browser version N/A',
+                        os:              {
+                            name:    'OS name N/A',
+                            version: 'OS version N/A'
                         }
-                    }
-                }
+                    } as BrowserInfo,
+                    actions: []
+                };
+
+                if (!testRuns[testRunId])
+                    testRuns[testRunId] = runInfo;
+
+                if (!isThirdPartyError(err))
+                    continue;
+
+                runInfo.thirdPartyError = createTestError(err,
+                    curly(this.useWordWrap(false).setIndent(0).formatError(err))
+                );
             }
 
-            const dashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, testRuns[name]);
+            const browserRuns = testRunIds.reduce((runs, runId) => {
+                const runInfo = testRuns[runId];
 
-            const payload = { name, testRunInfo: dashboardTestRunInfo };
+                if (runInfo)
+                    runs[runInfo.browser.alias] = runInfo;
 
-            await sendTestDoneCommand(id, payload );
+                return runs;
+            }, {} as Record<string, BrowserRunInfo>);
 
-            delete testRuns[name];
+            await sendTestDoneCommand(id, {
+                name,
+                testRunInfo: createDashboardTestRunInfo(testRunInfo, browserRuns)
+            });
+
+            for (const runId of testRunIds)
+                delete testRuns[runId];
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {

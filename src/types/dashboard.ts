@@ -31,13 +31,16 @@ export enum AggregateNames {
 export type BrowserRunInfo = {
     browser: BrowserInfo;
     actions: ActionInfo[];
+    thirdPartyError?: TestError;
 }
 
 export type ActionInfo = {
+    testRunId: string;
+    duration?: number;
     apiName: string;
     testPhase: TestPhase;
     command: Record<string, any> & { type: CommandType };
-    errors?: TestError[];
+    error?: TestError;
 }
 
 export type TestError = {
