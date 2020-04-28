@@ -2,9 +2,9 @@ const fs             = require('fs');
 const mock           = require('mock-require');
 const createTestCafe = require('testcafe');
 
-process.env.TESTCAFE_DASHBOARD_URL                 = 'http://localhost:3000';
-process.env.TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiIxNmY3MWNkNS0yODAyLTQ4ZmMtODE4MC0zMTU3ZTM1NjljYTUiLCJpYXQiOjE1ODIyMTA3MjN9.So-kVQzEv-V-jPO1JW7AN9vGVDHRQoxvOWp1bdEMcdM';
-//process.env.VIDEO_FOLDER = 'video_artifacts';
+process.env.TESTCAFE_DASHBOARD_URL                  = 'http://localhost:3000';
+process.env.TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiJjM2ZlMDg1OC0wYzNmLTQ5YzUtODNjMi1lOWE1NzZmMjZlOGEiLCJpYXQiOjE1ODgxNDk3NTJ9.9sxG0seXYTnLbJtrkM_20wudmNG0fzAVWHXqCiMCp6A';
+process.env.ENABLE_VIDEO_UPLOAD = true;
 
 const REPORTER_DIRECTORY = './node_modules/testcafe-reporter-dashboard-sandbox';
 
@@ -23,8 +23,8 @@ createTestCafe()
 
         return runner
             .src(['./sandbox/test.ts'])
-            .browsers(['chrome', 'firefox'])
-            //.video('video_artifacts', { pathPattern: '${TEST_INDEX}_${USERAGENT}/${QUARANTINE_ATTEMPT}.mp4' })
+            .browsers(['chrome', 'chrome:headless'])
+            .video('video_artifacts', { pathPattern: '${TEST_INDEX}_${USERAGENT}/${QUARANTINE_ATTEMPT}.mp4' })
             .reporter('dashboard-sandbox')
             .run();
     })

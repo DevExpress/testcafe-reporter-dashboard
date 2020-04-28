@@ -124,6 +124,8 @@ export type Video = {
     uploadId: string;
     userAgent: string;
     quarantineAttempt: number;
+    videoPath: string;
+    testRunId: string;
 }
 
 export type TestRunInfo = {

@@ -26,6 +26,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "@types/isomorphic-fetch": "0.0.35",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.9.2",

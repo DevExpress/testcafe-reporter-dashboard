@@ -1,9 +1,7 @@
 import uuid from 'uuid';
 import logger from './logger';
-import { join as pathJoin } from 'path';
-import fs from 'fs';
 
-import { ENABLE_SCREENSHOTS_UPLOAD, VIDEO_FOLDER, BUILD_ID } from './env-variables';
+import { ENABLE_SCREENSHOTS_UPLOAD, ENABLE_VIDEO_UPLOAD, BUILD_ID } from './env-variables';
 
 import { createReportUrlMessage } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
@@ -11,16 +9,6 @@ import { getUploadInfo, uploadFile } from './upload';
 import { ReporterPluginObject, Error, BrowserInfo } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import { sendTaskStartCommand, sendFixtureStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
-
-const WORKING_DIR = process.cwd();
-
-function formatUserAgent (prettyUserAgent: string): string {
-    return prettyUserAgent.replace(' / ', '_').replace(/\s/g, '_');
-}
-
-function getVideoPath (testIndex: number, userAgent: string, qarantinAttempt: string): string {
-    return pathJoin(WORKING_DIR, VIDEO_FOLDER, `${testIndex}_${userAgent}/${qarantinAttempt}.mp4`);
-}
 
 const browserNameMap = {
     'chrome':        'Chrome',
@@ -58,7 +46,6 @@ function getBrowserAlias (error: Error): string {
 module.exports = function plaginFactory (): ReporterPluginObject {
     const id = uuid() as string;
     const uploads: Promise<void>[]  = [];
-    let testIndex = 0;
 
     const testRuns: Record<string, BrowserRunInfo> = {};
     let testRunIds: string[] = [];
@@ -67,8 +54,6 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            this.userAgents = userAgents;
-
             await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: BUILD_ID });
             logger.log(createReportUrlMessage(id));
         },
@@ -78,7 +63,6 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            testIndex += 1;
             testRunIds = testStartInfo.testRunIds;
 
             await sendTestStartCommand(id, { name });
@@ -108,7 +92,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            const { screenshots, errs } = testRunInfo;
+            const { screenshots, videos, errs } = testRunInfo;
 
             if (ENABLE_SCREENSHOTS_UPLOAD) {
                 for (const screenshotInfo of screenshots) {
@@ -123,28 +107,17 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 }
             }
 
-            if (VIDEO_FOLDER) {
-                testRunInfo.videos = [];
-                const { quarantine } = testRunInfo;
-                const quarantineAttempts = quarantine ? Object.keys(quarantine) : ['1'];
+            if (ENABLE_VIDEO_UPLOAD) {
+                for (const videoInfo of videos) {
+                    const { videoPath } = videoInfo;
+                    const uploadInfo = await getUploadInfo(id, videoPath);
 
-                for (const userAgent of this.userAgents) {
-                    for (const attempt of quarantineAttempts) {
-                        const videoPath  = getVideoPath(testIndex, formatUserAgent(userAgent), attempt);
+                    if (!uploadInfo) continue;
 
-                        if (!fs.existsSync(videoPath)) continue;
-                        const uploadInfo = await getUploadInfo(id, videoPath);
+                    videoInfo.uploadId  = uploadInfo.uploadId;
+                    videoInfo.userAgent = testRuns[videoInfo.testRunId].browser.prettyUserAgent;
 
-                        if (!uploadInfo) continue;
-
-                        testRunInfo.videos.push({
-                            uploadId:          uploadInfo.uploadId,
-                            userAgent:         userAgent,
-                            quarantineAttempt: parseInt(attempt, 10)
-                        });
-
-                        uploads.push(uploadFile(videoPath, uploadInfo, id));
-                    }
+                    uploads.push(uploadFile(videoPath, uploadInfo, id));
                 }
             }
 
