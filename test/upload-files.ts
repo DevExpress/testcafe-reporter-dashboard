@@ -109,7 +109,7 @@ describe('Uploads', () => {
 
             const reporter = mock.reRequire('../lib/index')();
 
-            await reporter.reportTestDone('Test 1', { screenshots });
+            await reporter.reportTestDone('Test 1', { screenshots, errs: [] });
             await reporter.reportTaskDone('', 1, [], {});
 
             assert.equal(uploadInfos.length, 2);
@@ -160,12 +160,13 @@ describe('Uploads', () => {
             const reporter = mock.reRequire('../lib/index')();
 
             await reporter.reportTaskStart('timeStamp', prettyUserAgents, 2);
-            await reporter.reportTestStart('testName1', {});
-            await reporter.reportTestDone('testName1', { screenshots: [] }, {});
-            await reporter.reportTestStart('testName2', {});
+            await reporter.reportTestStart('testName1', {}, { testRunIds: ['testId1'] });
+            await reporter.reportTestDone('testName1', { screenshots: [], errs: [] }, {});
+            await reporter.reportTestStart('testName2', {}, { testRunIds: ['testId2'] });
             await reporter.reportTestDone('testName2', {
                 quarantine:  { '1': {}, '2': {} },
-                screenshots: []
+                screenshots: [],
+                errs:        []
             }, {});
             await reporter.reportTaskDone('', 1, [], {});
 

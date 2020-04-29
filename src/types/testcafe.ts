@@ -58,6 +58,7 @@ export enum TestPhase {
 };
 
 export type Error = {
+    testRunId: string;
     code: string;
     data: any;
     callsite: {
@@ -86,14 +87,20 @@ export type BrowserInfo = {
     version: string;
 }
 
-type ActionInfo = {
+type TestStartInfo = {
+    testRunIds: string[];
+}
+
+type TestcafeActionInfo = {
     browser: BrowserInfo;
     command: Record<string, any> & { type: CommandType };
     test: {
         name: string;
         phase: TestPhase;
     };
-    errors?: Error[];
+    err?: Error;
+    duration?: number;
+    testRunId: string;
 };
 
 type Meta = Record<string, string>;
@@ -151,17 +158,13 @@ export type TestResult = {
 
 export type decoratorFn = (str: string) => string;
 
-interface DecoratorType {
-    [key: string]: decoratorFn;
-}
-
 export type ReporterPluginObject = {
-    createErrorDecorator: () => DecoratorType;
+    createErrorDecorator: () => Record<string, decoratorFn>;
     reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number) => Promise<void>;
     reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
-    reportTestStart?: (name: string, meta: Meta) => Promise<void>;
-    reportTestActionStart?: (apiActionName: string, actionInfo: ActionInfo) => Promise<void>;
-    reportTestActionDone?: (apiActionName: string, actionInfo: ActionInfo) => Promise<void>;
+    reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
+    reportTestActionStart?: (apiActionName: string, actionInfo: TestcafeActionInfo) => Promise<void>;
+    reportTestActionDone?: (apiActionName: string, actionInfo: TestcafeActionInfo) => Promise<void>;
     reportTestDone?: (name: string, testRunInfo: TestRunInfo, meta: Meta) => Promise<void>;
     reportTaskDone?: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
 };
