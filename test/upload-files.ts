@@ -131,13 +131,13 @@ describe('Uploads', () => {
     });
 
     describe('Videos', () => {
-        const VIDEO_FOLDER = 'video_artifacts';
+        const ENABLE_VIDEO_UPLOAD = true;
 
         before(() => {
             mock('../lib/env-variables', {
                 TESTCAFE_DASHBOARD_URL,
                 TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                VIDEO_FOLDER
+                ENABLE_VIDEO_UPLOAD
             });
         });
 
@@ -159,32 +159,44 @@ describe('Uploads', () => {
 
             const reporter = mock.reRequire('../lib/index')();
 
-            await reporter.reportTaskStart('timeStamp', prettyUserAgents, 2);
-            await reporter.reportTestStart('testName1', {}, { testRunIds: ['testId1'] });
-            await reporter.reportTestDone('testName1', { screenshots: [], errs: [] }, {});
-            await reporter.reportTestStart('testName2', {}, { testRunIds: ['testId2'] });
-            await reporter.reportTestDone('testName2', {
-                quarantine:  { '1': {}, '2': {} },
+            await reporter.reportTaskStart('timeStamp', prettyUserAgents, 1);
+            await reporter.reportTestStart('testName1', {}, { testRunIds: [ 'testRun_1', 'testRun_2' ] });
+            await reporter.reportTestActionDone('click', { testRunId: 'testRun_1', test: { phase: '' }, browser: { prettyUserAgent: prettyUserAgents[0] } });
+            await reporter.reportTestActionDone('click', { testRunId: 'testRun_2', test: { phase: '' }, browser: { prettyUserAgent: prettyUserAgents[1] } });
+            await reporter.reportTestDone('testName1', {
                 screenshots: [],
-                errs:        []
+                errs:        [],
+
+                videos: [
+                    {
+                        videoPath: '1.mp4',
+                        testRunId: 'testRun_1'
+                    },
+                    {
+                        videoPath: '2.mp4',
+                        testRunId: 'testRun_2'
+                    }
+                ],
             }, {});
             await reporter.reportTaskDone('', 1, [], {});
 
-            assert.equal(videoPaths.length, 5);
-            assert.equal(uploadInfos.length, 5);
-            assert.equal(uploadedUrls.length, 5);
+            assert.equal(videoPaths.length, 2, 'videoPaths');
+            assert.equal(uploadInfos.length, 2, 'uploadInfos');
+            assert.equal(uploadedUrls.length, 2, 'uploadedUrls');
 
             const isReportTestDone = cmd => cmd.type === CommandTypes.reportTestDone;
 
-            assert.equal(aggregateCommands.filter(isReportTestDone).length, 2);
+            const { payload: { testRunInfo: { videos } } } = aggregateCommands.filter(isReportTestDone)[0];
 
-            for (const command of aggregateCommands.filter(isReportTestDone)) {
-                for (const videoInfo of command.payload.testRunInfo.videos)
-                    assert.equal(prettyUserAgents.includes(videoInfo.userAgent), true);
-            }
+            assert.equal(videos[0].uploadId, uploadInfos[0].uploadId);
+            assert.equal(videos[0].testRunId, 'testRun_1');
+            assert.equal(videos[0].userAgent, prettyUserAgents[0]);
+            assert.equal(videos[1].uploadId, uploadInfos[1].uploadId);
+            assert.equal(videos[1].testRunId, 'testRun_2');
+            assert.equal(videos[1].userAgent, prettyUserAgents[1]);
 
-            for (const index of [...Array(5).keys()])
-                assert.equal(uploadedUrls[index], uploadInfos[index].uploadUrl);
+            assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
+            assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
         });
     });
 });
