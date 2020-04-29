@@ -151,6 +151,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             for (const err of errs) {
                 const { testRunId } = err;
                 const browserAlias = getBrowserAlias(err);
+                //NOTE: we mock browser object in case if no actions have been performed in test before an error
                 const runInfo = testRuns[testRunId] || {
                     browser: {
                         alias:           browserAlias,
