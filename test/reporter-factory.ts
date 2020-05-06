@@ -19,6 +19,7 @@ describe('reportTaskStart', () => {
 
     it('Show reporter URL message', async () => {
         const logs = [];
+        const projectId = 'mock_project_id';
 
         let reportId = null;
 
@@ -33,6 +34,9 @@ describe('reportTaskStart', () => {
                 logs.push(message);
             }
         });
+        mock('jsonwebtoken', {
+            decode: () => ({ projectId })
+        });
 
         const reporter = mock.reRequire('../lib/index')();
 
@@ -40,7 +44,7 @@ describe('reportTaskStart', () => {
 
 
         assert.equal(logs.length, 1);
-        assert.equal(logs[0], `Task execution report: http://localhost/details/${reportId}`);
+        assert.equal(logs[0], `Task execution report: http://localhost/runs/${projectId}/${reportId}`);
 
         mock.stop('../lib/logger');
         mock.stop('isomorphic-fetch');
