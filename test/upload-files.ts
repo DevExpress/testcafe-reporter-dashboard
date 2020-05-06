@@ -1,3 +1,4 @@
+import { noop } from 'lodash';
 import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
@@ -127,6 +128,47 @@ describe('Uploads', () => {
             assert.equal(screenshotPaths.length, 2);
             assert.equal(screenshotPaths[0], 'C:\\screenshots\\1.png');
             assert.equal(screenshotPaths[1], 'C:\\screenshots\\errors\\1.png');
+        });
+
+        it('Should not send screenshots info to dashboard if ENABLE_SCREENSHOTS_UPLOAD disabled', async () => {
+            mock('../lib/env-variables', {
+                TESTCAFE_DASHBOARD_URL,
+                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
+                ENABLE_SCREENSHOTS_UPLOAD:               false
+            });
+
+            const screenshots = [
+                {
+                    screenshotPath: 'C:\\screenshots\\1.png',
+                    thumbnailPath:  'C:\\screenshots\\thumbnails\\1.png',
+                    userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:    false,
+                    uploadId:       null,
+                },
+                {
+                    screenshotPath: 'C:\\screenshots\\errors\\1.png',
+                    thumbnailPath:  'C:\\screenshots\\errors\\thumbnails\\1.png',
+                    userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:    true,
+                    uploadId:       null,
+                }
+            ];
+
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop });
+
+            const reporter = mock.reRequire('../lib/index')();
+
+            await reporter.reportTestDone('Test 1', { screenshots, errs: [] });
+            await reporter.reportTaskDone('', 1, [], {});
+
+            assert.equal(uploadInfos.length, 0);
+            assert.equal(uploadedUrls.length, 0);
+            assert.equal(uploadedFiles.length, 0);
+            assert.equal(uploadedFiles.length, 0);
+
+            const { payload: { testRunInfo } } = aggregateCommands[0];
+
+            assert.equal(testRunInfo.screenshots.length, 0);
         });
     });
 
