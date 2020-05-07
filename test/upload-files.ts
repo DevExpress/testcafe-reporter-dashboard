@@ -174,10 +174,7 @@ describe('Uploads', () => {
 
     describe('Videos', () => {
         const ENABLE_VIDEO_UPLOAD = true;
-
-        function isReportTestDone (cmd) {
-            return cmd.type === CommandTypes.reportTestDone;
-        }
+        const isReportTestDone    = cmd => cmd.type === CommandTypes.reportTestDone;
 
         before(() => {
             mock('../lib/env-variables', {
