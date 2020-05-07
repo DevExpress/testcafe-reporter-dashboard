@@ -5,11 +5,33 @@ import { reportTestActionDoneCalls } from './data/report-test-action-done-calls'
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
 
+
 describe('reportTaskStart', () => {
+    const buildId = 'test_build_id';
+
+
+    async function assertReporterMessage (expected: string): Promise<void> {
+        const logs = [];
+
+
+        mock('../lib/logger', {
+            log: message => {
+                logs.push(message);
+            }
+        });
+        mock.reRequire('../lib/env-variables');
+        const reporter = mock.reRequire('../lib/index')();
+
+        await reporter.reportTaskStart(1, [], 1);
+        assert.equal(logs.length, 1);
+        assert.equal(logs[0], expected);
+        mock.stop('../lib/logger');
+    }
+
     before(() => {
         mock('../lib/env-variables', {
             TESTCAFE_DASHBOARD_URL:                  'http://localhost',
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
         });
     });
 
@@ -18,35 +40,35 @@ describe('reportTaskStart', () => {
     });
 
     it('Show reporter URL message', async () => {
-        const logs = [];
         const projectId = 'mock_project_id';
+        const reportId = 'mock_report_id';
 
-        let reportId = null;
+        mock('uuid', ()=> {
+            return reportId;
+        });
 
-        mock('isomorphic-fetch', (_, request) => {
-            reportId = JSON.parse(request.body).aggregateId;
 
+        mock('isomorphic-fetch', () => {
             return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
         });
 
-        mock('../lib/logger', {
-            log: message => {
-                logs.push(message);
-            }
-        });
         mock('jsonwebtoken', {
             decode: () => ({ projectId })
         });
 
-        const reporter = mock.reRequire('../lib/index')();
+        await assertReporterMessage(`Task execution report: http://localhost/runs/${projectId}/${reportId}`);
 
-        await reporter.reportTaskStart(1, [], 1);
+        mock('../lib/env-variables', {
+            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
+            BUILD_ID:                                buildId
+        });
+
+        await assertReporterMessage(`Task execution report: http://localhost/runs/${projectId}/${buildId}`);
 
 
-        assert.equal(logs.length, 1);
-        assert.equal(logs[0], `Task execution report: http://localhost/runs/${projectId}/${reportId}`);
-
-        mock.stop('../lib/logger');
+        mock.stop('uuid');
+        mock.stop('jsonwebtoken');
         mock.stop('isomorphic-fetch');
     });
 });
