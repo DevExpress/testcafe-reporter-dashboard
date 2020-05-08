@@ -76,12 +76,12 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns
     durationMs:     testRunInfo.durationMs,
     quarantine:     testRunInfo.quarantine,
     screenshotPath: testRunInfo.screenshotPath,
-    screenshots:    [...testRunInfo.screenshots],
+    screenshots:    (testRunInfo.screenshots || []).filter(s => !!s.uploadId),
     skipped:        testRunInfo.skipped,
     unstable:       testRunInfo.unstable,
     warnings:       testRunInfo.warnings,
     browserRuns:    browserRuns,
-    videos:         testRunInfo.videos
+    videos:         (testRunInfo.videos || []).filter(v => !!v.uploadId)
 });
 
 export type TaskStartArgs = {

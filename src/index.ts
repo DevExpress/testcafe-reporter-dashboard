@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 import logger from './logger';
 
-import { ENABLE_SCREENSHOTS_UPLOAD, ENABLE_VIDEO_UPLOAD, BUILD_ID } from './env-variables';
+import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, BUILD_ID } from './env-variables';
 
 import { createReportUrlMessage } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
@@ -94,7 +94,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         async reportTestDone (name, testRunInfo): Promise<void> {
             const { screenshots, videos, errs } = testRunInfo;
 
-            if (ENABLE_SCREENSHOTS_UPLOAD) {
+            if (!NO_SCREENSHOT_UPLOAD) {
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath } = screenshotInfo;
                     const uploadInfo = await getUploadInfo(id, screenshotPath);
@@ -107,7 +107,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 }
             }
 
-            if (ENABLE_VIDEO_UPLOAD) {
+            if (!NO_VIDEO_UPLOAD) {
                 for (const videoInfo of videos) {
                     const { videoPath } = videoInfo;
                     const uploadInfo = await getUploadInfo(id, videoPath);
