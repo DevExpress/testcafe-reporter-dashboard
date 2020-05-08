@@ -130,11 +130,11 @@ describe('Uploads', () => {
             assert.equal(screenshotPaths[1], 'C:\\screenshots\\errors\\1.png');
         });
 
-        it('Should not send screenshots info to dashboard if DISABLE_SCREENSHOTS_UPLOAD is true', async () => {
+        it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
             mock('../lib/env-variables', {
                 TESTCAFE_DASHBOARD_URL,
                 TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                DISABLE_SCREENSHOTS_UPLOAD:              true
+                NO_SCREENSHOT_UPLOAD:                    true
             });
 
             const screenshots = [
@@ -238,11 +238,11 @@ describe('Uploads', () => {
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
         });
 
-        it('Should not send videos info to dashboard if DISABLE_VIDEO_UPLOAD enabled', async () => {
+        it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
             mock('../lib/env-variables', {
                 TESTCAFE_DASHBOARD_URL,
                 TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                DISABLE_VIDEO_UPLOAD:                    true
+                NO_VIDEO_UPLOAD:                         true
             });
 
             const prettyUserAgents = ['Chrome 80.0.3987.149 \\ Windows 10', 'Firefox 73.0 \\ Windows 10'];
