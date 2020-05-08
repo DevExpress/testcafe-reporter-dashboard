@@ -1,5 +1,5 @@
 function parseBooleanVariable (value): boolean {
-    return value === 'false' ? false : !!value;
+    return value === 'false' || value === '0' ? false : !!value;
 }
 
 export const ENABLE_LOG             = process.env.ENABLE_LOG;

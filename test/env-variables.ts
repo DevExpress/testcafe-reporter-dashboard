@@ -15,5 +15,13 @@ describe('enviroment variables', () => {
             assert.equal(NO_SCREENSHOT_UPLOAD, false);
             assert.equal(NO_VIDEO_UPLOAD, false);
         });
+
+        it('Screenshots and videos upload should be enabled if value is "0"', () => {
+            process.env.NO_SCREENSHOT_UPLOAD = '0';
+            process.env.NO_VIDEO_UPLOAD      = '0';
+
+            assert.equal(NO_SCREENSHOT_UPLOAD, false);
+            assert.equal(NO_VIDEO_UPLOAD, false);
+        });
     });
 });
