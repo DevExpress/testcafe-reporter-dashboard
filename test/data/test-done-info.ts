@@ -8,6 +8,7 @@ export const testDoneInfo = {
     'durationMs':     17878,
     'screenshotPath': null,
     'screenshots':    [],
+    'videos':         [],
     'quarantine':     null,
     'skipped':        false
 };

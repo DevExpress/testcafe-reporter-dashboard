@@ -130,7 +130,7 @@ describe('reportTestActionDone', () => {
         for (const { apiActionName, actionInfo } of reportTestActionDoneCalls)
             await reporter.reportTestActionDone(apiActionName, actionInfo);
 
-        await reporter.reportTestDone('Test 1', { screenshots: [], errs: [] }, {});
+        await reporter.reportTestDone('Test 1', { screenshots: [], errs: [], videos: [] }, {});
 
         checkBrowserRun(testRunInfo.browserRuns['chrome'], 'Chrome 79.0.3945.130 / Windows 8.1');
         checkBrowserRun(testRunInfo.browserRuns['firefox'], 'Firefox 59.0 / Windows 8.1');
