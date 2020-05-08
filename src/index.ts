@@ -55,7 +55,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
             await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: BUILD_ID });
-            logger.log(createReportUrlMessage(id));
+            logger.log(createReportUrlMessage(BUILD_ID || id));
         },
 
         async reportFixtureStart (name): Promise<void> {
