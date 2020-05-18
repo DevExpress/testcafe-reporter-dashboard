@@ -1,14 +1,15 @@
-import { DashboardTestRunInfo } from './../src/types/dashboard';
+import { DashboardTestRunInfo, CommandTypes } from './../src/types/dashboard';
 import mock from 'mock-require';
 import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
 
+const TESTCAFE_DASHBOARD_URL = 'http://localhost';
+const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
 
 describe('reportTaskStart', () => {
     const buildId = 'test_build_id';
-
 
     async function assertReporterMessage (expected: string): Promise<void> {
         const logs = [];
@@ -30,8 +31,8 @@ describe('reportTaskStart', () => {
 
     before(() => {
         mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
+            TESTCAFE_DASHBOARD_URL,
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
         });
     });
 
@@ -56,15 +57,16 @@ describe('reportTaskStart', () => {
             decode: () => ({ projectId })
         });
 
-        await assertReporterMessage(`Task execution report: http://localhost/runs/${projectId}/${reportId}`);
+        await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${reportId}`);
 
         mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-            BUILD_ID:                                buildId
+            TESTCAFE_DASHBOARD_URL,
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
+
+            BUILD_ID: buildId
         });
 
-        await assertReporterMessage(`Task execution report: http://localhost/runs/${projectId}/${buildId}`);
+        await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${buildId}`);
 
 
         mock.stop('uuid');
@@ -79,6 +81,7 @@ function mockReporter (fetchHandler): () => any {
     mock.reRequire('../lib/fetch');
     mock.reRequire('../lib/send-resolve-command');
     mock.reRequire('../lib/commands');
+    mock.reRequire('../lib/upload');
 
     return mock.reRequire('../lib/index');
 }
@@ -86,8 +89,8 @@ function mockReporter (fetchHandler): () => any {
 describe('reportTestActionDone', () => {
     before(() => {
         mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
+            TESTCAFE_DASHBOARD_URL,
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN
         });
     });
 
@@ -136,13 +139,26 @@ describe('reportTestActionDone', () => {
         assert.equal(actions[4].command.expected, 'Peter1');
     }
 
-    it('Should add test actions info to reportTestDone command', async () => {
+    it('Should add test actions info to uploaded testRunInfo', async () => {
         let testRunInfo = null;
+        let testDonePayload = null;
 
-        const reporter = mockReporter((_, request) => {
-            testRunInfo = JSON.parse(request.body).payload.testRunInfo;
+        const reporter = mockReporter((url: string, request) => {
+            const response  = { ok: true, status: 200, statusText: 'OK', json: null };
+            const uploadUrl = 'upload_url';
 
-            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
+            if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
+                response.json = () => ({ uploadId: 'upload_id', uploadUrl });
+            else if (url.startsWith(uploadUrl))
+                testRunInfo = JSON.parse(request.body.toString());
+            else if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
+                const { type, payload } = JSON.parse(request.body);
+
+                if (type === CommandTypes.reportTestDone)
+                    testDonePayload = payload;
+            }
+
+            return Promise.resolve(response);
         })();
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
@@ -152,11 +168,18 @@ describe('reportTestActionDone', () => {
         for (const { apiActionName, actionInfo } of reportTestActionDoneCalls)
             await reporter.reportTestActionDone(apiActionName, actionInfo);
 
-        await reporter.reportTestDone('Test 1', { screenshots: [], errs: [], videos: [] }, {});
+        await reporter.reportTestDone('Test 1', { screenshots: [], errs: [], videos: [], durationMs: 100 }, {});
 
         checkBrowserRun(testRunInfo.browserRuns['chrome'], 'Chrome 79.0.3945.130 / Windows 8.1');
         checkBrowserRun(testRunInfo.browserRuns['firefox'], 'Firefox 59.0 / Windows 8.1');
         checkBrowserRun(testRunInfo.browserRuns['chrome:headless'], 'Chrome 79.0.3945.130 / Windows 8.1');
+
+        assert.deepEqual(testDonePayload, {
+            name:     'Test 1',
+            failed:   false,
+            duration: 100,
+            uploadId: 'upload_id'
+        });
 
         mock.stop('isomorphic-fetch');
     });
@@ -164,10 +187,16 @@ describe('reportTestActionDone', () => {
     it('Format error on test done', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
-        const reporter = buildReporterPlugin(mockReporter((_, request) => {
-            testRunInfo = JSON.parse(request.body).payload.testRunInfo;
+        const reporter = buildReporterPlugin(mockReporter((url: string, request) => {
+            const response  = { ok: true, status: 200, statusText: 'OK', json: null };
+            const uploadUrl = 'upload_url';
 
-            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
+            if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
+                response.json = () => ({ uploadId: 'upload_id', uploadUrl });
+            else if (url.startsWith(uploadUrl))
+                testRunInfo = JSON.parse(request.body.toString());
+
+            return Promise.resolve(response);
         }), process.stdout);
 
         const testRunIds = new Set(twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId));
@@ -199,8 +228,8 @@ describe('reportTestActionDone', () => {
 describe('reportTestDone', () => {
     before(() => {
         mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL:                  'http://localhost',
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
+            TESTCAFE_DASHBOARD_URL,
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN
         });
     });
 
@@ -211,10 +240,16 @@ describe('reportTestDone', () => {
     it('Should process errors originated not form actions', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
-        const reporter = buildReporterPlugin(mockReporter((_, request) => {
-            testRunInfo = JSON.parse(request.body).payload.testRunInfo;
+        const reporter = buildReporterPlugin(mockReporter((url: string, request) => {
+            const response  = { ok: true, status: 200, statusText: 'OK', json: null };
+            const uploadUrl = 'upload_url';
 
-            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
+            if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
+                response.json = () => ({ uploadId: 'upload_id', uploadUrl });
+            else if (url.startsWith(uploadUrl))
+                testRunInfo = JSON.parse(request.body.toString());
+
+            return Promise.resolve(response);
         }), process.stdout);
 
         await reporter.reportTestStart('Test 1', {}, { testRunIds: [thirdPartyTestDone.errs[0].testRunId] });

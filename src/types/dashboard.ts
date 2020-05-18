@@ -101,7 +101,9 @@ export type TestStartArgs = {
 
 export type TestDoneArgs = {
     name: string;
-    testRunInfo: DashboardTestRunInfo;
+    failed: boolean;
+    duration: number;
+    uploadId: string;
 };
 
 export type TaskDoneArgs = {
