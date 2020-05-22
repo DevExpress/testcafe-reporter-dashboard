@@ -8,7 +8,7 @@ export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 export const createReportUrlMessage = (reportId: string): string => {
     const token = decode(TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN);
 
-    return `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${token.projectId}/${reportId}`;
+    return `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
 };
 
 export const createFileUploadError = (uploadId: string, filePath: string, response: string): string =>

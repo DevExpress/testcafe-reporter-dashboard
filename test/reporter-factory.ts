@@ -7,7 +7,7 @@ import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/li
 
 
 describe('reportTaskStart', () => {
-    const buildId = 'test_build_id';
+    const buildId = 'test_build_id/:?&"=;+$';
 
 
     async function assertReporterMessage (expected: string): Promise<void> {
@@ -64,7 +64,7 @@ describe('reportTaskStart', () => {
             BUILD_ID:                                buildId
         });
 
-        await assertReporterMessage(`Task execution report: http://localhost/runs/${projectId}/${buildId}`);
+        await assertReporterMessage(`Task execution report: http://localhost/runs/${projectId}/${encodeURIComponent(buildId)}`);
 
 
         mock.stop('uuid');
