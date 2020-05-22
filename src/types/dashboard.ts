@@ -101,7 +101,7 @@ export type TestStartArgs = {
 
 export type TestDoneArgs = {
     name: string;
-    failed: boolean;
+    errorCount: number;
     duration: number;
     uploadId: string;
 };

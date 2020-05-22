@@ -160,7 +160,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
 
-            const testDonePayload = { name, failed: !!errs.length, duration: durationMs, uploadId: null };
+            const testDonePayload = { name, errorCount: errs.length, duration: durationMs, uploadId: null };
             const uploadInfo      = await getUploadInfo(id, name);
 
             if (uploadInfo) {

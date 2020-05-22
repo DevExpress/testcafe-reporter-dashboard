@@ -175,10 +175,10 @@ describe('reportTestActionDone', () => {
         checkBrowserRun(testRunInfo.browserRuns['chrome:headless'], 'Chrome 79.0.3945.130 / Windows 8.1');
 
         assert.deepEqual(testDonePayload, {
-            name:     'Test 1',
-            failed:   false,
-            duration: 100,
-            uploadId: 'upload_id'
+            name:       'Test 1',
+            errorCount: 0,
+            duration:   100,
+            uploadId:   'upload_id'
         });
 
         mock.stop('isomorphic-fetch');
