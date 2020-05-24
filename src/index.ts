@@ -5,7 +5,7 @@ import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, BUILD_ID } from './env-variables
 
 import { createReportUrlMessage } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
-import { getUploadInfo, uploadFile, upload } from './upload';
+import { Uploader } from './upload';
 import { ReporterPluginObject, Error, BrowserInfo } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import { sendTaskStartCommand, sendFixtureStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
@@ -45,7 +45,7 @@ function getBrowserAlias (error: Error): string {
 
 module.exports = function plaginFactory (): ReporterPluginObject {
     const id = uuid() as string;
-    const uploads: Promise<void>[]  = [];
+    const uploader = new Uploader(id);
 
     const testRuns: Record<string, BrowserRunInfo> = {};
     let testRunIds: string[] = [];
@@ -97,27 +97,17 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             if (!NO_SCREENSHOT_UPLOAD) {
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath } = screenshotInfo;
-                    const uploadInfo = await getUploadInfo(id, screenshotPath);
 
-                    if (!uploadInfo) continue;
-
-                    screenshotInfo.uploadId = uploadInfo.uploadId;
-
-                    uploads.push(uploadFile(screenshotPath, uploadInfo, id));
+                    screenshotInfo.uploadId = await uploader.uploadFile(screenshotPath);
                 }
             }
 
             if (!NO_VIDEO_UPLOAD) {
                 for (const videoInfo of videos) {
                     const { videoPath } = videoInfo;
-                    const uploadInfo = await getUploadInfo(id, videoPath);
 
-                    if (!uploadInfo) continue;
-
-                    videoInfo.uploadId  = uploadInfo.uploadId;
+                    videoInfo.uploadId = await uploader.uploadFile(videoPath);
                     videoInfo.userAgent = testRuns[videoInfo.testRunId].browser.prettyUserAgent;
-
-                    uploads.push(uploadFile(videoPath, uploadInfo, id));
                 }
             }
 
@@ -160,16 +150,12 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
 
-            const testDonePayload = { name, errorCount: errs.length, duration: durationMs, uploadId: null };
-            const uploadInfo      = await getUploadInfo(id, name);
-
-            if (uploadInfo) {
-                const dashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, browserRuns);
-
-                uploads.push(upload(name, Buffer.from(JSON.stringify(dashboardTestRunInfo)), uploadInfo, id));
-
-                testDonePayload.uploadId = uploadInfo.uploadId;
-            }
+            const testDonePayload = {
+                name,
+                errorCount: errs.length,
+                duration:   durationMs,
+                uploadId:   await uploader.uploadTest(name, createDashboardTestRunInfo(testRunInfo, browserRuns))
+            };
 
             await sendTestDoneCommand(id, testDonePayload);
 
@@ -178,7 +164,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
-            await Promise.all(uploads);
+            await uploader.waitUploads();
             await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: BUILD_ID });
         }
     };

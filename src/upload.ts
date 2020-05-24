@@ -5,72 +5,102 @@ import {
     TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
-import { CommandTypes, AggregateNames } from './types/dashboard';
+import { CommandTypes, AggregateNames, DashboardTestRunInfo } from './types/dashboard';
 import { UploadInfo } from './types/resolve';
 import logger from './logger';
-import { createGetUploadInfoError, createUploadError } from './texts';
+import { createGetUploadInfoError, createFileUploadError, createTestUploadError } from './texts';
 import fetch from './fetch';
 
 const readFile = promisify(fs.readFile);
 
-export async function getUploadInfo (reportId: string, uploadEntityId: string): Promise<UploadInfo> {
-    const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${reportId}`, {
-        method:  'GET',
-        headers: {
-            authorization: `Bearer ${AUTHENTICATION_TOKEN}`
-        }
-    });
+export class Uploader {
+    private _runId: string;
+    private _uploads: Promise<void>[];
 
-    if (response.ok)
-        return await response.json();
+    constructor (runId: string) {
+        this._runId   = runId;
+        this._uploads = [];
+    }
 
-    logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
+    async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo> {
+        const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${this._runId}`, {
+            method:  'GET',
+            headers: {
+                authorization: `Bearer ${AUTHENTICATION_TOKEN}`
+            }
+        });
 
-    return null;
-}
+        if (response.ok)
+            return await response.json();
 
-export async function upload (uploadEntityId: string, uploadEntity: Buffer, uploadInfo: UploadInfo, reportId: string): Promise<void> {
-    const { uploadUrl, uploadId } = uploadInfo;
+        logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
 
-    const sizeInBytes = uploadEntity.length;
+        return null;
+    }
 
-    await sendResolveCommand({
-        aggregateId:   uploadId,
-        aggregateName: AggregateNames.Upload,
-        type:          CommandTypes.startUpload,
+    async _upload (uploadInfo: UploadInfo, uploadEntity: Buffer, uploadError: string): Promise<void> {
+        const { uploadUrl, uploadId } = uploadInfo;
 
-        payload: { reportId }
-    });
+        const sizeInBytes = uploadEntity.length;
 
-    const response = await fetch(uploadUrl, {
-        method:  'PUT',
-        headers: {
-            'Content-Length': sizeInBytes
-        },
-        body: uploadEntity
-    });
-
-    if (response.ok) {
         await sendResolveCommand({
             aggregateId:   uploadId,
             aggregateName: AggregateNames.Upload,
-            type:          CommandTypes.completeUpload
+            type:          CommandTypes.startUpload,
+
+            payload: { reportId: this._runId }
         });
 
-        return;
+        const response = await fetch(uploadUrl, {
+            method:  'PUT',
+            headers: {
+                'Content-Length': sizeInBytes
+            },
+            body: uploadEntity
+        });
+
+        if (response.ok) {
+            await sendResolveCommand({
+                aggregateId:   uploadId,
+                aggregateName: AggregateNames.Upload,
+                type:          CommandTypes.completeUpload
+            });
+        }
+
+        logger.error(`${uploadError}. Response: ${response}`);
+
+        await sendResolveCommand({
+            aggregateId:   uploadId,
+            aggregateName: AggregateNames.Upload,
+            type:          CommandTypes.markUploadFailed
+        });
     }
 
-    logger.error(createUploadError(uploadId, uploadEntityId, response.toString()));
+    async uploadFile (filePath: string): Promise<string> {
+        const uploadInfo = await this._getUploadInfo(filePath);
 
-    await sendResolveCommand({
-        aggregateId:   uploadId,
-        aggregateName: AggregateNames.Upload,
-        type:          CommandTypes.markUploadFailed
-    });
-}
+        if (!uploadInfo) return null;
 
-export async function uploadFile (filePath: string, uploadInfo: UploadInfo, reportId: string): Promise<void> {
-    const file = await readFile(filePath);
+        const file = await readFile(filePath);
 
-    upload(filePath, file, uploadInfo, reportId);
+        this._uploads.push(this._upload(uploadInfo, file, createFileUploadError(uploadInfo.uploadId, filePath)));
+
+        return uploadInfo.uploadId;
+    }
+
+    async uploadTest (testName: string, testRunInfo: DashboardTestRunInfo): Promise<string> {
+        const uploadInfo = await this._getUploadInfo(testName);
+
+        if (!uploadInfo) return null;
+
+        const buffer = Buffer.from(JSON.stringify(testRunInfo));
+
+        this._uploads.push(this._upload(uploadInfo, buffer, createTestUploadError(uploadInfo.uploadId, testName)));
+
+        return uploadInfo.uploadId;
+    }
+
+    async waitUploads (): Promise<void> {
+        await Promise.all(this._uploads);
+    }
 }
