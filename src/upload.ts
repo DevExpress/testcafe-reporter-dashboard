@@ -65,6 +65,8 @@ export class Uploader {
                 aggregateName: AggregateNames.Upload,
                 type:          CommandTypes.completeUpload
             });
+
+            return;
         }
 
         logger.error(`${uploadError}. Response: ${response}`);
