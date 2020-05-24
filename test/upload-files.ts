@@ -1,7 +1,6 @@
 import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
-import { CommandTypes } from '../src/types/dashboard';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
@@ -113,15 +112,15 @@ describe('Uploads', () => {
             await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [] });
             await reporter.reportTaskDone('', 1, [], {});
 
-            assert.equal(uploadInfos.length, 2);
-            assert.equal(uploadedUrls.length, 2);
+            assert.equal(uploadInfos.length, 3);
+            assert.equal(uploadedUrls.length, 3);
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
 
             assert.equal(screenshots[0].uploadId, uploadInfos[0].uploadId);
             assert.equal(screenshots[1].uploadId, uploadInfos[1].uploadId);
 
-            assert.equal(uploadedFiles.length, 2);
+            assert.equal(uploadedFiles.length, 3);
             assert.equal(uploadedFiles[0], 'take_screenshot_action');
             assert.equal(uploadedFiles[1], 'screenshot_on_fail');
 
@@ -154,27 +153,25 @@ describe('Uploads', () => {
                 }
             ];
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop });
+            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile: noop });
 
             const reporter = mock.reRequire('../lib/index')();
 
             await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [] });
             await reporter.reportTaskDone('', 1, [], {});
 
-            assert.equal(uploadInfos.length, 0);
-            assert.equal(uploadedUrls.length, 0);
-            assert.equal(uploadedFiles.length, 0);
-            assert.equal(uploadedFiles.length, 0);
+            assert.equal(uploadInfos.length, 1);
+            assert.equal(uploadedUrls.length, 1);
+            assert.equal(uploadedFiles.length, 1);
+            assert.equal(uploadedFiles.length, 1);
 
-            const { payload: { testRunInfo } } = aggregateCommands[0];
+            const testRunInfo = JSON.parse(uploadedFiles[0].toString());
 
             assert.equal(testRunInfo.screenshots.length, 0);
         });
     });
 
     describe('Videos', () => {
-        const isReportTestDone = cmd => cmd.type === CommandTypes.reportTestDone;
-
         before(() => {
             mock('../lib/env-variables', {
                 TESTCAFE_DASHBOARD_URL,
@@ -196,7 +193,7 @@ describe('Uploads', () => {
                 return !path.includes('1_Chrome');
             }
 
-            const { uploadInfos, uploadedUrls, aggregateCommands } = mockFetchAndFs({ readFile, existsSync });
+            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile, existsSync });
 
             const reporter = mock.reRequire('../lib/index')();
 
@@ -222,10 +219,10 @@ describe('Uploads', () => {
             await reporter.reportTaskDone('', 1, [], {});
 
             assert.equal(videoPaths.length, 2, 'videoPaths');
-            assert.equal(uploadInfos.length, 2, 'uploadInfos');
-            assert.equal(uploadedUrls.length, 2, 'uploadedUrls');
+            assert.equal(uploadInfos.length, 3, 'uploadInfos');
+            assert.equal(uploadedUrls.length, 3, 'uploadedUrls');
 
-            const { payload: { testRunInfo: { videos } } } = aggregateCommands.filter(isReportTestDone)[0];
+            const { videos } = JSON.parse(uploadedFiles[2].toString());
 
             assert.equal(videos[0].uploadId, uploadInfos[0].uploadId);
             assert.equal(videos[0].testRunId, 'testRun_1');
@@ -247,7 +244,7 @@ describe('Uploads', () => {
 
             const prettyUserAgents = ['Chrome 80.0.3987.149 \\ Windows 10', 'Firefox 73.0 \\ Windows 10'];
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop, existsSync: noop });
+            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile: noop, existsSync: noop });
 
             const reporter = mock.reRequire('../lib/index')();
 
@@ -272,11 +269,11 @@ describe('Uploads', () => {
             }, {});
             await reporter.reportTaskDone('', 1, [], {});
 
-            const { payload: { testRunInfo: { videos } } } = aggregateCommands.filter(isReportTestDone)[0];
+            const { videos } = JSON.parse(uploadedFiles[0].toString());
 
-            assert.equal(uploadInfos.length, 0);
-            assert.equal(uploadedUrls.length, 0);
-            assert.equal(uploadedFiles.length, 0);
+            assert.equal(uploadInfos.length, 1);
+            assert.equal(uploadedUrls.length, 1);
+            assert.equal(uploadedFiles.length, 1);
             assert.equal(videos.length, 0);
         });
     });

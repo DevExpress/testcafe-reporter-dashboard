@@ -8,12 +8,12 @@ import {
 import { CommandTypes, AggregateNames } from './types/dashboard';
 import { UploadInfo } from './types/resolve';
 import logger from './logger';
-import { createGetUploadInfoError, createFileUploadError } from './texts';
+import { createGetUploadInfoError, createUploadError } from './texts';
 import fetch from './fetch';
 
 const readFile = promisify(fs.readFile);
 
-export async function getUploadInfo (reportId: string, filePath: string): Promise<UploadInfo> {
+export async function getUploadInfo (reportId: string, uploadEntityId: string): Promise<UploadInfo> {
     const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${reportId}`, {
         method:  'GET',
         headers: {
@@ -24,16 +24,15 @@ export async function getUploadInfo (reportId: string, filePath: string): Promis
     if (response.ok)
         return await response.json();
 
-    logger.error(createGetUploadInfoError(filePath, response.toString()));
+    logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
 
     return null;
 }
 
-export async function uploadFile (filePath: string, uploadInfo: UploadInfo, reportId: string): Promise<void> {
+export async function upload (uploadEntityId: string, uploadEntity: Buffer, uploadInfo: UploadInfo, reportId: string): Promise<void> {
     const { uploadUrl, uploadId } = uploadInfo;
 
-    const file            = await readFile(filePath);
-    const fileSizeInBytes = file.length;
+    const sizeInBytes = uploadEntity.length;
 
     await sendResolveCommand({
         aggregateId:   uploadId,
@@ -46,9 +45,9 @@ export async function uploadFile (filePath: string, uploadInfo: UploadInfo, repo
     const response = await fetch(uploadUrl, {
         method:  'PUT',
         headers: {
-            'Content-Length': fileSizeInBytes
+            'Content-Length': sizeInBytes
         },
-        body: file
+        body: uploadEntity
     });
 
     if (response.ok) {
@@ -61,11 +60,17 @@ export async function uploadFile (filePath: string, uploadInfo: UploadInfo, repo
         return;
     }
 
-    logger.error(createFileUploadError(uploadId, filePath, response.toString()));
+    logger.error(createUploadError(uploadId, uploadEntityId, response.toString()));
 
     await sendResolveCommand({
         aggregateId:   uploadId,
         aggregateName: AggregateNames.Upload,
         type:          CommandTypes.markUploadFailed
     });
+}
+
+export async function uploadFile (filePath: string, uploadInfo: UploadInfo, reportId: string): Promise<void> {
+    const file = await readFile(filePath);
+
+    upload(filePath, file, uploadInfo, reportId);
 }
