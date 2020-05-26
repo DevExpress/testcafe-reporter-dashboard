@@ -9,7 +9,7 @@ const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
 
 describe('reportTaskStart', () => {
-    const buildId = 'test_build_id';
+    const buildId = 'test_build_id/:?&"=;+$';
 
     async function assertReporterMessage (expected: string): Promise<void> {
         const logs = [];
@@ -66,8 +66,7 @@ describe('reportTaskStart', () => {
             BUILD_ID: buildId
         });
 
-        await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${buildId}`);
-
+        await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${encodeURIComponent(buildId)}`);
 
         mock.stop('uuid');
         mock.stop('jsonwebtoken');
