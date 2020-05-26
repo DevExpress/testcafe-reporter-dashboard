@@ -11,8 +11,8 @@ export const createReportUrlMessage = (reportId: string): string => {
     return `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
 };
 
-export const createFileUploadError = (uploadId: string, filePath: string, response: string): string =>
-   `Upload failed. Upload id: ${uploadId}, file path: ${filePath}. Response: ${response}`;
+export const createUploadError = (uploadId: string, uploadEntityId: string, response: string): string =>
+   `Upload failed. Upload id: ${uploadId}, upload entity ID: ${uploadEntityId}. Response: ${response}`;
 
-export const createGetUploadInfoError = (filePath: string, response: string): string =>
-   `Cannot get an upload URL. File path: ${filePath}. Response: ${response}`;
+export const createGetUploadInfoError = (uploadEntityId: string, response: string): string =>
+   `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;

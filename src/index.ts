@@ -1,11 +1,11 @@
 import uuid from 'uuid';
 import logger from './logger';
 
-import { ENABLE_SCREENSHOTS_UPLOAD, ENABLE_VIDEO_UPLOAD, BUILD_ID } from './env-variables';
+import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, BUILD_ID } from './env-variables';
 
 import { createReportUrlMessage } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
-import { getUploadInfo, uploadFile } from './upload';
+import { getUploadInfo, uploadFile, upload } from './upload';
 import { ReporterPluginObject, Error, BrowserInfo } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import { sendTaskStartCommand, sendFixtureStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
@@ -92,9 +92,9 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            const { screenshots, videos, errs } = testRunInfo;
+            const { screenshots, videos, errs, durationMs } = testRunInfo;
 
-            if (ENABLE_SCREENSHOTS_UPLOAD) {
+            if (!NO_SCREENSHOT_UPLOAD) {
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath } = screenshotInfo;
                     const uploadInfo = await getUploadInfo(id, screenshotPath);
@@ -107,7 +107,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 }
             }
 
-            if (ENABLE_VIDEO_UPLOAD) {
+            if (!NO_VIDEO_UPLOAD) {
                 for (const videoInfo of videos) {
                     const { videoPath } = videoInfo;
                     const uploadInfo = await getUploadInfo(id, videoPath);
@@ -160,10 +160,18 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
 
-            await sendTestDoneCommand(id, {
-                name,
-                testRunInfo: createDashboardTestRunInfo(testRunInfo, browserRuns)
-            });
+            const testDonePayload = { name, errorCount: errs.length, duration: durationMs, uploadId: null };
+            const uploadInfo      = await getUploadInfo(id, name);
+
+            if (uploadInfo) {
+                const dashboardTestRunInfo = createDashboardTestRunInfo(testRunInfo, browserRuns);
+
+                uploads.push(upload(name, Buffer.from(JSON.stringify(dashboardTestRunInfo)), uploadInfo, id));
+
+                testDonePayload.uploadId = uploadInfo.uploadId;
+            }
+
+            await sendTestDoneCommand(id, testDonePayload);
 
             for (const runId of testRunIds)
                 delete testRuns[runId];
