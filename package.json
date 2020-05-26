@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "dashboard TestCafe reporter plugin.",
   "repository": "https://github.com/DevExpress/testcafe-reporter-dashboard",
   "author": {
