@@ -22,7 +22,7 @@ export class Uploader {
         this._uploads = [];
     }
 
-    async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo> {
+    private async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo> {
         const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${this._runId}`, {
             method:  'GET',
             headers: {
@@ -38,7 +38,7 @@ export class Uploader {
         return null;
     }
 
-    async _upload (uploadInfo: UploadInfo, uploadEntity: Buffer, uploadError: string): Promise<void> {
+    private async _upload (uploadInfo: UploadInfo, uploadEntity: Buffer, uploadError: string): Promise<void> {
         const { uploadUrl, uploadId } = uploadInfo;
 
         const sizeInBytes = uploadEntity.length;
