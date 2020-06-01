@@ -11,8 +11,11 @@ export const createReportUrlMessage = (reportId: string): string => {
     return `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
 };
 
-export const createUploadError = (uploadId: string, uploadEntityId: string, response: string): string =>
-   `Upload failed. Upload id: ${uploadId}, upload entity ID: ${uploadEntityId}. Response: ${response}`;
+export const createFileUploadError = (uploadId: string, filePath: string): string =>
+   `Failed to upload visual artifacts. Upload ID: ${uploadId}, file path: ${filePath}.`;
+
+export const createTestUploadError = (uploadId: string, testName: string): string =>
+   `Failed to upload a test log. Upload ID: ${uploadId}, test name: ${testName}.`;
 
 export const createGetUploadInfoError = (uploadEntityId: string, response: string): string =>
    `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
