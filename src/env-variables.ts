@@ -9,4 +9,4 @@ export const NO_SCREENSHOT_UPLOAD = parseBooleanVariable(process.env.NO_SCREENSH
 export const NO_VIDEO_UPLOAD      = parseBooleanVariable(process.env.NO_VIDEO_UPLOAD);
 
 export const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = process.env.TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN;
-export const BUILD_ID: string | undefined = process.env.BUILD_ID;
+export const TESTCAFE_DASHBOARD_BUILD_ID: string | undefined = process.env.TESTCAFE_DASHBOARD_BUILD_ID;

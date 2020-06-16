@@ -19,3 +19,6 @@ export const createTestUploadError = (uploadId: string, testName: string): strin
 
 export const createGetUploadInfoError = (uploadEntityId: string, response: string): string =>
    `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
+
+export const createLongBuildIdError = (buildId: string): string =>
+   `Build id is too long. Biild ID: ${buildId}.`;

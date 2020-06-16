@@ -63,7 +63,7 @@ describe('reportTaskStart', () => {
             TESTCAFE_DASHBOARD_URL,
             TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
 
-            BUILD_ID: buildId
+            TESTCAFE_DASHBOARD_BUILD_ID: buildId
         });
 
         await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${encodeURIComponent(buildId)}`);
