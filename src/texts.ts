@@ -1,5 +1,6 @@
 import { TESTCAFE_DASHBOARD_URL, TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN } from './env-variables';
 import { decode } from 'jsonwebtoken';
+import { MAX_BUILD_ID_LENGTH } from '.';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
 export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable is not defined.';
@@ -21,4 +22,4 @@ export const createGetUploadInfoError = (uploadEntityId: string, response: strin
    `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
 
 export const createLongBuildIdError = (buildId: string): string =>
-   `Build id is too long. Biild ID: ${buildId}.`;
+   `Build ID should not exceed ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${buildId}.`;

@@ -40,6 +40,38 @@ describe('reportTaskStart', () => {
         mock.stop('../lib/env-variables');
     });
 
+    it('Show reporter long build id message', async () => {
+        const longBuildId = '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+
+        const projectId = 'mock_project_id';
+        const reportId = 'mock_report_id';
+
+        mock('uuid', ()=> {
+            return reportId;
+        });
+
+        mock('isomorphic-fetch', () => {
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
+        });
+
+        mock('jsonwebtoken', {
+            decode: () => ({ projectId })
+        });
+
+        mock('../lib/env-variables', {
+            TESTCAFE_DASHBOARD_URL,
+            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
+
+            TESTCAFE_DASHBOARD_BUILD_ID: buildId
+        });
+
+        await assertReporterMessage(`Build ID should not exceed 100 symbols. Build ID: ${longBuildId}.`);
+
+        mock.stop('uuid');
+        mock.stop('jsonwebtoken');
+        mock.stop('isomorphic-fetch');
+    });
+
     it('Show reporter URL message', async () => {
         const projectId = 'mock_project_id';
         const reportId = 'mock_report_id';

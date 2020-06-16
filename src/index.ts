@@ -18,7 +18,7 @@ const browserNameMap = {
     'firefox':       'Firefox',
 };
 
-const MAX_BUILD_ID_LENGTH = 100;
+export const MAX_BUILD_ID_LENGTH = 100;
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
@@ -55,8 +55,8 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            if (TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
-                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID || id));
+            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
+                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
                 return;
             }
             await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
