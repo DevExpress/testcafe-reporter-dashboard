@@ -4,6 +4,7 @@ import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
+import { MAX_BUILD_ID_LENGTH } from '../src';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
@@ -65,7 +66,7 @@ describe('reportTaskStart', () => {
             TESTCAFE_DASHBOARD_BUILD_ID: buildId
         });
 
-        await assertReporterMessage(`Build ID should not exceed 100 symbols. Build ID: ${longBuildId}.`);
+        await assertReporterMessage(`Build ID cannot be longer than ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${longBuildId}.`);
 
         mock.stop('uuid');
         mock.stop('jsonwebtoken');

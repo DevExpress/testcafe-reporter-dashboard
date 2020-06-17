@@ -22,4 +22,4 @@ export const createGetUploadInfoError = (uploadEntityId: string, response: strin
    `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
 
 export const createLongBuildIdError = (buildId: string): string =>
-   `Build ID should not exceed ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${buildId}.`;
+   `Build ID cannot be longer than ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${buildId}.`;
