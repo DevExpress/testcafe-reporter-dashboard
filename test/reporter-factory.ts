@@ -44,21 +44,6 @@ describe('reportTaskStart', () => {
     it('Show reporter long build id message', async () => {
         const longBuildId = '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-        const projectId = 'mock_project_id';
-        const reportId = 'mock_report_id';
-
-        mock('uuid', ()=> {
-            return reportId;
-        });
-
-        mock('isomorphic-fetch', () => {
-            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
-        });
-
-        mock('jsonwebtoken', {
-            decode: () => ({ projectId })
-        });
-
         mock('../lib/env-variables', {
             TESTCAFE_DASHBOARD_URL,
             TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
@@ -67,10 +52,6 @@ describe('reportTaskStart', () => {
         });
 
         await assertReporterMessage(`Build ID cannot be longer than ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${longBuildId}.`);
-
-        mock.stop('uuid');
-        mock.stop('jsonwebtoken');
-        mock.stop('isomorphic-fetch');
     });
 
     it('Show reporter URL message', async () => {
