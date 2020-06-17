@@ -55,7 +55,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
+            if (TESTCAFE_DASHBOARD_BUILD_ID?.length > MAX_BUILD_ID_LENGTH) {
                 logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
                 return;
             }
