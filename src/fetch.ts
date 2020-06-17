@@ -28,6 +28,9 @@ export class FetchResponse {
         if (this._error && this._error.hasOwnProperty('toString'))
             result += `. Error: ${this._error}`;
 
+        if (this._response)
+            result += `. Original response: ${this._response}`;
+
         return result;
     }
 
