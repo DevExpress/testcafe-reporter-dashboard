@@ -4,7 +4,6 @@ import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { MAX_BUILD_ID_LENGTH } from '../src';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
@@ -14,7 +13,6 @@ describe('reportTaskStart', () => {
 
     async function assertReporterMessage (expected: string): Promise<void> {
         const logs = [];
-
 
         mock('../lib/logger', {
             log: message => {
@@ -39,38 +37,6 @@ describe('reportTaskStart', () => {
 
     after(() => {
         mock.stop('../lib/env-variables');
-    });
-
-    it('Show reporter long build id message', async () => {
-        const longBuildId = 'test_build_id/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-
-        const projectId = 'mock_project_id';
-        const reportId = 'mock_report_id';
-
-        mock('uuid', ()=> {
-            return reportId;
-        });
-
-        mock('isomorphic-fetch', () => {
-            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
-        });
-
-        mock('jsonwebtoken', {
-            decode: () => ({ projectId })
-        });
-
-        mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL,
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
-
-            TESTCAFE_DASHBOARD_BUILD_ID: longBuildId
-        });
-
-        await assertReporterMessage(`Build ID cannot be longer than ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${longBuildId}.`);
-
-        mock.stop('uuid');
-        mock.stop('jsonwebtoken');
-        mock.stop('isomorphic-fetch');
     });
 
     it('Show reporter URL message', async () => {
@@ -104,6 +70,16 @@ describe('reportTaskStart', () => {
         mock.stop('uuid');
         mock.stop('jsonwebtoken');
         mock.stop('isomorphic-fetch');
+    });
+
+    it('Show reporter long build id message', async () => {
+        const longBuildId = 'test_build_id/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+
+        mock('../lib/env-variables', {
+            TESTCAFE_DASHBOARD_BUILD_ID: longBuildId
+        });
+
+        await assertReporterMessage(`Build ID cannot be longer than 100 symbols. Build ID: ${longBuildId}.`);
     });
 });
 
