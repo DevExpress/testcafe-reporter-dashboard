@@ -9,8 +9,9 @@ import { ResolveCommand } from './types/resolve';
 import fetch, { FetchResponse } from './fetch';
 import logger from './logger';
 
-const CONCURRENT_ERROR_CODE = 409;
-const MAX_RETRY_COUNT       = 5;
+export const CONCURRENT_ERROR_CODE = 409;
+
+const MAX_RETRY_COUNT = 5;
 
 if (!TESTCAFE_DASHBOARD_URL)
     logger.error(DASHBOARD_LOCATION_NOT_DEFINED);

@@ -2,6 +2,8 @@ import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
 
+import { CONCURRENT_ERROR_CODE } from '../src/send-resolve-command';
+
 describe('sendResolveCommand', () => {
     before(() => {
         mock('../lib/env-variables', {
@@ -20,7 +22,7 @@ describe('sendResolveCommand', () => {
         mock('isomorphic-fetch', function retryCommandTest () {
             sendCommandCount++;
 
-            const response = sendCommandCount === 1 ? { status: 408, ok: false } : { status: 200, ok: true };
+            const response = sendCommandCount === 1 ? { status: CONCURRENT_ERROR_CODE, ok: false } : { status: 200, ok: true };
 
             return Promise.resolve(response);
         });
