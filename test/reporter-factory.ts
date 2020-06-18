@@ -4,7 +4,7 @@ import assert from 'assert';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { MAX_BUILD_ID_LENGTH } from '../src';
+// import { MAX_BUILD_ID_LENGTH } from '../src';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
