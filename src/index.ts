@@ -55,25 +55,30 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
-                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
-                return;
+            if(buildIdIsValid()) {
+                await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+                logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
             }
-            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
-            logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
         },
 
         async reportFixtureStart (name): Promise<void> {
-            await sendFixtureStartCommand(id, { name });
+            if(buildIdIsValid()) {
+                await sendFixtureStartCommand(id, { name });
+            }
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            testRunIds = testStartInfo.testRunIds;
-
-            await sendTestStartCommand(id, { name });
+            if(buildIdIsValid()) {
+                testRunIds = testStartInfo.testRunIds;
+                await sendTestStartCommand(id, { name });
+            }
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
+            if(!buildIdIsValid()) { 
+                return;
+            }
+
             const { browser, test: { phase }, command, testRunId, err, duration } = actionInfo;
 
             if (!testRuns[testRunId])
@@ -97,6 +102,15 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
+            if(!buildIdIsValid()) { 
+                return;
+            }
+
+            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
+                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+                return;
+            }
+
             const { screenshots, videos, errs, durationMs } = testRunInfo;
 
             if (!NO_SCREENSHOT_UPLOAD) {
@@ -169,8 +183,18 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
-            await uploader.waitUploads();
-            await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+            if(buildIdIsValid()) { 
+                await uploader.waitUploads();
+                await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+            }
         }
     };
+  
+    function buildIdIsValid (): boolean {
+        if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
+            logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+            return false;
+        }
+        return true;
+    }
 };
