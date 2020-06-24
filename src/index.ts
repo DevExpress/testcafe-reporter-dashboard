@@ -1,9 +1,8 @@
 import uuid from 'uuid';
 import logger from './logger';
 
-import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, BUILD_ID } from './env-variables';
-
-import { createReportUrlMessage } from './texts';
+import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, TESTCAFE_DASHBOARD_BUILD_ID } from './env-variables';
+import { createReportUrlMessage, createLongBuildIdError } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
 import { Uploader } from './upload';
 import { ReporterPluginObject, Error, BrowserInfo } from './types/testcafe';
@@ -18,6 +17,8 @@ const browserNameMap = {
     'Opera':         'Opera',
     'firefox':       'Firefox',
 };
+
+export const MAX_BUILD_ID_LENGTH = 100;
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
@@ -54,8 +55,13 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: BUILD_ID });
-            logger.log(createReportUrlMessage(BUILD_ID || id));
+            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
+                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+                throw new Error(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+            }
+
+            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+            logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
         },
 
         async reportFixtureStart (name): Promise<void> {
@@ -64,7 +70,6 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
             testRunIds = testStartInfo.testRunIds;
-
             await sendTestStartCommand(id, { name });
         },
 
@@ -165,7 +170,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await uploader.waitUploads();
-            await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: BUILD_ID });
+            await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
         }
     };
 };

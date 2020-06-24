@@ -14,7 +14,6 @@ describe('reportTaskStart', () => {
     async function assertReporterMessage (expected: string): Promise<void> {
         const logs = [];
 
-
         mock('../lib/logger', {
             log: message => {
                 logs.push(message);
@@ -63,7 +62,7 @@ describe('reportTaskStart', () => {
             TESTCAFE_DASHBOARD_URL,
             TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
 
-            BUILD_ID: buildId
+            TESTCAFE_DASHBOARD_BUILD_ID: buildId
         });
 
         await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${encodeURIComponent(buildId)}`);
@@ -71,6 +70,20 @@ describe('reportTaskStart', () => {
         mock.stop('uuid');
         mock.stop('jsonwebtoken');
         mock.stop('isomorphic-fetch');
+    });
+
+    it('Throw Exception if build id is too long', async () => {
+        const longBuildId = 'test_build_id/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+
+        mock('../lib/env-variables', {
+            TESTCAFE_DASHBOARD_BUILD_ID: longBuildId
+        });
+        const reporter = mock.reRequire('../lib/index')();
+
+        await assert.rejects(async () => await reporter.reportTaskStart(1, [], 1), {
+            name:    'Error',
+            message: `Build ID cannot be longer than 100 symbols. Build ID: ${longBuildId}.`
+        });
     });
 });
 
