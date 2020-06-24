@@ -72,14 +72,15 @@ describe('reportTaskStart', () => {
         mock.stop('isomorphic-fetch');
     });
 
-    it('Show reporter long build id message', async () => {
+    it('Throw Exception if build id is too long', async () => {
         const longBuildId = 'test_build_id/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
         mock('../lib/env-variables', {
             TESTCAFE_DASHBOARD_BUILD_ID: longBuildId
         });
+        const reporter = mock.reRequire('../lib/index')();
 
-        await assertReporterMessage(`Build ID cannot be longer than 100 symbols. Build ID: ${longBuildId}.`);
+        assert.throws(async () => await reporter.reportTaskStart(1, null, 1), `Build ID cannot be longer than 100 symbols. Build ID: ${longBuildId}.`);
     });
 });
 

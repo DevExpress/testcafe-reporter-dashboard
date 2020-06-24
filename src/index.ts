@@ -51,42 +51,29 @@ module.exports = function plaginFactory (): ReporterPluginObject {
     const testRuns: Record<string, BrowserRunInfo> = {};
     let testRunIds: string[] = [];
 
-    function buildIdIsValid (): boolean {
-        if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
-            logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
-            return false;
-        }
-        return true;
-    }
-
     return {
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
-            if (buildIdIsValid()) {
-                await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
-                logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
+            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
+                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+                throw new Error(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
             }
+
+            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+            logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
         },
 
         async reportFixtureStart (name): Promise<void> {
-            if (buildIdIsValid())
-                await sendFixtureStartCommand(id, { name });
-
+            await sendFixtureStartCommand(id, { name });
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            if (buildIdIsValid()) {
-                testRunIds = testStartInfo.testRunIds;
-                await sendTestStartCommand(id, { name });
-            }
+            testRunIds = testStartInfo.testRunIds;
+            await sendTestStartCommand(id, { name });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            if (!buildIdIsValid())
-                return;
-
-
             const { browser, test: { phase }, command, testRunId, err, duration } = actionInfo;
 
             if (!testRuns[testRunId])
@@ -110,15 +97,6 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            if (!buildIdIsValid())
-                return;
-
-
-            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
-                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
-                return;
-            }
-
             const { screenshots, videos, errs, durationMs } = testRunInfo;
 
             if (!NO_SCREENSHOT_UPLOAD) {
@@ -191,10 +169,8 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
-            if (buildIdIsValid()) {
-                await uploader.waitUploads();
-                await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
-            }
+            await uploader.waitUploads();
+            await sendTaskDoneCommand(id, { endTime, passed, warnings, result, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
         }
     };
 };
