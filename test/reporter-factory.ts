@@ -81,7 +81,7 @@ describe('reportTaskStart', () => {
         const reporter = mock.reRequire('../lib/index')();
 
         await assert.rejects(async () => await reporter.reportTaskStart(1, [], 1), {
-            name: 'Error',
+            name:    'Error',
             message: `Build ID cannot be longer than 100 symbols. Build ID: ${longBuildId}.`
         });
     });
