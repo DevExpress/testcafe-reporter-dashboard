@@ -89,6 +89,7 @@ export type BrowserInfo = {
 
 type TestStartInfo = {
     testRunIds: string[];
+    testId: string;
 }
 
 type TestcafeActionInfo = {
@@ -112,16 +113,15 @@ export type Quarantine = {
 }
 
 export type Screenshot = {
+    testRunId: string;
     screenshotPath: string;
     thumbnailPath: string;
     userAgent: string;
     quarantineAttempt: number;
     takenOnFail: boolean;
-    uploadId?: string;
 }
 
 export type Video = {
-    uploadId: string;
     userAgent: string;
     quarantineAttempt: number;
     videoPath: string;
@@ -132,12 +132,14 @@ export type TestRunInfo = {
     errs: Error[];
     warnings: string[];
     durationMs: number;
+    browsers: (BrowserInfo & { testRunId: string })[];
     unstable: boolean;
     screenshotPath: string;
     screenshots: Screenshot[];
     quarantine: Quarantine;
     skipped: boolean;
     videos: Video[];
+    testId: string;
 }
 
 
@@ -160,9 +162,25 @@ export type TestResult = {
 
 export type decoratorFn = (str: string) => string;
 
+interface ReportedTestItem {
+    id: string;
+    name: string;
+    skip: boolean;
+}
+
+interface ReportedFixtureItem {
+    id: string;
+    name: string;
+    tests: ReportedTestItem[];
+}
+
+export interface ReportedTestStructureItem {
+    fixture: ReportedFixtureItem;
+}
+
 export type ReporterPluginObject = {
     createErrorDecorator: () => Record<string, decoratorFn>;
-    reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number) => Promise<void>;
+    reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
     reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
     reportTestActionStart?: (apiActionName: string, actionInfo: TestcafeActionInfo) => Promise<void>;

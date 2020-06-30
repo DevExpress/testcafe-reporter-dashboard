@@ -3,20 +3,11 @@ import logger from './logger';
 
 import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, TESTCAFE_DASHBOARD_BUILD_ID } from './env-variables';
 import { createReportUrlMessage, createLongBuildIdError } from './texts';
-import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo } from './types/dashboard';
+import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo, TestError } from './types/dashboard';
 import { Uploader } from './upload';
-import { ReporterPluginObject, Error, BrowserInfo } from './types/testcafe';
+import { ReporterPluginObject, Error, BrowserInfo, ReportedTestStructureItem } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
-import { sendTaskStartCommand, sendFixtureStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
-
-const browserNameMap = {
-    'chrome':        'Chrome',
-    'chrome-canary': 'Chrome Canary',
-    'ie':            'Explorer',
-    'edge':          'Edge',
-    'Opera':         'Opera',
-    'firefox':       'Firefox',
-};
+import { sendTaskStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
 
 export const MAX_BUILD_ID_LENGTH = 100;
 
@@ -24,63 +15,40 @@ function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
-function getBrowserAlias (error: Error): string {
-    const { userAgent } = error;
-    let alias = 'chrome';
-
-    if (userAgent.includes('Canary'))
-        alias = 'chrome-canary';
-    else if (userAgent.includes('Chrome'))
-        alias = 'chrome';
-    else if (userAgent.includes('Explorer'))
-        alias = 'ie';
-    else if (userAgent.includes('Edge'))
-        alias = 'edge';
-    else if (userAgent.includes('Firefox'))
-        alias = 'firefox';
-    else if (userAgent.includes('Opera'))
-        alias = 'opera';
-
-    return alias;
-}
-
 module.exports = function plaginFactory (): ReporterPluginObject {
     const id = uuid() as string;
     const uploader = new Uploader(id);
 
-    const testRuns: Record<string, BrowserRunInfo> = {};
-    let testRunIds: string[] = [];
+    const testRunToActionsMap: Record<string, ActionInfo[]> = {};
 
     return {
         createErrorDecorator: errorDecorator,
 
-        async reportTaskStart (startTime, userAgents, testCount): Promise<void> {
+        async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
                 logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
                 throw new Error(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
             }
 
-            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+            await sendTaskStartCommand(id, { startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID, taskStructure });
             logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
         },
 
-        async reportFixtureStart (name): Promise<void> {
-            await sendFixtureStartCommand(id, { name });
-        },
+        async reportFixtureStart () { },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            testRunIds = testStartInfo.testRunIds;
-            await sendTestStartCommand(id, { name });
+            const { testId } = testStartInfo;
+
+            await sendTestStartCommand(id, { testId });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            const { browser, test: { phase }, command, testRunId, err, duration } = actionInfo;
+            const { test: { phase }, command, testRunId, err, duration } = actionInfo;
 
-            if (!testRuns[testRunId])
-                testRuns[testRunId] = { browser, actions: [] };
+            if (!testRunToActionsMap[testRunId])
+                testRunToActionsMap[testRunId] = [];
 
             const action: ActionInfo = {
-                testRunId,
                 duration,
                 apiName:   apiActionName,
                 testPhase: phase,
@@ -93,79 +61,81 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 );
             }
 
-            testRuns[testRunId].actions.push(action);
+            testRunToActionsMap[testRunId].push(action);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            const { screenshots, videos, errs, durationMs } = testRunInfo;
+            const { screenshots, videos, errs, durationMs, testId, browsers } = testRunInfo;
+
+            const testRunToScreenshotsMap: Record<string, string[]> = {};
+            const testRunToVideosMap: Record<string, string[]>      = {};
+            const testRunToErrorsMap: Record<string, TestError>     = {}
 
             if (!NO_SCREENSHOT_UPLOAD) {
                 for (const screenshotInfo of screenshots) {
-                    const { screenshotPath } = screenshotInfo;
+                    const { screenshotPath, testRunId  } = screenshotInfo;
 
-                    screenshotInfo.uploadId = await uploader.uploadFile(screenshotPath);
+                    const uploadId = await uploader.uploadFile(screenshotPath);
+
+                    if (!uploadId) continue;
+
+                    if (testRunToScreenshotsMap[testRunId])
+                        testRunToScreenshotsMap[testRunId].push(uploadId);
+                    else
+                        testRunToScreenshotsMap[testRunId] = [uploadId];
                 }
             }
 
             if (!NO_VIDEO_UPLOAD) {
                 for (const videoInfo of videos) {
-                    const { videoPath } = videoInfo;
+                    const { videoPath, testRunId } = videoInfo;
+        
+                    const uploadId = await uploader.uploadFile(videoPath);
 
-                    videoInfo.uploadId = await uploader.uploadFile(videoPath);
-                    videoInfo.userAgent = testRuns[videoInfo.testRunId].browser.prettyUserAgent;
+                    if (!uploadId) continue;
+
+                    if (testRunToVideosMap[testRunId])
+                        testRunToVideosMap[testRunId].push(uploadId);
+                    else
+                        testRunToVideosMap[testRunId] = [uploadId];
                 }
             }
 
             for (const err of errs) {
-                const { testRunId } = err;
-                const browserAlias = getBrowserAlias(err);
-                //NOTE: we mock browser object in case if no actions have been performed in test before an error
-                const runInfo = testRuns[testRunId] || {
-                    browser: {
-                        alias:           browserAlias,
-                        name:            browserNameMap[browserAlias],
-                        userAgent:       err.userAgent,
-                        prettyUserAgent: err.userAgent,
-                        version:         'browser version N/A',
-                        os:              {
-                            name:    'OS name N/A',
-                            version: 'OS version N/A'
-                        }
-                    } as BrowserInfo,
-                    actions: []
-                };
-
-                if (!testRuns[testRunId])
-                    testRuns[testRunId] = runInfo;
-
                 if (!isThirdPartyError(err))
                     continue;
 
-                runInfo.thirdPartyError = createTestError(err,
+                const { testRunId } = err;
+                
+                testRunToErrorsMap[testRunId] = createTestError(err,
                     curly(this.useWordWrap(false).setIndent(0).formatError(err))
                 );
             }
 
-            const browserRuns = testRunIds.reduce((runs, runId) => {
-                const runInfo = testRuns[runId];
+            const browserRuns = browsers.reduce((runs, browser) => {
+                const { testRunId } = browser;
 
-                if (runInfo)
-                    runs[runInfo.browser.alias] = runInfo;
+                runs[testRunId] = {
+                    browser,
+                    screenshotUploadIds: testRunToScreenshotsMap[testRunId],
+                    videoUploadIds:      testRunToVideosMap[testRunId],
+                    actions:             testRunToActionsMap[testRunId],
+                    thirdPartyError:     testRunToErrorsMap[testRunId]
+                };
+
+                delete testRunToActionsMap[testRunId];
 
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
 
             const testDonePayload = {
-                name,
+                testId,
                 errorCount: errs.length,
                 duration:   durationMs,
                 uploadId:   await uploader.uploadTest(name, createDashboardTestRunInfo(testRunInfo, browserRuns))
             };
 
             await sendTestDoneCommand(id, testDonePayload);
-
-            for (const runId of testRunIds)
-                delete testRuns[runId];
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {

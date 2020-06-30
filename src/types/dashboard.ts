@@ -2,17 +2,15 @@ import {
     TestPhase,
     CommandType,
     BrowserInfo,
-    Screenshot,
     Quarantine,
     Error,
-    Video,
     TestRunInfo,
-    TestResult
+    TestResult,
+    ReportedTestStructureItem
 } from './testcafe';
 
 export enum CommandTypes {
     reportTaskStart = 'reportTaskStart',
-    reportFixtureStart = 'reportFixtureStart',
     reportTestStart = 'reportTestStart',
     reportTestDone = 'reportTestDone',
     reportTaskDone = 'reportTaskDone',
@@ -30,13 +28,14 @@ export enum AggregateNames {
 
 export type BrowserRunInfo = {
     browser: BrowserInfo;
-    actions: ActionInfo[];
+    screenshotUploadIds?: string[];
+    videoUploadIds?: string[];
+    actions?: ActionInfo[];
     thirdPartyError?: TestError;
 }
 
 export type ActionInfo = {
-    testRunId: string;
-    duration?: number;
+    duration: number;
     apiName: string;
     testPhase: TestPhase;
     command: Record<string, any> & { type: CommandType };
@@ -44,8 +43,6 @@ export type ActionInfo = {
 }
 
 export type TestError = {
-    userAgent: string;
-    screenshotPath: string;
     testRunPhase: string;
     code: string;
     errorModel: string;
@@ -53,35 +50,23 @@ export type TestError = {
 
 export type DashboardTestRunInfo = {
     warnings: string[];
-    durationMs: number;
     unstable: boolean;
-    screenshotPath: string;
-    screenshots: Screenshot[];
     quarantine: Quarantine;
-    skipped: boolean;
     browserRuns: Record<string, BrowserRunInfo>;
-    videos: Video[];
 }
 
 export const createTestError = (error: Error, errorModel: string): TestError => ({
     code:           error.code,
-    screenshotPath: error.screenshotPath,
     testRunPhase:   error.testRunPhase,
-    userAgent:      error.userAgent,
-    errorModel:     errorModel,
+    errorModel:     errorModel
 });
 
 
 export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns: Record<string, BrowserRunInfo>): DashboardTestRunInfo => ({
-    durationMs:     testRunInfo.durationMs,
     quarantine:     testRunInfo.quarantine,
-    screenshotPath: testRunInfo.screenshotPath,
-    screenshots:    (testRunInfo.screenshots || []).filter(s => !!s.uploadId),
-    skipped:        testRunInfo.skipped,
     unstable:       testRunInfo.unstable,
     warnings:       testRunInfo.warnings,
-    browserRuns:    browserRuns,
-    videos:         (testRunInfo.videos || []).filter(v => !!v.uploadId)
+    browserRuns:    browserRuns
 });
 
 export type TaskStartArgs = {
@@ -89,18 +74,15 @@ export type TaskStartArgs = {
     userAgents: string[];
     testCount: number;
     buildId: string;
-};
-
-export type FixtureStartArgs = {
-    name: string;
+    taskStructure: ReportedTestStructureItem[];
 };
 
 export type TestStartArgs = {
-    name: string;
+    testId: string;
 };
 
 export type TestDoneArgs = {
-    name: string;
+    testId: string;
     errorCount: number;
     duration: number;
     uploadId: string;
@@ -113,4 +95,3 @@ export type TaskDoneArgs = {
      result: TestResult;
      buildId: string;
 }
-
