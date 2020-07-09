@@ -1,6 +1,8 @@
 import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
+import { Screenshot } from '../src/types/testcafe';
+import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
@@ -73,20 +75,22 @@ describe('Uploads', () => {
         it('Smoke test', async () => {
             const screenshotPaths = [];
 
-            const screenshots = [
+            const screenshots: Screenshot[] = [
                 {
-                    screenshotPath: 'C:\\screenshots\\1.png',
-                    thumbnailPath:  'C:\\screenshots\\thumbnails\\1.png',
-                    userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
-                    takenOnFail:    false,
-                    uploadId:       null,
+                    testRunId:         'chrome_headless',
+                    screenshotPath:    'C:\\screenshots\\1.png',
+                    thumbnailPath:     'C:\\screenshots\\thumbnails\\1.png',
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
                 },
                 {
-                    screenshotPath: 'C:\\screenshots\\errors\\1.png',
-                    thumbnailPath:  'C:\\screenshots\\errors\\thumbnails\\1.png',
-                    userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
-                    takenOnFail:    true,
-                    uploadId:       null,
+                    testRunId:         'chrome_headless',
+                    screenshotPath:    'C:\\screenshots\\errors\\1.png',
+                    thumbnailPath:     'C:\\screenshots\\errors\\thumbnails\\1.png',
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       true,
+                    quarantineAttempt: 0
                 }
             ];
 
@@ -109,16 +113,13 @@ describe('Uploads', () => {
 
             const reporter = mock.reRequire('../lib/index')();
 
-            await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [] });
+            await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [], browsers: [{ ...CHROME_HEADLESS, testRunId: 'chrome_headless' }] });
             await reporter.reportTaskDone('', 1, [], {});
 
             assert.equal(uploadInfos.length, 3);
             assert.equal(uploadedUrls.length, 3);
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
-
-            assert.equal(screenshots[0].uploadId, uploadInfos[0].uploadId);
-            assert.equal(screenshots[1].uploadId, uploadInfos[1].uploadId);
 
             assert.equal(uploadedFiles.length, 3);
             assert.equal(uploadedFiles[0], 'take_screenshot_action');
@@ -136,20 +137,22 @@ describe('Uploads', () => {
                 NO_SCREENSHOT_UPLOAD:                    true
             });
 
-            const screenshots = [
+            const screenshots: Screenshot[] = [
                 {
-                    screenshotPath: 'C:\\screenshots\\1.png',
-                    thumbnailPath:  'C:\\screenshots\\thumbnails\\1.png',
-                    userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
-                    takenOnFail:    false,
-                    uploadId:       null,
+                    testRunId:         'chrome_headless',
+                    screenshotPath:    'C:\\screenshots\\1.png',
+                    thumbnailPath:     'C:\\screenshots\\thumbnails\\1.png',
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
                 },
                 {
-                    screenshotPath: 'C:\\screenshots\\errors\\1.png',
-                    thumbnailPath:  'C:\\screenshots\\errors\\thumbnails\\1.png',
-                    userAgent:      'Chrome_79.0.3945.88_Windows_8.1',
-                    takenOnFail:    true,
-                    uploadId:       null,
+                    testRunId:         'chrome_headless',
+                    screenshotPath:    'C:\\screenshots\\errors\\1.png',
+                    thumbnailPath:     'C:\\screenshots\\errors\\thumbnails\\1.png',
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       true,
+                    quarantineAttempt: 0
                 }
             ];
 
@@ -157,7 +160,7 @@ describe('Uploads', () => {
 
             const reporter = mock.reRequire('../lib/index')();
 
-            await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [] });
+            await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [], browsers: [{ ...CHROME_HEADLESS, testRunId: 'chrome_headless' }] });
             await reporter.reportTaskDone('', 1, [], {});
 
             assert.equal(uploadInfos.length, 1);
@@ -167,7 +170,7 @@ describe('Uploads', () => {
 
             const testRunInfo = JSON.parse(uploadedFiles[0].toString());
 
-            assert.equal(testRunInfo.screenshots.length, 0);
+            assert.equal(testRunInfo.screenshots, void 0);
         });
     });
 
@@ -180,7 +183,7 @@ describe('Uploads', () => {
         });
 
         it('Smoke test', async () => {
-            const prettyUserAgents = ['Chrome 80.0.3987.149 \\ Windows 10', 'Firefox 73.0 \\ Windows 10'];
+            const prettyUserAgents = [ CHROME.prettyUserAgent, FIREFOX.prettyUserAgent ];
             const videoPaths = [];
 
             function readFile (path, readFileCallback): void {
@@ -215,6 +218,8 @@ describe('Uploads', () => {
                         testRunId: 'testRun_2'
                     }
                 ],
+
+                browsers: [ { ...CHROME, testRunId: 'testRun_1' }, { ...FIREFOX, testRunId: 'testRun_2' } ]
             }, {});
             await reporter.reportTaskDone('', 1, [], {});
 
@@ -224,10 +229,8 @@ describe('Uploads', () => {
 
             const { videos } = JSON.parse(uploadedFiles[2].toString());
 
-            assert.equal(videos[0].uploadId, uploadInfos[0].uploadId);
             assert.equal(videos[0].testRunId, 'testRun_1');
             assert.equal(videos[0].userAgent, prettyUserAgents[0]);
-            assert.equal(videos[1].uploadId, uploadInfos[1].uploadId);
             assert.equal(videos[1].testRunId, 'testRun_2');
             assert.equal(videos[1].userAgent, prettyUserAgents[1]);
 

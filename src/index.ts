@@ -5,7 +5,7 @@ import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, TESTCAFE_DASHBOARD_BUILD_ID } fr
 import { createReportUrlMessage, createLongBuildIdError } from './texts';
 import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo, TestError } from './types/dashboard';
 import { Uploader } from './upload';
-import { ReporterPluginObject, Error, BrowserInfo, ReportedTestStructureItem } from './types/testcafe';
+import { ReporterPluginObject, Error, ReportedTestStructureItem } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import { sendTaskStartCommand, sendTestStartCommand, sendTestDoneCommand, sendTaskDoneCommand } from './commands';
 
@@ -34,7 +34,9 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
         },
 
-        async reportFixtureStart () { },
+        async reportFixtureStart () {
+            return void 0;
+        },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
             const { testId } = testStartInfo;
@@ -69,11 +71,11 @@ module.exports = function plaginFactory (): ReporterPluginObject {
 
             const testRunToScreenshotsMap: Record<string, string[]> = {};
             const testRunToVideosMap: Record<string, string[]>      = {};
-            const testRunToErrorsMap: Record<string, TestError>     = {}
+            const testRunToErrorsMap: Record<string, TestError>     = {};
 
             if (!NO_SCREENSHOT_UPLOAD) {
                 for (const screenshotInfo of screenshots) {
-                    const { screenshotPath, testRunId  } = screenshotInfo;
+                    const { screenshotPath, testRunId } = screenshotInfo;
 
                     const uploadId = await uploader.uploadFile(screenshotPath);
 
@@ -89,7 +91,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             if (!NO_VIDEO_UPLOAD) {
                 for (const videoInfo of videos) {
                     const { videoPath, testRunId } = videoInfo;
-        
+
                     const uploadId = await uploader.uploadFile(videoPath);
 
                     if (!uploadId) continue;
@@ -106,7 +108,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                     continue;
 
                 const { testRunId } = err;
-                
+
                 testRunToErrorsMap[testRunId] = createTestError(err,
                     curly(this.useWordWrap(false).setIndent(0).formatError(err))
                 );

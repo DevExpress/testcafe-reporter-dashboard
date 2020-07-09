@@ -1,744 +1,237 @@
-export const reportTestActionDoneCalls = [
+import { TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
+import { TestCafeActionInfo, CommandType, TestPhase } from '../../src/types/testcafe';
+import { FIREFOX, CHROME, CHROME_HEADLESS } from './test-browser-info';
+
+export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: TestCafeActionInfo }[] = [
     {
-        'apiActionName': 'click',
-        'actionInfo':    {
-            'testRunId': '1',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'click',
-                'selector': "Selector('#developer-name')",
-                'options':  {
-                    'speed':     0.5,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  true,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null
-                }
-            },
-            'browser': {
-                'name':     'Firefox',
-                'version':  '59.0',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
+        apiActionName: 'click',
+        actionInfo:    {
+            browser: FIREFOX,
+            command: {
+                options: {
+                    speed:     0.5,
+                    modifiers: { ctrl: true }
                 },
-                'engine': {
-                    'name':    'Gecko',
-                    'version': '20100101'
-                },
-                'prettyUserAgent': 'Firefox 59.0 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0',
-                'alias':           'firefox',
-                'headless':        false
-            }
+                type:     CommandType.click,
+                selector: 'Selector(\'#developer-name\')'
+            },
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'firefox_1'
         }
     },
     {
-        'apiActionName': 'typeText',
-        'actionInfo':    {
-            'testRunId': '1',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
+        apiActionName: 'typeText',
+        actionInfo:    {
+            browser: FIREFOX,
+            command: {
+                type:     CommandType.typeText,
+                selector: 'Selector(\'#developer-name\')',
+                text:     'Peter',
             },
-            'command': {
-                'type':     'type-text',
-                'selector': "Selector('#developer-name')",
-                'text':     'Peter',
-                'options':  {
-                    'speed':     null,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null,
-                    'replace':  false,
-                    'paste':    false
-                }
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
             },
-            'browser': {
-                'name':     'Firefox',
-                'version':  '59.0',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Gecko',
-                    'version': '20100101'
-                },
-                'prettyUserAgent': 'Firefox 59.0 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0',
-                'alias':           'firefox',
-                'headless':        false
-            }
+            testRunId: 'firefox_1'
         }
     },
     {
-        'apiActionName': 'click',
-        'actionInfo':    {
-            'testRunId': '1',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
+        apiActionName: 'eql',
+        actionInfo:    {
+            browser: FIREFOX,
+            command: {
+                type:          CommandType.assertion,
+                assertionType: 'eql',
+                actual:        'Peter',
+                expected:      'Peter1',
+                message:       null,
             },
-            'command': {
-                'type':     'click',
-                'selector': "Selector('#tried-test-cafe')",
-                'options':  {
-                    'speed':     null,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null
-                }
-            },
-            'browser': {
-                'name':     'Firefox',
-                'version':  '59.0',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Gecko',
-                    'version': '20100101'
-                },
-                'prettyUserAgent': 'Firefox 59.0 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0',
-                'alias':           'firefox',
-                'headless':        false
-            }
-        }
-    },
-    {
-        'apiActionName': 'drag',
-        'actionInfo':    {
-            'testRunId': '1',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':        'drag',
-                'selector':    "Selector('.ui-slider-handle.ui-corner-all.ui-state-default')",
-                'dragOffsetX': 94,
-                'dragOffsetY': -2,
-                'options':     {
-                    'speed':     null,
-                    'offsetX':   8,
-                    'offsetY':   12,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    }
-                }
-            },
-            'browser': {
-                'name':     'Firefox',
-                'version':  '59.0',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Gecko',
-                    'version': '20100101'
-                },
-                'prettyUserAgent': 'Firefox 59.0 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0',
-                'alias':           'firefox',
-                'headless':        false
-            }
-        }
-    },
-    {
-        'apiActionName': 'click',
-        'actionInfo':    {
-            'testRunId': '2',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'click',
-                'selector': "Selector('#developer-name')",
-                'options':  {
-                    'speed':     0.5,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  true,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome:headless',
-                'headless':        true
-            }
-        }
-    },
-    {
-        'apiActionName': 'typeText',
-        'actionInfo':    {
-            'testRunId': '2',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'type-text',
-                'selector': "Selector('#developer-name')",
-                'text':     'Peter',
-                'options':  {
-                    'speed':     null,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null,
-                    'replace':  false,
-                    'paste':    false
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome:headless',
-                'headless':        true
-            }
-        }
-    },
-    {
-        'apiActionName': 'click',
-        'actionInfo':    {
-            'testRunId': '2',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'click',
-                'selector': "Selector('#tried-test-cafe')",
-                'options':  {
-                    'speed':     null,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome:headless',
-                'headless':        true
-            }
-        }
-    },
-    {
-        'apiActionName': 'drag',
-        'actionInfo':    {
-            'testRunId': '2',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':        'drag',
-                'selector':    "Selector('.ui-slider-handle.ui-corner-all.ui-state-default')",
-                'dragOffsetX': 94,
-                'dragOffsetY': -2,
-                'options':     {
-                    'speed':     null,
-                    'offsetX':   8,
-                    'offsetY':   12,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    }
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome:headless',
-                'headless':        true
-            }
-        }
-    },
-    {
-        'apiActionName': 'click',
-        'actionInfo':    {
-            'testRunId': '3',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'click',
-                'selector': "Selector('#developer-name')",
-                'options':  {
-                    'speed':     0.5,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  true,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome',
-                'headless':        false
-            }
-        }
-    },
-    {
-        'apiActionName': 'typeText',
-        'actionInfo':    {
-            'testRunId': '3',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'type-text',
-                'selector': "Selector('#developer-name')",
-                'text':     'Peter',
-                'options':  {
-                    'speed':     null,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null,
-                    'replace':  false,
-                    'paste':    false
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome',
-                'headless':        false
-            }
-        }
-    },
-    {
-        'apiActionName': 'click',
-        'actionInfo':    {
-            'testRunId': '3',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':     'click',
-                'selector': "Selector('#tried-test-cafe')",
-                'options':  {
-                    'speed':     null,
-                    'offsetX':   null,
-                    'offsetY':   null,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    },
-                    'caretPos': null
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome',
-                'headless':        false
-            }
-        }
-    },
-    {
-        'apiActionName': 'drag',
-        'actionInfo':    {
-            'testRunId': '3',
-            'test':      {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':        'drag',
-                'selector':    "Selector('.ui-slider-handle.ui-corner-all.ui-state-default')",
-                'dragOffsetX': 94,
-                'dragOffsetY': -2,
-                'options':     {
-                    'speed':     null,
-                    'offsetX':   8,
-                    'offsetY':   12,
-                    'modifiers': {
-                        'ctrl':  false,
-                        'alt':   false,
-                        'shift': false,
-                        'meta':  false
-                    }
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
-                },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome',
-                'headless':        false
-            }
-        }
-    },
-    {
-        'apiActionName': 'eql',
-        'actionInfo':    {
-            'testRunId': '1',
-            'errors':    [
+            err: new TestRunErrorFormattableAdapter(
                 {
-                    'code':            'E53',
-                    'isTestCafeError': true,
-                    'callsite':        {
-                        'filename':         'C:\\testcafe-reporter-dashboard\\sandbox\\test.js',
-                        'lineNum':          14,
-                        'callsiteFrameIdx': 6,
-                        'stackFrames':      [
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {}
-                        ],
-                        'isV8Frames': true
+                    callsite: {
+                        callsiteFrameIdx: 6,
+                        filename:         'file_1',
+                        isV8Frames:	      true,
+                        lineNum:          9,
+                        stackFrames:      [],
                     },
-                    'errMsg': "AssertionError: expected 'Peter' to deeply equal 'Peter1'"
-                }
-            ],
-            'test': {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':          'assertion',
-                'assertionType': 'eql',
-                'actual':        'Peter',
-                'expected':      'Peter1',
-                'message':       null,
-                'options':       {
-                    'allowUnawaitedPromise': false
-                }
-            },
-            'browser': {
-                'name':     'Firefox',
-                'version':  '59.0',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
+                    code:            'E53',
+                    errMsg:	         'AssertionError: expected \'Peter\' to deeply equal \'Peter1\'',
+                    isTestCafeError: true,
+                    screenshotPath:	 '',
+                    testRunId:	      'firefox_1',
+                    testRunPhase:    TestPhase.inTest,
+                    userAgent:       FIREFOX.prettyUserAgent
                 },
-                'engine': {
-                    'name':    'Gecko',
-                    'version': '20100101'
-                },
-                'prettyUserAgent': 'Firefox 59.0 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0',
-                'alias':           'firefox',
-                'headless':        false
-            }
+                {
+                    screenshotPath:	'',
+                    testRunId:	     'firefox_1',
+                    testRunPhase:   TestPhase.inTest,
+                    userAgent:      FIREFOX.prettyUserAgent
+                }
+            ),
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'firefox_1',
         }
     },
     {
-        'apiActionName': 'eql',
-        'actionInfo':    {
-            'testRunId': '2',
-            'errors':    [
-                {
-                    'code':            'E53',
-                    'isTestCafeError': true,
-                    'callsite':        {
-                        'filename':         'C:\\testcafe-reporter-dashboard\\sandbox\\test.js',
-                        'lineNum':          14,
-                        'callsiteFrameIdx': 6,
-                        'stackFrames':      [
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {}
-                        ],
-                        'isV8Frames': true
-                    },
-                    'errMsg': "AssertionError: expected 'Peter' to deeply equal 'Peter1'"
-                }
-            ],
-            'test': {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':          'assertion',
-                'assertionType': 'eql',
-                'actual':        'Peter',
-                'expected':      'Peter1',
-                'message':       null,
-                'options':       {
-                    'allowUnawaitedPromise': false
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
+        apiActionName: 'click',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                options: {
+                    speed:     0.5,
+                    modifiers: { ctrl: true }
                 },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
-                },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome:headless',
-                'headless':        true
-            }
+                type:     CommandType.click,
+                selector: 'Selector(\'#developer-name\')',
+            },
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_1'
         }
     },
     {
-        'apiActionName': 'eql',
-        'actionInfo':    {
-            'testRunId': '3',
-            'errors':    [
+        apiActionName: 'typeText',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:     CommandType.typeText,
+                selector: 'Selector(\'#developer-name\')',
+                text:     'Peter',
+            },
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_1'
+        }
+    },
+    {
+        apiActionName: 'eql',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:          CommandType.assertion,
+                assertionType: 'eql',
+                actual:        'Peter',
+                expected:      'Peter1',
+                message:       null,
+            },
+            err: new TestRunErrorFormattableAdapter(
                 {
-                    'code':            'E53',
-                    'isTestCafeError': true,
-                    'callsite':        {
-                        'filename':         'C:\\testcafe-reporter-dashboard\\sandbox\\test.js',
-                        'lineNum':          14,
-                        'callsiteFrameIdx': 6,
-                        'stackFrames':      [
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {},
-                            {}
-                        ],
-                        'isV8Frames': true
+                    callsite: {
+                        callsiteFrameIdx: 6,
+                        filename:         'file_1',
+                        isV8Frames:	      true,
+                        lineNum:          9,
+                        stackFrames:      [],
                     },
-                    'errMsg': "AssertionError: expected 'Peter' to deeply equal 'Peter1'"
-                }
-            ],
-            'test': {
-                'name':  'Test 1',
-                'phase': 'inTest'
-            },
-            'command': {
-                'type':          'assertion',
-                'assertionType': 'eql',
-                'actual':        'Peter',
-                'expected':      'Peter1',
-                'message':       null,
-                'options':       {
-                    'allowUnawaitedPromise': false
-                }
-            },
-            'browser': {
-                'name':     'Chrome',
-                'version':  '79.0.3945.130',
-                'platform': 'desktop',
-                'os':       {
-                    'name':    'Windows',
-                    'version': '8.1'
+                    code:            'E53',
+                    errMsg:	         'AssertionError: expected \'Peter\' to deeply equal \'Peter1\'',
+                    isTestCafeError: true,
+                    screenshotPath:	 '',
+                    testRunId:	      'chrome_1',
+                    testRunPhase:    TestPhase.inTest,
+                    userAgent:       CHROME.prettyUserAgent
                 },
-                'engine': {
-                    'name':    'Blink',
-                    'version': '0.0'
+                {
+                    screenshotPath:	'',
+                    testRunId:	     'chrome_1',
+                    testRunPhase:   TestPhase.inTest,
+                    userAgent:      CHROME.prettyUserAgent
+                }
+            ),
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_1',
+        }
+    },
+    {
+        apiActionName: 'click',
+        actionInfo:    {
+            browser: CHROME_HEADLESS,
+            command: {
+                options: {
+                    speed:     0.5,
+                    modifiers: { ctrl: true }
                 },
-                'prettyUserAgent': 'Chrome 79.0.3945.130 / Windows 8.1',
-                'userAgent':       'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-                'alias':           'chrome',
-                'headless':        false
-            }
+                type:     CommandType.click,
+                selector: 'Selector(\'#developer-name\')',
+            },
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_headless'
+        }
+    },
+    {
+        apiActionName: 'typeText',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:     CommandType.typeText,
+                selector: 'Selector(\'#developer-name\')',
+                text:     'Peter',
+            },
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_headless'
+        }
+    },
+    {
+        apiActionName: 'eql',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:          CommandType.assertion,
+                assertionType: 'eql',
+                actual:        'Peter',
+                expected:      'Peter1',
+                message:       null,
+            },
+            err: new TestRunErrorFormattableAdapter(
+                {
+                    callsite: {
+                        callsiteFrameIdx: 6,
+                        filename:         'file_1',
+                        isV8Frames:	      true,
+                        lineNum:          9,
+                        stackFrames:      [],
+                    },
+                    code:            'E53',
+                    errMsg:	         'AssertionError: expected \'Peter\' to deeply equal \'Peter1\'',
+                    isTestCafeError: true,
+                    screenshotPath:	 '',
+                    testRunId:	      'chrome_headless',
+                    testRunPhase:    TestPhase.inTest,
+                    userAgent:       CHROME.prettyUserAgent
+                },
+                {
+                    screenshotPath:	'',
+                    testRunId:	     'chrome_headless',
+                    testRunPhase:   TestPhase.inTest,
+                    userAgent:      CHROME.prettyUserAgent
+                }
+            ),
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_headless',
         }
     }
 ];

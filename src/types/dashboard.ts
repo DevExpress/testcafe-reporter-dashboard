@@ -56,17 +56,16 @@ export type DashboardTestRunInfo = {
 }
 
 export const createTestError = (error: Error, errorModel: string): TestError => ({
-    code:           error.code,
-    testRunPhase:   error.testRunPhase,
-    errorModel:     errorModel
+    code:         error.code,
+    testRunPhase: error.testRunPhase,
+    errorModel:   errorModel
 });
 
-
 export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns: Record<string, BrowserRunInfo>): DashboardTestRunInfo => ({
-    quarantine:     testRunInfo.quarantine,
-    unstable:       testRunInfo.unstable,
-    warnings:       testRunInfo.warnings,
-    browserRuns:    browserRuns
+    quarantine:  testRunInfo.quarantine,
+    unstable:    testRunInfo.unstable,
+    warnings:    testRunInfo.warnings,
+    browserRuns: browserRuns
 });
 
 export type TaskStartArgs = {

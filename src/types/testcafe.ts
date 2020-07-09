@@ -58,9 +58,8 @@ export enum TestPhase {
 };
 
 export type Error = {
-    testRunId: string;
-    code: string;
-    data: any;
+    apiFnChain?: string[];
+    apiFnIndex?: number;
     callsite: {
         filename: string;
         lineNum: number;
@@ -68,11 +67,13 @@ export type Error = {
         stackFrames: any[];
         isV8Frames: boolean;
     };
-    message: string;
-    stack: string;
-    userAgent: string;
+    code: string;
+    errMsg: string;
+    isTestCafeError: boolean;
     screenshotPath: string;
+    testRunId: string;
     testRunPhase: string;
+    userAgent: string;
 };
 
 export type BrowserInfo = {
@@ -92,15 +93,15 @@ type TestStartInfo = {
     testId: string;
 }
 
-type TestcafeActionInfo = {
+export type TestCafeActionInfo = {
     browser: BrowserInfo;
     command: Record<string, any> & { type: CommandType };
+    duration?: number;
+    err?: Error;
     test: {
         name: string;
         phase: TestPhase;
     };
-    err?: Error;
-    duration?: number;
     testRunId: string;
 };
 
@@ -129,17 +130,17 @@ export type Video = {
 }
 
 export type TestRunInfo = {
-    errs: Error[];
-    warnings: string[];
-    durationMs: number;
     browsers: (BrowserInfo & { testRunId: string })[];
-    unstable: boolean;
+    durationMs: number;
+    errs: Error[];
+    quarantine: Quarantine;
     screenshotPath: string;
     screenshots: Screenshot[];
-    quarantine: Quarantine;
     skipped: boolean;
-    videos: Video[];
     testId: string;
+    unstable: boolean;
+    videos: Video[];
+    warnings: string[];
 }
 
 
@@ -183,8 +184,8 @@ export type ReporterPluginObject = {
     reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
     reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
-    reportTestActionStart?: (apiActionName: string, actionInfo: TestcafeActionInfo) => Promise<void>;
-    reportTestActionDone?: (apiActionName: string, actionInfo: TestcafeActionInfo) => Promise<void>;
-    reportTestDone?: (name: string, testRunInfo: TestRunInfo, meta: Meta) => Promise<void>;
+    reportTestActionStart?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
+    reportTestActionDone?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
+    reportTestDone?: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
     reportTaskDone?: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
 };
