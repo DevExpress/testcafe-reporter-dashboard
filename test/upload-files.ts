@@ -1,8 +1,10 @@
 import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
-import { Screenshot } from '../src/types/testcafe';
+import { Screenshot, ReporterPluginObject } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
+import { DashboardTestRunInfo } from '../src/types/dashboard';
+import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
@@ -113,8 +115,16 @@ describe('Uploads', () => {
 
             const reporter = mock.reRequire('../lib/index')();
 
-            await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [], browsers: [{ ...CHROME_HEADLESS, testRunId: 'chrome_headless' }] });
-            await reporter.reportTaskDone('', 1, [], {});
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                screenshots,
+                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ]
+            });
+
+            const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
+
+            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[0], uploadInfos[0].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[1], uploadInfos[1].uploadId);
 
             assert.equal(uploadInfos.length, 3);
             assert.equal(uploadedUrls.length, 3);
@@ -158,19 +168,22 @@ describe('Uploads', () => {
 
             const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile: noop });
 
-            const reporter = mock.reRequire('../lib/index')();
+            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
 
-            await reporter.reportTestDone('Test 1', { screenshots, errs: [], videos: [], browsers: [{ ...CHROME_HEADLESS, testRunId: 'chrome_headless' }] });
-            await reporter.reportTaskDone('', 1, [], {});
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                screenshots,
+                browsers: [ { ...CHROME, testRunId: 'chrome_headless' } ]
+            });
 
             assert.equal(uploadInfos.length, 1);
             assert.equal(uploadedUrls.length, 1);
             assert.equal(uploadedFiles.length, 1);
             assert.equal(uploadedFiles.length, 1);
 
-            const testRunInfo = JSON.parse(uploadedFiles[0].toString());
+            const { browserRuns } = JSON.parse(uploadedFiles[0].toString()) as DashboardTestRunInfo;
 
-            assert.equal(testRunInfo.screenshots, void 0);
+            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds, void 0);
         });
     });
 
@@ -183,13 +196,12 @@ describe('Uploads', () => {
         });
 
         it('Smoke test', async () => {
-            const prettyUserAgents = [ CHROME.prettyUserAgent, FIREFOX.prettyUserAgent ];
             const videoPaths = [];
 
             function readFile (path, readFileCallback): void {
                 videoPaths.push(path);
 
-                readFileCallback(null, 'fileContent');
+                readFileCallback(null, `fileContent_${path}`);
             }
 
             function existsSync (path: string): boolean {
@@ -197,45 +209,44 @@ describe('Uploads', () => {
             }
 
             const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile, existsSync });
+            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
 
-            const reporter = mock.reRequire('../lib/index')();
-
-            await reporter.reportTaskStart('timeStamp', prettyUserAgents, 1);
-            await reporter.reportTestStart('testName1', {}, { testRunIds: [ 'testRun_1', 'testRun_2' ] });
-            await reporter.reportTestActionDone('click', { testRunId: 'testRun_1', test: { phase: '' }, browser: { prettyUserAgent: prettyUserAgents[0] } });
-            await reporter.reportTestActionDone('click', { testRunId: 'testRun_2', test: { phase: '' }, browser: { prettyUserAgent: prettyUserAgents[1] } });
-            await reporter.reportTestDone('testName1', {
-                screenshots: [],
-                errs:        [],
-
-                videos: [
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                browsers: [ { ...CHROME, testRunId: 'testRun_1' }, { ...FIREFOX, testRunId: 'testRun_2' } ],
+                videos:   [
                     {
-                        videoPath: '1.mp4',
-                        testRunId: 'testRun_1'
+                        quarantineAttempt: null,
+                        testRunId:         'testRun_1',
+                        userAgent:         CHROME.prettyUserAgent,
+                        videoPath:         '1.mp4'
                     },
                     {
-                        videoPath: '2.mp4',
-                        testRunId: 'testRun_2'
+                        quarantineAttempt: null,
+                        testRunId:         'testRun_2',
+                        userAgent:         FIREFOX.prettyUserAgent,
+                        videoPath:         '2.mp4'
                     }
-                ],
+                ]
+            });
 
-                browsers: [ { ...CHROME, testRunId: 'testRun_1' }, { ...FIREFOX, testRunId: 'testRun_2' } ]
-            }, {});
-            await reporter.reportTaskDone('', 1, [], {});
+            const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
 
             assert.equal(videoPaths.length, 2, 'videoPaths');
             assert.equal(uploadInfos.length, 3, 'uploadInfos');
             assert.equal(uploadedUrls.length, 3, 'uploadedUrls');
 
-            const { videos } = JSON.parse(uploadedFiles[2].toString());
-
-            assert.equal(videos[0].testRunId, 'testRun_1');
-            assert.equal(videos[0].userAgent, prettyUserAgents[0]);
-            assert.equal(videos[1].testRunId, 'testRun_2');
-            assert.equal(videos[1].userAgent, prettyUserAgents[1]);
+            assert.equal(browserRuns['testRun_1'].videoUploadIds[0], uploadInfos[0].uploadId);
+            assert.equal(browserRuns['testRun_2'].videoUploadIds[0], uploadInfos[1].uploadId);
 
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
+
+            assert.equal(videoPaths[0], '1.mp4');
+            assert.equal(videoPaths[1], '2.mp4');
+
+            assert.equal(uploadedFiles[0], 'fileContent_1.mp4');
+            assert.equal(uploadedFiles[1], 'fileContent_2.mp4');
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
@@ -245,39 +256,36 @@ describe('Uploads', () => {
                 NO_VIDEO_UPLOAD:                         true
             });
 
-            const prettyUserAgents = ['Chrome 80.0.3987.149 \\ Windows 10', 'Firefox 73.0 \\ Windows 10'];
-
             const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile: noop, existsSync: noop });
 
-            const reporter = mock.reRequire('../lib/index')();
+            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
 
-            await reporter.reportTaskStart('timeStamp', prettyUserAgents, 1);
-            await reporter.reportTestStart('testName1', {}, { testRunIds: [ 'testRun_1', 'testRun_2' ] });
-            await reporter.reportTestActionDone('click', { testRunId: 'testRun_1', test: { phase: '' }, browser: { prettyUserAgent: prettyUserAgents[0] } });
-            await reporter.reportTestActionDone('click', { testRunId: 'testRun_2', test: { phase: '' }, browser: { prettyUserAgent: prettyUserAgents[1] } });
-            await reporter.reportTestDone('testName1', {
-                screenshots: [],
-                errs:        [],
-
-                videos: [
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                browsers: [ { ...CHROME, testRunId: 'testRun_1' }, { ...FIREFOX, testRunId: 'testRun_2' } ],
+                videos:   [
                     {
-                        videoPath: '1.mp4',
-                        testRunId: 'testRun_1'
+                        quarantineAttempt: null,
+                        testRunId:         'testRun_1',
+                        userAgent:         CHROME.prettyUserAgent,
+                        videoPath:         '1.mp4'
                     },
                     {
-                        videoPath: '2.mp4',
-                        testRunId: 'testRun_2'
+                        quarantineAttempt: null,
+                        testRunId:         'testRun_2',
+                        userAgent:         FIREFOX.prettyUserAgent,
+                        videoPath:         '2.mp4'
                     }
-                ],
-            }, {});
-            await reporter.reportTaskDone('', 1, [], {});
+                ]
+            });
 
-            const { videos } = JSON.parse(uploadedFiles[0].toString());
+            const { browserRuns } = JSON.parse(uploadedFiles[0].toString()) as DashboardTestRunInfo;
 
             assert.equal(uploadInfos.length, 1);
             assert.equal(uploadedUrls.length, 1);
             assert.equal(uploadedFiles.length, 1);
-            assert.equal(videos.length, 0);
+            assert.equal(browserRuns['testRun_1'].videoUploadIds, void 0);
+            assert.equal(browserRuns['testRun_2'].videoUploadIds, void 0);
         });
     });
 });
