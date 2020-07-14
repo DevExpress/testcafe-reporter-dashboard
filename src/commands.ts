@@ -1,4 +1,4 @@
-import { CommandTypes, AggregateNames, TaskStartArgs, TestStartArgs, FixtureStartArgs, TestDoneArgs, TaskDoneArgs } from './types/dashboard';
+import { CommandTypes, AggregateNames, TaskStartArgs, TestStartArgs, TestDoneArgs, TaskDoneArgs } from './types/dashboard';
 import sendResolveCommand from './send-resolve-command';
 
 async function sendReportCommand (id: string, type: CommandTypes, payload: Record<string, any>): Promise<void> {
@@ -12,10 +12,6 @@ async function sendReportCommand (id: string, type: CommandTypes, payload: Recor
 
 export async function sendTaskStartCommand (id: string, payload: TaskStartArgs): Promise<void> {
     return sendReportCommand(id, CommandTypes.reportTaskStart, payload);
-}
-
-export async function sendFixtureStartCommand (id: string, payload: FixtureStartArgs): Promise<void> {
-    return sendReportCommand(id, CommandTypes.reportFixtureStart, payload);
 }
 
 export async function sendTestStartCommand (id: string, payload: TestStartArgs): Promise<void> {

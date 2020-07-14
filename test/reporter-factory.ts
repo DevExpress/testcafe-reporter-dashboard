@@ -1,12 +1,26 @@
-import { DashboardTestRunInfo, CommandTypes } from './../src/types/dashboard';
-import mock from 'mock-require';
 import assert from 'assert';
-import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
-import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
+import mock from 'mock-require';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
+
+import { ReporterPluginObject } from '../src/types/testcafe';
+import { DashboardTestRunInfo, CommandTypes } from './../src/types/dashboard';
+import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
+import { CHROME, FIREFOX, CHROME_HEADLESS } from './data/test-browser-info';
+import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
+
+function mockReporter (fetchHandler): () => any {
+    mock('isomorphic-fetch', fetchHandler);
+
+    mock.reRequire('../lib/fetch');
+    mock.reRequire('../lib/send-resolve-command');
+    mock.reRequire('../lib/commands');
+    mock.reRequire('../lib/upload');
+
+    return mock.reRequire('../lib/index');
+}
 
 describe('reportTaskStart', () => {
     const buildId = 'test_build_id/:?&"=;+$';
@@ -87,17 +101,6 @@ describe('reportTaskStart', () => {
     });
 });
 
-function mockReporter (fetchHandler): () => any {
-    mock('isomorphic-fetch', fetchHandler);
-
-    mock.reRequire('../lib/fetch');
-    mock.reRequire('../lib/send-resolve-command');
-    mock.reRequire('../lib/commands');
-    mock.reRequire('../lib/upload');
-
-    return mock.reRequire('../lib/index');
-}
-
 describe('reportTestActionDone', () => {
     before(() => {
         mock('../lib/env-variables', {
@@ -114,7 +117,7 @@ describe('reportTestActionDone', () => {
         const { browser, actions } = browserRun;
 
         assert.equal(browser.prettyUserAgent, prettyUserAgent);
-        assert.equal(actions.length, 5);
+        assert.equal(actions.length, 3);
 
         assert.equal(actions[0].apiName, 'click');
         assert.equal(actions[0].testPhase, 'inTest');
@@ -128,41 +131,27 @@ describe('reportTestActionDone', () => {
         assert.equal(actions[1].command.type, 'type-text');
         assert.equal(actions[1].command.selector, 'Selector(\'#developer-name\')');
 
-        assert.equal(actions[2].apiName, 'click');
+        assert.equal(actions[2].apiName, 'eql');
         assert.equal(actions[2].testPhase, 'inTest');
-        assert.equal(actions[2].command.type, 'click');
-        assert.equal(actions[2].command.selector, 'Selector(\'#tried-test-cafe\')');
-        assert.equal(actions[3].command.dragOffsetX, 94);
-        assert.equal(actions[3].command.dragOffsetY, -2);
-
-        assert.equal(actions[3].apiName, 'drag');
-        assert.equal(actions[3].testPhase, 'inTest');
-        assert.equal(actions[3].command.type, 'drag');
-        assert.equal(actions[3].command.selector, 'Selector(\'.ui-slider-handle.ui-corner-all.ui-state-default\')');
-        assert.equal(actions[3].command.options.offsetX, 8);
-        assert.equal(actions[3].command.options.offsetY, 12);
-
-        assert.equal(actions[4].apiName, 'eql');
-        assert.equal(actions[4].testPhase, 'inTest');
-        assert.equal(actions[4].command.type, 'assertion');
-        assert.equal(actions[4].command.type, 'assertion');
-        assert.equal(actions[4].command.assertionType, 'eql');
-        assert.equal(actions[4].command.actual, 'Peter');
-        assert.equal(actions[4].command.expected, 'Peter1');
+        assert.equal(actions[2].command.type, 'assertion');
+        assert.equal(actions[2].command.type, 'assertion');
+        assert.equal(actions[2].command.assertionType, 'eql');
+        assert.equal(actions[2].command.actual, 'Peter');
+        assert.equal(actions[2].command.expected, 'Peter1');
     }
 
     it('Should add test actions info to uploaded testRunInfo', async () => {
-        let testRunInfo = null;
+        let testRunInfo: DashboardTestRunInfo = null;
         let testDonePayload = null;
 
-        const reporter = mockReporter((url: string, request) => {
+        const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
             const response  = { ok: true, status: 200, statusText: 'OK', json: null };
             const uploadUrl = 'upload_url';
 
             if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
                 response.json = () => ({ uploadId: 'upload_id', uploadUrl });
             else if (url.startsWith(uploadUrl))
-                testRunInfo = JSON.parse(request.body.toString());
+                testRunInfo = JSON.parse(request.body.toString()) as DashboardTestRunInfo;
             else if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
                 const { type, payload } = JSON.parse(request.body);
 
@@ -171,23 +160,40 @@ describe('reportTestActionDone', () => {
             }
 
             return Promise.resolve(response);
-        })();
+        }), process.stdout);
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
+        const testId     = 'test_1';
 
-        await reporter.reportTestStart('Test 1', {}, { testRunIds: [...testRunIds] });
+        await reporter.reportTestStart('Test 1', {}, { testRunIds: [...testRunIds], testId });
 
         for (const { apiActionName, actionInfo } of reportTestActionDoneCalls)
             await reporter.reportTestActionDone(apiActionName, actionInfo);
 
-        await reporter.reportTestDone('Test 1', { screenshots: [], errs: [], videos: [], durationMs: 100 }, {});
+        await reporter.reportTestDone('Test 1', {
+            browsers: [
+                { ...FIREFOX, testRunId: 'firefox_1' },
+                { ...CHROME, testRunId: 'chrome_1' },
+                { ...CHROME_HEADLESS, testRunId: 'chrome_headless' }
+            ],
+            durationMs:     100,
+            errs:           [],
+            quarantine:     null,
+            screenshotPath: '',
+            screenshots:    [],
+            skipped:        false,
+            testId,
+            unstable:       false,
+            videos:         [],
+            warnings:       []
+        }, {});
 
-        checkBrowserRun(testRunInfo.browserRuns['chrome'], 'Chrome 79.0.3945.130 / Windows 8.1');
-        checkBrowserRun(testRunInfo.browserRuns['firefox'], 'Firefox 59.0 / Windows 8.1');
-        checkBrowserRun(testRunInfo.browserRuns['chrome:headless'], 'Chrome 79.0.3945.130 / Windows 8.1');
+        checkBrowserRun(testRunInfo.browserRuns['firefox_1'], FIREFOX.prettyUserAgent);
+        checkBrowserRun(testRunInfo.browserRuns['chrome_1'], CHROME.prettyUserAgent);
+        checkBrowserRun(testRunInfo.browserRuns['chrome_headless'], CHROME_HEADLESS.prettyUserAgent);
 
         assert.deepEqual(testDonePayload, {
-            name:       'Test 1',
+            testId:     'test_1',
             errorCount: 0,
             duration:   100,
             uploadId:   'upload_id'
@@ -211,26 +217,28 @@ describe('reportTestActionDone', () => {
             return Promise.resolve(response);
         }), process.stdout);
 
-        const testRunIds = new Set(twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId));
+        const testRunIds = twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId);
 
-        await reporter.reportTestStart('Test 1', {}, { testRunIds: [...testRunIds] });
+        await reporter.reportTestStart('Test 1', {}, { testRunIds });
 
         for (const actionInfo of twoErrorsTestActionDone) {
-            actionInfo.err = new TestRunErrorFormattableAdapter(actionInfo.err, {
-                screenshotPath: '',
-                testRunPhase:   'inTest',
-                testRunId:      actionInfo.testRunId,
-                userAgent:      actionInfo.browser.prettyUserAgent
-            });
+            actionInfo.err = new TestRunErrorFormattableAdapter(actionInfo.err,
+                {
+                    screenshotPath: '',
+                    testRunPhase:   'inTest',
+                    testRunId:      actionInfo.testRunId,
+                    userAgent:      actionInfo.browser.prettyUserAgent
+                }
+            );
             await reporter.reportTestActionDone('name', actionInfo);
         }
 
         await reporter.reportTestDone('Test 1', testDoneInfo, {});
 
-        assert.equal(testRunInfo.browserRuns['chrome'].actions[0].error.errorModel,
+        assert.equal(testRunInfo.browserRuns[testRunIds[1]].actions[0].error.errorModel,
                      '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Chrome 80.0.3987.132 / Windows 10\"}');
 
-        assert.equal(testRunInfo.browserRuns['firefox'].actions[0].error.errorModel,
+        assert.equal(testRunInfo.browserRuns[testRunIds[0]].actions[0].error.errorModel,
                     '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Firefox 73.0 / Windows 10\"}');
 
         mock.stop('isomorphic-fetch');
@@ -252,7 +260,7 @@ describe('reportTestDone', () => {
     it('Should process errors originated not form actions', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
-        const reporter = buildReporterPlugin(mockReporter((url: string, request) => {
+        const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
             const response  = { ok: true, status: 200, statusText: 'OK', json: null };
             const uploadUrl = 'upload_url';
 
@@ -264,16 +272,15 @@ describe('reportTestDone', () => {
             return Promise.resolve(response);
         }), process.stdout);
 
-        await reporter.reportTestStart('Test 1', {}, { testRunIds: [thirdPartyTestDone.errs[0].testRunId] });
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
-        const { thirdPartyError, actions, browser } = testRunInfo.browserRuns['chrome'];
+        const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
 
         assert.ok(thirdPartyError);
-        assert.deepEqual(actions, []);
+        assert.deepEqual(actions, void 0);
         assert.ok(browser);
-        assert.equal(browser.alias, 'chrome');
-        assert.equal(browser.name, 'Chrome');
+        assert.equal(browser.alias, CHROME.alias);
+        assert.equal(browser.name, CHROME.name);
         assert.equal(browser.prettyUserAgent, thirdPartyTestDone.errs[0].userAgent);
         assert.ok(browser.version);
         assert.ok(browser.os);
