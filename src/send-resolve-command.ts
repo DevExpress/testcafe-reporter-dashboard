@@ -21,6 +21,7 @@ if (!AUTHENTICATION_TOKEN)
 
 function removeNullValues (key, value) {
     if (value !== null) return value;
+
     return void 0;
 }
 
@@ -42,7 +43,7 @@ export default async function sendResolveCommand (command: ResolveCommand): Prom
     if (!AUTHENTICATION_TOKEN)
         return;
 
-    let response   = null;
+    let response = null;
 
     let retryCount = 0;
 

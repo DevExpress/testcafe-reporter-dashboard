@@ -3,7 +3,14 @@ import logger from './logger';
 
 import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, TESTCAFE_DASHBOARD_BUILD_ID } from './env-variables';
 import { createReportUrlMessage, createLongBuildIdError } from './texts';
-import { BrowserRunInfo, createDashboardTestRunInfo, createTestError, ActionInfo, TestError } from './types/dashboard';
+import {
+    BrowserRunInfo,
+    createDashboardTestRunInfo,
+    createTestError,
+    ActionInfo,
+    TestError,
+    TestDoneArgs
+} from './types/dashboard';
 import { Uploader } from './upload';
 import { ReporterPluginObject, Error, ReportedTestStructureItem } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
@@ -34,7 +41,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
             logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id));
         },
 
-        async reportFixtureStart () {
+        async reportFixtureStart (): Promise<void> {
             return void 0;
         },
 
@@ -67,7 +74,7 @@ module.exports = function plaginFactory (): ReporterPluginObject {
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            const { screenshots, videos, errs, durationMs, testId, browsers } = testRunInfo;
+            const { screenshots, videos, errs, durationMs, testId, browsers, skipped } = testRunInfo;
 
             const testRunToScreenshotsMap: Record<string, string[]> = {};
             const testRunToVideosMap: Record<string, string[]>      = {};
@@ -130,8 +137,9 @@ module.exports = function plaginFactory (): ReporterPluginObject {
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
 
-            const testDonePayload = {
+            const testDonePayload: TestDoneArgs = {
                 testId,
+                skipped,
                 errorCount: errs.length,
                 duration:   durationMs,
                 uploadId:   await uploader.uploadTest(name, createDashboardTestRunInfo(testRunInfo, browserRuns))

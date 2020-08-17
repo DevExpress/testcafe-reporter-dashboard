@@ -82,6 +82,7 @@ export type TestStartArgs = {
 
 export type TestDoneArgs = {
     testId: string;
+    skipped: boolean;
     errorCount: number;
     duration: number;
     uploadId: string;

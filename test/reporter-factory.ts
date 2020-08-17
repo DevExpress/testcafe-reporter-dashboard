@@ -6,7 +6,7 @@ import { ReporterPluginObject } from '../src/types/testcafe';
 import { DashboardTestRunInfo, CommandTypes } from './../src/types/dashboard';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from './data/test-browser-info';
-import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone } from './data/';
+import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone, skippedTestDone } from './data/';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
@@ -196,7 +196,8 @@ describe('reportTestActionDone', () => {
             testId:     'test_1',
             errorCount: 0,
             duration:   100,
-            uploadId:   'upload_id'
+            uploadId:   'upload_id',
+            skipped:    false
         });
 
         mock.stop('isomorphic-fetch');
@@ -255,6 +256,7 @@ describe('reportTestDone', () => {
 
     after(() => {
         mock.stop('../lib/env-variables');
+        mock.stop('isomorphic-fetch');
     });
 
     it('Should process errors originated not form actions', async () => {
@@ -286,5 +288,27 @@ describe('reportTestDone', () => {
         assert.ok(browser.os);
         assert.ok(browser.os.name);
         assert.ok(browser.os.version);
+    });
+
+    it('should send skipped prop in test done command', async () => {
+        let testDonePayload = null;
+
+        const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
+            const response  = { ok: true, status: 200, statusText: 'OK', json: () => Promise.resolve('') };
+
+            if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
+                const { type, payload } = JSON.parse(request.body);
+
+                if (type === CommandTypes.reportTestDone)
+                    testDonePayload = payload;
+            }
+
+            return Promise.resolve(response);
+        }), process.stdout);
+
+        await reporter.reportTestDone('Test 1', skippedTestDone);
+
+        assert.ok(testDonePayload);
+        assert.ok(testDonePayload.skipped);
     });
 });
