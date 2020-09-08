@@ -117,7 +117,7 @@ describe('reportTestActionDone', () => {
         const { browser, actions } = browserRun;
 
         assert.equal(browser.prettyUserAgent, prettyUserAgent);
-        assert.equal(actions.length, 3);
+        assert.equal(actions.length, 4);
 
         assert.equal(actions[0].apiName, 'click');
         assert.equal(actions[0].testPhase, 'inTest');
@@ -138,6 +138,10 @@ describe('reportTestActionDone', () => {
         assert.equal(actions[2].command.assertionType, 'eql');
         assert.equal(actions[2].command.actual, 'Peter');
         assert.equal(actions[2].command.expected, 'Peter1');
+
+        assert.equal(actions[3].apiName, 'match');
+        assert.equal(actions[3].command.actual, 'foobar');
+        assert.equal(actions[3].command.expected, /\/^f\//);
     }
 
     it('Should add test actions info to uploaded testRunInfo', async () => {

@@ -81,6 +81,25 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
         }
     },
     {
+        apiActionName: 'match',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:          CommandType.assertion,
+                assertionType: 'match',
+                actual:        'foobar',
+                expected:      new RegExp('/^f/'),
+                message:       'this is regex test',
+            },
+
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'firefox_1',
+        }
+    },
+    {
         apiActionName: 'click',
         actionInfo:    {
             browser: CHROME,
@@ -158,6 +177,26 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
         }
     },
     {
+        apiActionName: 'match',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:          CommandType.assertion,
+                assertionType: 'match',
+                actual:        'foobar',
+                expected:      new RegExp('/^f/'),
+                message:       'this is regex test',
+            },
+
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_1',
+        }
+    },
+
+    {
         apiActionName: 'click',
         actionInfo:    {
             browser: CHROME_HEADLESS,
@@ -227,6 +266,25 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
                     userAgent:      CHROME.prettyUserAgent
                 }
             ),
+            test: {
+                name:  'Test 1',
+                phase: TestPhase.inTest
+            },
+            testRunId: 'chrome_headless',
+        }
+    },
+    {
+        apiActionName: 'match',
+        actionInfo:    {
+            browser: CHROME,
+            command: {
+                type:          CommandType.assertion,
+                assertionType: 'match',
+                actual:        'foobar',
+                expected:      new RegExp('/^f/'),
+                message:       'this is regex test',
+            },
+
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest
