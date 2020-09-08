@@ -1,7 +1,7 @@
-import { CommandTypes, AggregateNames, TaskStartArgs, TestStartArgs, TestDoneArgs, TaskDoneArgs } from './types/dashboard';
+import { AggregateCommandType, AggregateNames, TaskStartArgs, TestStartArgs, TestDoneArgs, TaskDoneArgs } from './types/dashboard';
 import sendResolveCommand from './send-resolve-command';
 
-async function sendReportCommand (id: string, type: CommandTypes, payload: Record<string, any>): Promise<void> {
+async function sendReportCommand (id: string, type: AggregateCommandType, payload: Record<string, any>): Promise<void> {
     return sendResolveCommand({
         aggregateId:   id,
         aggregateName: AggregateNames.Run,
@@ -11,17 +11,17 @@ async function sendReportCommand (id: string, type: CommandTypes, payload: Recor
 }
 
 export async function sendTaskStartCommand (id: string, payload: TaskStartArgs): Promise<void> {
-    return sendReportCommand(id, CommandTypes.reportTaskStart, payload);
+    return sendReportCommand(id, AggregateCommandType.reportTaskStart, payload);
 }
 
 export async function sendTestStartCommand (id: string, payload: TestStartArgs): Promise<void> {
-    return sendReportCommand(id, CommandTypes.reportTestStart, payload);
+    return sendReportCommand(id, AggregateCommandType.reportTestStart, payload);
 }
 
 export async function sendTestDoneCommand (id: string, payload: TestDoneArgs): Promise<void> {
-    return sendReportCommand(id, CommandTypes.reportTestDone, payload);
+    return sendReportCommand(id, AggregateCommandType.reportTestDone, payload);
 }
 
 export async function sendTaskDoneCommand (id: string, payload: TaskDoneArgs): Promise<void> {
-    return sendReportCommand(id, CommandTypes.reportTaskDone, payload);
+    return sendReportCommand(id, AggregateCommandType.reportTaskDone, payload);
 }

@@ -9,22 +9,19 @@ import {
     ReportedTestStructureItem
 } from './testcafe';
 
-export enum CommandTypes {
+export enum AggregateCommandType {
     reportTaskStart = 'reportTaskStart',
     reportTestStart = 'reportTestStart',
     reportTestDone = 'reportTestDone',
     reportTaskDone = 'reportTaskDone',
 
-    startUpload = 'startUpload',
-    markUploadFailed = 'markUploadFailed',
-    completeUpload = 'completeUpload'
+    createUpload = 'createUpload'
 };
 
 export enum AggregateNames {
     Run = 'Run',
     Upload = 'Upload'
 };
-
 
 export type BrowserRunInfo = {
     browser: BrowserInfo;
@@ -94,4 +91,9 @@ export type TaskDoneArgs = {
      warnings: string[];
      result: TestResult;
      buildId: string;
-}
+};
+
+export enum UploadStatus {
+    Completed = 'Completed',
+    Failed = 'Failed'
+};

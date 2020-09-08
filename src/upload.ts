@@ -5,7 +5,7 @@ import {
     TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
-import { CommandTypes, AggregateNames, DashboardTestRunInfo } from './types/dashboard';
+import { AggregateCommandType, AggregateNames, DashboardTestRunInfo, UploadStatus } from './types/dashboard';
 import { UploadInfo } from './types/resolve';
 import logger from './logger';
 import { createGetUploadInfoError, createFileUploadError, createTestUploadError } from './texts';
@@ -41,41 +41,24 @@ export class Uploader {
     private async _upload (uploadInfo: UploadInfo, uploadEntity: Buffer, uploadError: string): Promise<void> {
         const { uploadUrl, uploadId } = uploadInfo;
 
-        const sizeInBytes = uploadEntity.length;
-
-        await sendResolveCommand({
-            aggregateId:   uploadId,
-            aggregateName: AggregateNames.Upload,
-            type:          CommandTypes.startUpload,
-
-            payload: { reportId: this._runId }
-        });
-
         const response = await fetch(uploadUrl, {
             method:  'PUT',
             headers: {
-                'Content-Length': sizeInBytes
+                'Content-Length': uploadEntity.length
             },
             body: uploadEntity
         });
 
-        if (response.ok) {
-            await sendResolveCommand({
-                aggregateId:   uploadId,
-                aggregateName: AggregateNames.Upload,
-                type:          CommandTypes.completeUpload
-            });
-
-            return;
-        }
-
-        logger.error(`${uploadError}. Response: ${response}`);
-
         await sendResolveCommand({
             aggregateId:   uploadId,
             aggregateName: AggregateNames.Upload,
-            type:          CommandTypes.markUploadFailed
+            type:          AggregateCommandType.createUpload,
+
+            payload: { reportId: this._runId, status: response.ok ? UploadStatus.Completed : UploadStatus.Failed }
         });
+
+        if (!response.ok)
+            logger.error(`${uploadError}. Response: ${response}`);
     }
 
     async uploadFile (filePath: string): Promise<string> {
