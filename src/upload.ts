@@ -94,6 +94,7 @@ export class Uploader {
         const uploadInfo = await this._getUploadInfo(testName);
 
         if (!uploadInfo) return null;
+        
         const buffer = Buffer.from(JSON.stringify(testRunInfo, (key, value) => value instanceof RegExp ? value.toString() : value));
 
         this._uploads.push(this._upload(uploadInfo, buffer, createTestUploadError(uploadInfo.uploadId, testName)));
