@@ -3,7 +3,7 @@ import mock from 'mock-require';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
 
 import { ReporterPluginObject } from '../src/types/testcafe';
-import { DashboardTestRunInfo, CommandTypes } from './../src/types/dashboard';
+import { DashboardTestRunInfo, AggregateCommandType } from './../src/types/dashboard';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from './data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone, skippedTestDone } from './data/';
@@ -155,7 +155,7 @@ describe('reportTestActionDone', () => {
             else if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
                 const { type, payload } = JSON.parse(request.body);
 
-                if (type === CommandTypes.reportTestDone)
+                if (type === AggregateCommandType.reportTestDone)
                     testDonePayload = payload;
             }
 
@@ -259,7 +259,7 @@ describe('reportTestDone', () => {
         mock.stop('isomorphic-fetch');
     });
 
-    it('Should process errors originated not form actions', async () => {
+    it('Should process errors originated not from actions', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
         const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
@@ -290,7 +290,7 @@ describe('reportTestDone', () => {
         assert.ok(browser.os.version);
     });
 
-    it('should send skipped prop in test done command', async () => {
+    it('Should send skipped prop in test done command', async () => {
         let testDonePayload = null;
 
         const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
@@ -299,7 +299,7 @@ describe('reportTestDone', () => {
             if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
                 const { type, payload } = JSON.parse(request.body);
 
-                if (type === CommandTypes.reportTestDone)
+                if (type === AggregateCommandType.reportTestDone)
                     testDonePayload = payload;
             }
 

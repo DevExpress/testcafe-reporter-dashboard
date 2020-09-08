@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import assert from 'assert';
 import { Screenshot, ReporterPluginObject } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { DashboardTestRunInfo } from '../src/types/dashboard';
+import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/dashboard';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
@@ -48,8 +48,8 @@ function mockFetchAndFs (fsObject) {
     mock('fs', fsObject);
 
     mock.reRequire('../lib/fetch');
-    mock.reRequire('../lib/upload');
     mock.reRequire('../lib/send-resolve-command');
+    mock.reRequire('../lib/upload');
     mock.reRequire('../lib/commands');
 
     return { uploadInfos, aggregateCommands, uploadedUrls, uploadedFiles };
@@ -57,13 +57,12 @@ function mockFetchAndFs (fsObject) {
 
 describe('Uploads', () => {
     afterEach(() => {
-        mock.stop('../lib/env-variables');
-        mock.stop('isomorphic-fetch');
-        mock.stop('fs');
+        mock.stopAll();
         mock.reRequire('../lib/fetch');
-        mock.reRequire('../lib/upload');
         mock.reRequire('../lib/send-resolve-command');
+        mock.reRequire('../lib/upload');
         mock.reRequire('../lib/commands');
+        mock.reRequire('../lib/index');
     });
 
     describe('Screenshots', () => {
@@ -111,7 +110,7 @@ describe('Uploads', () => {
                 readFileCallback(null, fileContent);
             }
 
-            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile });
 
             const reporter = mock.reRequire('../lib/index')();
 
@@ -122,14 +121,20 @@ describe('Uploads', () => {
             });
 
             const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
+            const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
+
+            assert.equal(runCommands.length, 1);
+            assert.equal(runCommands[0].type, AggregateCommandType.reportTestDone);
 
             assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[0], uploadInfos[0].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[1], uploadInfos[1].uploadId);
+            assert.equal(runCommands[0].payload.uploadId, uploadInfos[2].uploadId);
 
             assert.equal(uploadInfos.length, 3);
             assert.equal(uploadedUrls.length, 3);
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
+            assert.equal(uploadedUrls[2], uploadInfos[2].uploadUrl);
 
             assert.equal(uploadedFiles.length, 3);
             assert.equal(uploadedFiles[0], 'take_screenshot_action');
@@ -138,6 +143,20 @@ describe('Uploads', () => {
             assert.equal(screenshotPaths.length, 2);
             assert.equal(screenshotPaths[0], 'C:\\screenshots\\1.png');
             assert.equal(screenshotPaths[1], 'C:\\screenshots\\errors\\1.png');
+
+            const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
+
+            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+
+            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
+            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+
+            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
+            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
         });
 
         it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
@@ -166,7 +185,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile: noop });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop });
 
             const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
 
@@ -184,6 +203,14 @@ describe('Uploads', () => {
             const { browserRuns } = JSON.parse(uploadedFiles[0].toString()) as DashboardTestRunInfo;
 
             assert.equal(browserRuns['chrome_headless'].screenshotUploadIds, void 0);
+
+            assert.equal(aggregateCommands.length, 2);
+            assert.equal(aggregateCommands[0].payload.uploadId, uploadInfos[0].uploadId);
+            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTestDone);
+
+            assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
+            assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed, reportId: aggregateCommands[0].aggregateId });
         });
     });
 
@@ -208,7 +235,8 @@ describe('Uploads', () => {
                 return !path.includes('1_Chrome');
             }
 
-            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile, existsSync });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile, existsSync });
+
             const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
 
             await reporter.reportTestDone('Test 1', {
@@ -231,6 +259,10 @@ describe('Uploads', () => {
             });
 
             const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
+            const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
+
+            assert.equal(runCommands.length, 1);
+            assert.equal(runCommands[0].type, AggregateCommandType.reportTestDone);
 
             assert.equal(videoPaths.length, 2, 'videoPaths');
             assert.equal(uploadInfos.length, 3, 'uploadInfos');
@@ -238,15 +270,31 @@ describe('Uploads', () => {
 
             assert.equal(browserRuns['testRun_1'].videoUploadIds[0], uploadInfos[0].uploadId);
             assert.equal(browserRuns['testRun_2'].videoUploadIds[0], uploadInfos[1].uploadId);
+            assert.equal(runCommands[0].payload.uploadId, uploadInfos[2].uploadId);
 
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
+            assert.equal(uploadedUrls[2], uploadInfos[2].uploadUrl);
 
             assert.equal(videoPaths[0], '1.mp4');
             assert.equal(videoPaths[1], '2.mp4');
 
             assert.equal(uploadedFiles[0], 'fileContent_1.mp4');
             assert.equal(uploadedFiles[1], 'fileContent_2.mp4');
+
+            const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
+
+            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+
+            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
+            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+
+            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
+            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
@@ -256,7 +304,7 @@ describe('Uploads', () => {
                 NO_VIDEO_UPLOAD:                         true
             });
 
-            const { uploadInfos, uploadedUrls, uploadedFiles } = mockFetchAndFs({ readFile: noop, existsSync: noop });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop, existsSync: noop });
 
             const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
 
@@ -286,6 +334,14 @@ describe('Uploads', () => {
             assert.equal(uploadedFiles.length, 1);
             assert.equal(browserRuns['testRun_1'].videoUploadIds, void 0);
             assert.equal(browserRuns['testRun_2'].videoUploadIds, void 0);
+
+            assert.equal(aggregateCommands.length, 2);
+            assert.equal(aggregateCommands[0].payload.uploadId, uploadInfos[0].uploadId);
+            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTestDone);
+
+            assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
+            assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed, reportId: aggregateCommands[0].aggregateId });
         });
     });
 });

@@ -1,9 +1,9 @@
-import { AggregateNames, CommandTypes } from './dashboard';
+import { AggregateNames, AggregateCommandType } from './dashboard';
 
 export type ResolveCommand<TPayload = Record<string, any>> = {
     aggregateId: string;
     aggregateName: AggregateNames;
-    type: CommandTypes;
+    type: AggregateCommandType;
     payload?: TPayload;
 }
 
