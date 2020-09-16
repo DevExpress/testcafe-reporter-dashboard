@@ -18,7 +18,6 @@
     "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
     "test": "npm run lint && gulp build && ts-node \"./node_modules/mocha/lib/cli/cli.js\" \"test/**/*.ts\"",
     "test-debug": "gulp build && mocha -r ts-node/register \"test/**/*.ts\""
-    
   },
   "keywords": [
     "testcafe",
@@ -44,7 +43,7 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "gulp": "^4.0.0",
+    "gulp": "^4.0.2",
     "gulp-typescript": "^5.0.1",
     "mocha": "^7.0.1",
     "mock-require": "^3.0.3",
