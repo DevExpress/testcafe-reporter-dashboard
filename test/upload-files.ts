@@ -2,56 +2,65 @@ import uuid from 'uuid';
 import assert from 'assert';
 import { Screenshot } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/dashboard';
+import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/dashboard';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
+import logger from '../src/logger';
 
-const TESTCAFE_DASHBOARD_URL = 'http://localhost';
-const AUTHENTICATION_TOKEN   = 'authentication_token';
+const UPLOAD_URL_PREFIX           = 'http://upload_url/';
+const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
+const SETTINGS: DashboardSettings = {
+    authenticationToken: 'authentication_token',
+    buildId:             '',
+    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
+    isLogEnabled:        false,
+    noScreenshotUpload:  false,
+    noVideoUpload:       false
+};
 
 const noop  = () => void 0;
 
-let fetch = null;
-
-function mockFetch () {
-    const uploadUrlPrefix   = 'http://upload_url/';
-    const uploadInfos       = [];
+describe('Uploads', () => {
     const aggregateCommands = [];
-    const uploadedUrls      = [];
     const uploadedFiles     = [];
+    const uploadedUrls      = [];
+    const uploadInfos       = [];
 
-    fetch = (url, request) => {
+    function fetch (url, request) {
         if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=`)) {
-            const uploadInfo = { uploadId: uuid(), uploadUrl: `${uploadUrlPrefix}${uuid()}` };
+            const uploadInfo = { uploadId: uuid(), uploadUrl: `${UPLOAD_URL_PREFIX}${uuid()}` };
 
             uploadInfos.push(uploadInfo);
 
             return Promise.resolve({
                 ok:   true,
                 json: () => uploadInfo
-            });
+            } as unknown as Response);
         }
 
         if (url === `${TESTCAFE_DASHBOARD_URL}/api/commands/`) {
             aggregateCommands.push(JSON.parse(request.body));
 
-            return Promise.resolve({ ok: true });
+            return Promise.resolve({ ok: true } as Response);
         }
 
-        if (url.startsWith(uploadUrlPrefix)) {
+        if (url.startsWith(UPLOAD_URL_PREFIX)) {
             uploadedUrls.push(url);
             uploadedFiles.push(request.body);
 
-            return Promise.resolve({ ok: true });
+            return Promise.resolve({ ok: true } as Response);
         }
 
         throw new Error('Unknown request');
-    };
+    }
 
-    return { uploadInfos, aggregateCommands, uploadedUrls, uploadedFiles };
-}
+    beforeEach(() => {
+        aggregateCommands.splice(0);
+        uploadedFiles.splice(0);
+        uploadedUrls.splice(0);
+        uploadInfos.splice(0);
+    });
 
-describe('Uploads', () => {
     describe('Screenshots', () => {
         it('Smoke test', async () => {
             const screenshotPaths = [];
@@ -90,9 +99,7 @@ describe('Uploads', () => {
                 return Promise.resolve(Buffer.from(fileContent));
             }
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
-
-            const reporter = reporterObjectFactory(readFile, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -159,9 +166,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
-
-            const reporter = reporterObjectFactory(noop, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
+            const reporter = reporterObjectFactory(noop, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -198,9 +203,7 @@ describe('Uploads', () => {
                 return Promise.resolve(Buffer.from(`fileContent_${path}`));
             };
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
-
-            const reporter = reporterObjectFactory(readFile, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -261,9 +264,7 @@ describe('Uploads', () => {
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
-
-            const reporter = reporterObjectFactory(noop, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
+            const reporter = reporterObjectFactory(noop, fetch, { ...SETTINGS, noVideoUpload: true }, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,

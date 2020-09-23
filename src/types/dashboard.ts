@@ -1,3 +1,5 @@
+import fetch from 'isomorphic-fetch';
+
 import {
     TestPhase,
     CommandType,
@@ -98,10 +100,24 @@ export enum UploadStatus {
     Failed = 'Failed'
 };
 
-export interface FetchMethod {
-    (input: RequestInfo, init?: RequestInit): Promise<Response>;
-};
+export type FetchMethod = typeof fetch;
 
 export interface ReadFileMethod {
     (path: string): Promise<Buffer>;
+};
+
+export type DashboardSettings = {
+    authenticationToken: string;
+    buildId: string;
+    dashboardUrl: string;
+    isLogEnabled: boolean;
+    noScreenshotUpload: boolean;
+    noVideoUpload: boolean;
+    runId?: string;
+};
+
+export type Logger = {
+    log (...params): void;
+    warn (...params): void;
+    error (...params): void;
 };

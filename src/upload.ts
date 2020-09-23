@@ -1,6 +1,5 @@
-import { AggregateCommandType, AggregateNames, DashboardTestRunInfo, ReadFileMethod, UploadStatus } from './types/dashboard';
+import { AggregateCommandType, AggregateNames, DashboardTestRunInfo, Logger, ReadFileMethod, UploadStatus } from './types/dashboard';
 import { UploadInfo } from './types/resolve';
-import logger from './logger';
 import { createGetUploadInfoError, createFileUploadError, createTestUploadError } from './texts';
 import Transport from './transport';
 
@@ -8,13 +7,15 @@ export class Uploader {
     private _runId: string;
     private _transport: Transport;
     private _uploads: Promise<void>[];
+    private _logger: Logger;
 
     private _readFile: ReadFileMethod;
 
-    constructor (runId: string, readFile: ReadFileMethod, transport: Transport) {
-        this._runId    = runId;
+    constructor (runId: string, readFile: ReadFileMethod, transport: Transport, logger: Logger) {
+        this._runId     = runId;
         this._transport = transport;
-        this._uploads  = [];
+        this._uploads   = [];
+        this._logger    = logger;
 
         this._readFile = readFile;
     }
@@ -25,7 +26,7 @@ export class Uploader {
         if (response.ok)
             return await response.json();
 
-        logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
+        this._logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
 
         return null;
     }
@@ -50,7 +51,7 @@ export class Uploader {
         });
 
         if (!response.ok)
-            logger.error(`${uploadError}. Response: ${response}`);
+            this._logger.error(`${uploadError}. Response: ${response}`);
     }
 
     async uploadFile (filePath: string): Promise<string> {

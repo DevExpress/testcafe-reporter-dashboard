@@ -1,100 +1,70 @@
 import assert from 'assert';
-import mock from 'mock-require';
+import { sign } from 'jsonwebtoken';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
 
-import { ReporterPluginObject } from '../src/types/testcafe';
-import { DashboardTestRunInfo, AggregateCommandType } from './../src/types/dashboard';
+import { DashboardTestRunInfo, AggregateCommandType, DashboardSettings } from './../src/types/dashboard';
 import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from './data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone, thirdPartyTestDone, skippedTestDone } from './data/';
+import reporterObjectFactory from '../src/reporter-object-factory';
+import logger from '../src/logger';
 
-const TESTCAFE_DASHBOARD_URL = 'http://localhost';
-const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = 'authentication_token';
-
-function mockReporter (fetchHandler): () => any {
-    mock('isomorphic-fetch', fetchHandler);
-
-    mock.reRequire('../lib/fetch');
-    mock.reRequire('../lib/send-resolve-command');
-    mock.reRequire('../lib/commands');
-    mock.reRequire('../lib/upload');
-
-    return mock.reRequire('../lib/index');
-}
+const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
+const AUTHENTICATION_TOKEN        = 'authentication_token';
+const SETTINGS: DashboardSettings = {
+    authenticationToken: AUTHENTICATION_TOKEN,
+    buildId:             '',
+    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
+    isLogEnabled:        false,
+    noScreenshotUpload:  false,
+    noVideoUpload:       false
+};
 
 describe('reportTaskStart', () => {
     const buildId = 'test_build_id/:?&"=;+$';
 
-    async function assertReporterMessage (expected: string): Promise<void> {
-        const logs = [];
+    async function assertReporterMessage (expected: string, settings: DashboardSettings): Promise<void> {
+        const logs       = [];
+        const loggerMock = {
+            log:   message => logs.push(message),
+            warn:  message => logs.push(message),
+            error: message => logs.push(message)
+        };
 
-        mock('../lib/logger', {
-            log: message => {
-                logs.push(message);
-            }
-        });
-        mock.reRequire('../lib/env-variables');
-        const reporter = mock.reRequire('../lib/index')();
+        function fetchMock () {
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
+        };
 
-        await reporter.reportTaskStart(1, [], 1);
+        const reporter = reporterObjectFactory(() => void 0, fetchMock, settings, loggerMock);
+
+        await reporter.reportTaskStart(new Date(), [], 1, []);
+
         assert.equal(logs.length, 1);
         assert.equal(logs[0], expected);
-        mock.stop('../lib/logger');
     }
-
-    before(() => {
-        mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL,
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
-        });
-    });
-
-    after(() => {
-        mock.stop('../lib/env-variables');
-    });
 
     it('Show reporter URL message', async () => {
         const projectId = 'mock_project_id';
-        const reportId = 'mock_report_id';
+        const reportId  = 'mock_report_id';
 
-        mock('uuid', ()=> {
-            return reportId;
-        });
+        const authenticationToken = sign({ projectId }, 'secret');
 
+        await assertReporterMessage(
+            `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${reportId}`,
+            { ...SETTINGS, authenticationToken, runId: reportId }
+        );
 
-        mock('isomorphic-fetch', () => {
-            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' });
-        });
-
-        mock('jsonwebtoken', {
-            decode: () => ({ projectId })
-        });
-
-        await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${reportId}`);
-
-        mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL,
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN,
-
-            TESTCAFE_DASHBOARD_BUILD_ID: buildId
-        });
-
-        await assertReporterMessage(`Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${encodeURIComponent(buildId)}`);
-
-        mock.stop('uuid');
-        mock.stop('jsonwebtoken');
-        mock.stop('isomorphic-fetch');
+        await assertReporterMessage(
+            `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${encodeURIComponent(buildId)}`,
+            { ...SETTINGS, authenticationToken, runId: reportId, buildId }
+        );
     });
 
     it('Throw Exception if build id is too long', async () => {
         const longBuildId = 'test_build_id/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+        const reporter    = reporterObjectFactory(() => void 0, () => void 0, { ...SETTINGS, buildId: longBuildId }, logger);
 
-        mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_BUILD_ID: longBuildId
-        });
-        const reporter = mock.reRequire('../lib/index')();
-
-        await assert.rejects(async () => await reporter.reportTaskStart(1, [], 1), {
+        await assert.rejects(async () => await reporter.reportTaskStart(new Date(), [], 1, []), {
             name:    'Error',
             message: `Build ID cannot be longer than 100 symbols. Build ID: ${longBuildId}.`
         });
@@ -102,17 +72,6 @@ describe('reportTaskStart', () => {
 });
 
 describe('reportTestActionDone', () => {
-    before(() => {
-        mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL,
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN
-        });
-    });
-
-    after(() => {
-        mock.stop('../lib/env-variables');
-    });
-
     function checkBrowserRun (browserRun, prettyUserAgent): void {
         const { browser, actions } = browserRun;
 
@@ -148,7 +107,7 @@ describe('reportTestActionDone', () => {
         let testRunInfo: DashboardTestRunInfo = null;
         let testDonePayload = null;
 
-        const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
+        function fetchMock (url, request) {
             const response  = { ok: true, status: 200, statusText: 'OK', json: null };
             const uploadUrl = 'upload_url';
 
@@ -163,8 +122,10 @@ describe('reportTestActionDone', () => {
                     testDonePayload = payload;
             }
 
-            return Promise.resolve(response);
-        }), process.stdout);
+            return Promise.resolve(response as Response);
+        }
+
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
         const testId     = 'test_1';
@@ -203,14 +164,12 @@ describe('reportTestActionDone', () => {
             uploadId:   'upload_id',
             skipped:    false
         });
-
-        mock.stop('isomorphic-fetch');
     });
 
     it('Format error on test done', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
-        const reporter = buildReporterPlugin(mockReporter((url: string, request) => {
+        function fetchMock (url: string, request) {
             const response  = { ok: true, status: 200, statusText: 'OK', json: null };
             const uploadUrl = 'upload_url';
 
@@ -219,8 +178,10 @@ describe('reportTestActionDone', () => {
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString());
 
-            return Promise.resolve(response);
-        }), process.stdout);
+            return Promise.resolve(response as Response);
+        }
+
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
 
         const testRunIds = twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId);
 
@@ -245,28 +206,14 @@ describe('reportTestActionDone', () => {
 
         assert.equal(testRunInfo.browserRuns[testRunIds[0]].actions[0].error.errorModel,
                     '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Firefox 73.0 / Windows 10\"}');
-
-        mock.stop('isomorphic-fetch');
     });
 });
 
 describe('reportTestDone', () => {
-    before(() => {
-        mock('../lib/env-variables', {
-            TESTCAFE_DASHBOARD_URL,
-            TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN
-        });
-    });
-
-    after(() => {
-        mock.stop('../lib/env-variables');
-        mock.stop('isomorphic-fetch');
-    });
-
     it('Should process errors originated not from actions', async () => {
         let testRunInfo: DashboardTestRunInfo = null;
 
-        const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
+        function fetchMock (url: string, request) {
             const response  = { ok: true, status: 200, statusText: 'OK', json: null };
             const uploadUrl = 'upload_url';
 
@@ -275,8 +222,9 @@ describe('reportTestDone', () => {
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString());
 
-            return Promise.resolve(response);
-        }), process.stdout);
+            return Promise.resolve(response as Response);
+        }
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
 
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
@@ -297,7 +245,7 @@ describe('reportTestDone', () => {
     it('Should send skipped prop in test done command', async () => {
         let testDonePayload = null;
 
-        const reporter: ReporterPluginObject = buildReporterPlugin(mockReporter((url: string, request) => {
+        function fetchMock (url: string, request) {
             const response  = { ok: true, status: 200, statusText: 'OK', json: () => Promise.resolve('') };
 
             if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
@@ -307,8 +255,10 @@ describe('reportTestDone', () => {
                     testDonePayload = payload;
             }
 
-            return Promise.resolve(response);
-        }), process.stdout);
+            return Promise.resolve(response as Response);
+        }
+
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
 
         await reporter.reportTestDone('Test 1', skippedTestDone);
 

@@ -1,8 +1,7 @@
 import { CONCURRENT_ERROR_CODE } from '../consts';
 import FetchResponse from './fetch-response';
-import logger from '../logger';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
-import { FetchMethod } from '../types/dashboard';
+import { FetchMethod, Logger } from '../types/dashboard';
 import { ResolveCommand } from '../types/resolve';
 
 const MAX_RETRY_COUNT = 5;
@@ -17,13 +16,15 @@ export default class Transport {
     private _authenticationToken: string;
     private _dashboardUrl: string;
     private _isLogEnabled: boolean;
+    private _logger: Logger;
 
     private _fetch: FetchMethod;
 
-    constructor (fetch: FetchMethod, dashboardUrl: string, authenticationToken: string, isLogEnabled: boolean) {
+    constructor (fetch: FetchMethod, dashboardUrl: string, authenticationToken: string, isLogEnabled: boolean, logger: Logger) {
         this._authenticationToken = authenticationToken;
         this._dashboardUrl        = dashboardUrl;
         this._isLogEnabled        = isLogEnabled;
+        this._logger              = logger;
 
         this._fetch = fetch;
     }
@@ -76,9 +77,9 @@ export default class Transport {
             retryCount++;
 
             if (!response.ok)
-                logger.error(`${aggregateId} ${commandType} ${response}`);
+                this._logger.error(`${aggregateId} ${commandType} ${response}`);
             else if (this._isLogEnabled)
-                logger.log(response);
+                this._logger.log(response);
 
         } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= MAX_RETRY_COUNT);
     }

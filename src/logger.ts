@@ -1,3 +1,5 @@
+import { Logger } from './types/dashboard';
+
 function log (...params): void {
     console.log(...params);
 }
@@ -10,4 +12,6 @@ function warn (...params): void {
     console.warn(...params);
 }
 
-export default { log, error, warn };
+const logger: Logger = { log, error, warn };
+
+export default logger;

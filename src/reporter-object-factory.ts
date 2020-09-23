@@ -1,7 +1,5 @@
 import uuid from 'uuid';
-import logger from './logger';
 
-import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, TESTCAFE_DASHBOARD_BUILD_ID } from './env-variables';
 import { createReportUrlMessage, createLongBuildIdError } from './texts';
 import {
     BrowserRunInfo,
@@ -11,7 +9,7 @@ import {
     TestError,
     TestDoneArgs,
     FetchMethod,
-    ReadFileMethod
+    ReadFileMethod, DashboardSettings, Logger
 } from './types/dashboard';
 import { Uploader } from './upload';
 import { ReporterPluginObject, Error, ReportedTestStructureItem } from './types/testcafe';
@@ -24,11 +22,21 @@ function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
-export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: FetchMethod, dashboardUrl: string, authenticationToken: string, isLogEnabled = false): ReporterPluginObject {
-    const id = uuid() as string;
+export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: FetchMethod, settings: DashboardSettings, logger: Logger): ReporterPluginObject {
+    const {
+        authenticationToken,
+        buildId,
+        dashboardUrl,
+        isLogEnabled,
+        noScreenshotUpload,
+        noVideoUpload,
+        runId
+    } = settings;
 
-    const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled);
-    const uploader       = new Uploader(id, readFile, transport);
+    const id: string = runId || uuid();
+
+    const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger);
+    const uploader       = new Uploader(id, readFile, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
@@ -37,15 +45,15 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
         createErrorDecorator: errorDecorator,
 
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
-            if (TESTCAFE_DASHBOARD_BUILD_ID && TESTCAFE_DASHBOARD_BUILD_ID.length > MAX_BUILD_ID_LENGTH) {
-                logger.log(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+            if (buildId && buildId.length > MAX_BUILD_ID_LENGTH) {
+                logger.log(createLongBuildIdError(buildId));
 
-                throw new Error(createLongBuildIdError(TESTCAFE_DASHBOARD_BUILD_ID));
+                throw new Error(createLongBuildIdError(buildId));
             }
 
-            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId: TESTCAFE_DASHBOARD_BUILD_ID, taskStructure });
+            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId, taskStructure });
 
-            logger.log(createReportUrlMessage(TESTCAFE_DASHBOARD_BUILD_ID || id, authenticationToken, dashboardUrl));
+            logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
         },
 
         async reportFixtureStart (): Promise<void> {
@@ -87,7 +95,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
             const testRunToVideosMap: Record<string, string[]>      = {};
             const testRunToErrorsMap: Record<string, TestError>     = {};
 
-            if (!NO_SCREENSHOT_UPLOAD) {
+            if (!noScreenshotUpload) {
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath, testRunId } = screenshotInfo;
 
@@ -102,7 +110,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
                 }
             }
 
-            if (!NO_VIDEO_UPLOAD) {
+            if (!noVideoUpload) {
                 for (const videoInfo of videos) {
                     const { videoPath, testRunId } = videoInfo;
 
@@ -157,7 +165,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await uploader.waitUploads();
-            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId: TESTCAFE_DASHBOARD_BUILD_ID });
+            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId });
         }
     };
 };
