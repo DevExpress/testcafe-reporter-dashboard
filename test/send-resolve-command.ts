@@ -2,7 +2,7 @@ import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
 
-import { CONCURRENT_ERROR_CODE } from '../src/send-resolve-command';
+import { CONCURRENT_ERROR_CODE } from '../src/consts';
 
 describe('sendResolveCommand', () => {
     before(() => {

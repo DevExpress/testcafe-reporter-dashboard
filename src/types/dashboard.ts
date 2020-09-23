@@ -97,3 +97,11 @@ export enum UploadStatus {
     Completed = 'Completed',
     Failed = 'Failed'
 };
+
+export interface FetchMethod {
+    (input: RequestInfo, init?: RequestInit): Promise<Response>;
+};
+
+export interface ReadFileMethod {
+    (path: string): Promise<Buffer>;
+};

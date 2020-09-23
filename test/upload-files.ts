@@ -1,23 +1,26 @@
-import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
-import { Screenshot, ReporterPluginObject } from '../src/types/testcafe';
+import { Screenshot } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
 import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/dashboard';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
+import reporterObjectFactory from '../src/reporter-object-factory';
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
+const AUTHENTICATION_TOKEN   = 'authentication_token';
 
-const noop = () => void 0;
+const noop  = () => void 0;
 
-function mockFetchAndFs (fsObject) {
+let fetch = null;
+
+function mockFetch () {
     const uploadUrlPrefix   = 'http://upload_url/';
     const uploadInfos       = [];
     const aggregateCommands = [];
     const uploadedUrls      = [];
     const uploadedFiles     = [];
 
-    mock('isomorphic-fetch', (url, request) => {
+    fetch = (url, request) => {
         if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=`)) {
             const uploadInfo = { uploadId: uuid(), uploadUrl: `${uploadUrlPrefix}${uuid()}` };
 
@@ -43,36 +46,13 @@ function mockFetchAndFs (fsObject) {
         }
 
         throw new Error('Unknown request');
-    });
-
-    mock('fs', fsObject);
-
-    mock.reRequire('../lib/fetch');
-    mock.reRequire('../lib/send-resolve-command');
-    mock.reRequire('../lib/upload');
-    mock.reRequire('../lib/commands');
+    };
 
     return { uploadInfos, aggregateCommands, uploadedUrls, uploadedFiles };
 }
 
 describe('Uploads', () => {
-    afterEach(() => {
-        mock.stopAll();
-        mock.reRequire('../lib/fetch');
-        mock.reRequire('../lib/send-resolve-command');
-        mock.reRequire('../lib/upload');
-        mock.reRequire('../lib/commands');
-        mock.reRequire('../lib/index');
-    });
-
     describe('Screenshots', () => {
-        before(() => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
-            });
-        });
-
         it('Smoke test', async () => {
             const screenshotPaths = [];
 
@@ -95,7 +75,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            function readFile (path, readFileCallback): void {
+            function readFile (path: string) {
                 screenshotPaths.push(path);
 
                 let fileContent = '';
@@ -107,12 +87,12 @@ describe('Uploads', () => {
                 else
                     throw new Error('Unknown file path');
 
-                readFileCallback(null, fileContent);
+                return Promise.resolve(Buffer.from(fileContent));
             }
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
 
-            const reporter = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(readFile, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -160,12 +140,6 @@ describe('Uploads', () => {
         });
 
         it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                NO_SCREENSHOT_UPLOAD:                    true
-            });
-
             const screenshots: Screenshot[] = [
                 {
                     testRunId:         'chrome_headless',
@@ -185,9 +159,9 @@ describe('Uploads', () => {
                 }
             ];
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
 
-            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(noop, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -215,29 +189,18 @@ describe('Uploads', () => {
     });
 
     describe('Videos', () => {
-        before(() => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
-            });
-        });
-
         it('Smoke test', async () => {
             const videoPaths = [];
 
-            function readFile (path, readFileCallback): void {
+            function readFile (path: string) {
                 videoPaths.push(path);
 
-                readFileCallback(null, `fileContent_${path}`);
-            }
+                return Promise.resolve(Buffer.from(`fileContent_${path}`));
+            };
 
-            function existsSync (path: string): boolean {
-                return !path.includes('1_Chrome');
-            }
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile, existsSync });
-
-            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(readFile, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -298,15 +261,9 @@ describe('Uploads', () => {
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                NO_VIDEO_UPLOAD:                         true
-            });
+            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetch();
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop, existsSync: noop });
-
-            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(noop, fetch, TESTCAFE_DASHBOARD_URL, AUTHENTICATION_TOKEN);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
