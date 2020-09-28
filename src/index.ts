@@ -23,7 +23,7 @@ if (!TESTCAFE_DASHBOARD_URL)
 if (!AUTHENTICATION_TOKEN)
     logger.error(AUTHENTICATION_TOKEN_NOT_DEFINED);
 
-module.exports = function plaginFactory (): ReporterPluginObject {
+module.exports = function pluginFactory (): ReporterPluginObject {
     const settings = {
         authenticationToken: AUTHENTICATION_TOKEN,
         buildId:             TESTCAFE_DASHBOARD_BUILD_ID,

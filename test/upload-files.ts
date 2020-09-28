@@ -84,7 +84,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            function readFile (path: string) {
+            function readFile (path: string): Promise<Buffer> {
                 screenshotPaths.push(path);
 
                 let fileContent = '';
@@ -197,7 +197,7 @@ describe('Uploads', () => {
         it('Smoke test', async () => {
             const videoPaths = [];
 
-            function readFile (path: string) {
+            function readFile (path: string): Promise<Buffer> {
                 videoPaths.push(path);
 
                 return Promise.resolve(Buffer.from(`fileContent_${path}`));
