@@ -1,15 +1,14 @@
-import { TESTCAFE_DASHBOARD_URL, TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN } from './env-variables';
 import { decode } from 'jsonwebtoken';
-import { MAX_BUILD_ID_LENGTH } from '.';
+import { MAX_BUILD_ID_LENGTH } from './consts';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
 export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable is not defined.';
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
-export const createReportUrlMessage = (reportId: string): string => {
-    const token = decode(TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN);
+export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
+    const token = decode(authenticationToken);
 
-    return `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
+    return `Task execution report: ${dashboardUrl}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
 };
 
 export const createFileUploadError = (uploadId: string, filePath: string): string =>

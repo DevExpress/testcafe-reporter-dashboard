@@ -1,39 +1,32 @@
-import fs from 'fs';
-import { promisify } from 'util';
-import sendResolveCommand from './send-resolve-command';
-import {
-    TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
-    TESTCAFE_DASHBOARD_URL
-} from './env-variables';
-import { AggregateCommandType, AggregateNames, DashboardTestRunInfo, UploadStatus } from './types/dashboard';
+import { AggregateCommandType, AggregateNames, DashboardTestRunInfo, Logger, ReadFileMethod, UploadStatus } from './types/dashboard';
 import { UploadInfo } from './types/resolve';
-import logger from './logger';
 import { createGetUploadInfoError, createFileUploadError, createTestUploadError } from './texts';
-import fetch from './fetch';
-
-const readFile = promisify(fs.readFile);
+import Transport from './transport';
 
 export class Uploader {
     private _runId: string;
+    private _transport: Transport;
     private _uploads: Promise<void>[];
+    private _logger: Logger;
 
-    constructor (runId: string) {
-        this._runId   = runId;
-        this._uploads = [];
+    private _readFile: ReadFileMethod;
+
+    constructor (runId: string, readFile: ReadFileMethod, transport: Transport, logger: Logger) {
+        this._runId     = runId;
+        this._transport = transport;
+        this._uploads   = [];
+        this._logger    = logger;
+
+        this._readFile = readFile;
     }
 
     private async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo> {
-        const response = await fetch(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=${this._runId}`, {
-            method:  'GET',
-            headers: {
-                authorization: `Bearer ${AUTHENTICATION_TOKEN}`
-            }
-        });
+        const response = await this._transport.fetchFromDashboard(`api/uploader/getUploadUrl?dir=${this._runId}`);
 
         if (response.ok)
             return await response.json();
 
-        logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
+        this._logger.error(createGetUploadInfoError(uploadEntityId, response.toString()));
 
         return null;
     }
@@ -41,7 +34,7 @@ export class Uploader {
     private async _upload (uploadInfo: UploadInfo, uploadEntity: Buffer, uploadError: string): Promise<void> {
         const { uploadUrl, uploadId } = uploadInfo;
 
-        const response = await fetch(uploadUrl, {
+        const response = await this._transport.fetch(uploadUrl, {
             method:  'PUT',
             headers: {
                 'Content-Length': uploadEntity.length
@@ -49,7 +42,7 @@ export class Uploader {
             body: uploadEntity
         });
 
-        await sendResolveCommand({
+        await this._transport.sendResolveCommand({
             aggregateId:   uploadId,
             aggregateName: AggregateNames.Upload,
             type:          AggregateCommandType.createUpload,
@@ -58,7 +51,7 @@ export class Uploader {
         });
 
         if (!response.ok)
-            logger.error(`${uploadError}. Response: ${response}`);
+            this._logger.error(`${uploadError}. Response: ${response}`);
     }
 
     async uploadFile (filePath: string): Promise<string> {
@@ -66,7 +59,7 @@ export class Uploader {
 
         if (!uploadInfo) return null;
 
-        const file = await readFile(filePath);
+        const file = await this._readFile(filePath);
 
         this._uploads.push(this._upload(uploadInfo, file, createFileUploadError(uploadInfo.uploadId, filePath)));
 

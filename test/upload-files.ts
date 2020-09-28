@@ -1,78 +1,67 @@
-import mock from 'mock-require';
 import uuid from 'uuid';
 import assert from 'assert';
-import { Screenshot, ReporterPluginObject } from '../src/types/testcafe';
+import { Screenshot } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/dashboard';
+import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/dashboard';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
+import reporterObjectFactory from '../src/reporter-object-factory';
+import logger from '../src/logger';
 
-const TESTCAFE_DASHBOARD_URL = 'http://localhost';
+const UPLOAD_URL_PREFIX           = 'http://upload_url/';
+const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
+const SETTINGS: DashboardSettings = {
+    authenticationToken: 'authentication_token',
+    buildId:             '',
+    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
+    isLogEnabled:        false,
+    noScreenshotUpload:  false,
+    noVideoUpload:       false
+};
 
-const noop = () => void 0;
+const noop  = () => void 0;
 
-function mockFetchAndFs (fsObject) {
-    const uploadUrlPrefix   = 'http://upload_url/';
-    const uploadInfos       = [];
+describe('Uploads', () => {
     const aggregateCommands = [];
-    const uploadedUrls      = [];
     const uploadedFiles     = [];
+    const uploadedUrls      = [];
+    const uploadInfos       = [];
 
-    mock('isomorphic-fetch', (url, request) => {
+    function fetch (url, request) {
         if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=`)) {
-            const uploadInfo = { uploadId: uuid(), uploadUrl: `${uploadUrlPrefix}${uuid()}` };
+            const uploadInfo = { uploadId: uuid(), uploadUrl: `${UPLOAD_URL_PREFIX}${uuid()}` };
 
             uploadInfos.push(uploadInfo);
 
             return Promise.resolve({
                 ok:   true,
                 json: () => uploadInfo
-            });
+            } as unknown as Response);
         }
 
         if (url === `${TESTCAFE_DASHBOARD_URL}/api/commands/`) {
             aggregateCommands.push(JSON.parse(request.body));
 
-            return Promise.resolve({ ok: true });
+            return Promise.resolve({ ok: true } as Response);
         }
 
-        if (url.startsWith(uploadUrlPrefix)) {
+        if (url.startsWith(UPLOAD_URL_PREFIX)) {
             uploadedUrls.push(url);
             uploadedFiles.push(request.body);
 
-            return Promise.resolve({ ok: true });
+            return Promise.resolve({ ok: true } as Response);
         }
 
         throw new Error('Unknown request');
-    });
+    }
 
-    mock('fs', fsObject);
-
-    mock.reRequire('../lib/fetch');
-    mock.reRequire('../lib/send-resolve-command');
-    mock.reRequire('../lib/upload');
-    mock.reRequire('../lib/commands');
-
-    return { uploadInfos, aggregateCommands, uploadedUrls, uploadedFiles };
-}
-
-describe('Uploads', () => {
-    afterEach(() => {
-        mock.stopAll();
-        mock.reRequire('../lib/fetch');
-        mock.reRequire('../lib/send-resolve-command');
-        mock.reRequire('../lib/upload');
-        mock.reRequire('../lib/commands');
-        mock.reRequire('../lib/index');
+    beforeEach(() => {
+        aggregateCommands.splice(0);
+        uploadedFiles.splice(0);
+        uploadedUrls.splice(0);
+        uploadInfos.splice(0);
     });
 
     describe('Screenshots', () => {
-        before(() => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
-            });
-        });
-
         it('Smoke test', async () => {
             const screenshotPaths = [];
 
@@ -95,7 +84,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            function readFile (path, readFileCallback): void {
+            function readFile (path: string): Promise<Buffer> {
                 screenshotPaths.push(path);
 
                 let fileContent = '';
@@ -107,12 +96,10 @@ describe('Uploads', () => {
                 else
                     throw new Error('Unknown file path');
 
-                readFileCallback(null, fileContent);
+                return Promise.resolve(Buffer.from(fileContent));
             }
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile });
-
-            const reporter = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -160,12 +147,6 @@ describe('Uploads', () => {
         });
 
         it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                NO_SCREENSHOT_UPLOAD:                    true
-            });
-
             const screenshots: Screenshot[] = [
                 {
                     testRunId:         'chrome_headless',
@@ -185,9 +166,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop });
-
-            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(noop, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -215,29 +194,16 @@ describe('Uploads', () => {
     });
 
     describe('Videos', () => {
-        before(() => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token'
-            });
-        });
-
         it('Smoke test', async () => {
             const videoPaths = [];
 
-            function readFile (path, readFileCallback): void {
+            function readFile (path: string): Promise<Buffer> {
                 videoPaths.push(path);
 
-                readFileCallback(null, `fileContent_${path}`);
-            }
+                return Promise.resolve(Buffer.from(`fileContent_${path}`));
+            };
 
-            function existsSync (path: string): boolean {
-                return !path.includes('1_Chrome');
-            }
-
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile, existsSync });
-
-            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -298,15 +264,7 @@ describe('Uploads', () => {
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
-            mock('../lib/env-variables', {
-                TESTCAFE_DASHBOARD_URL,
-                TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN: 'authentication_token',
-                NO_VIDEO_UPLOAD:                         true
-            });
-
-            const { uploadInfos, uploadedUrls, uploadedFiles, aggregateCommands } = mockFetchAndFs({ readFile: noop, existsSync: noop });
-
-            const reporter: ReporterPluginObject = mock.reRequire('../lib/index')();
+            const reporter = reporterObjectFactory(noop, fetch, { ...SETTINGS, noVideoUpload: true }, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,

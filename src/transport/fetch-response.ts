@@ -1,7 +1,4 @@
-import isomorphicFetch from 'isomorphic-fetch';
-import { FETCH_NETWORK_CONNECTION_ERROR } from './texts';
-
-export class FetchResponse {
+export default class FetchResponse {
     ok = false;
     status = 0;
     statusText: string;
@@ -39,16 +36,5 @@ export class FetchResponse {
             return await this._response.json();
 
         return null;
-    }
-}
-
-export default async function fetch (url: string, requestOptions): Promise<FetchResponse> {
-    try {
-        const response = await isomorphicFetch(url, requestOptions);
-
-        return new FetchResponse(response);
-    }
-    catch (error) {
-        return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, error);
     }
 }
