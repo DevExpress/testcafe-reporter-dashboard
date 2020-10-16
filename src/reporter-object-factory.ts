@@ -17,6 +17,7 @@ import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
 import { MAX_BUILD_ID_LENGTH } from './consts';
 import Transport from './transport';
+import assignReporterMethods from './assign-reporter-methods';
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
@@ -41,9 +42,9 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
 
-    return {
-        createErrorDecorator: errorDecorator,
+    const reporterPluginObject: ReporterPluginObject = { createErrorDecorator: errorDecorator };
 
+    assignReporterMethods({
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             if (buildId && buildId.length > MAX_BUILD_ID_LENGTH) {
                 logger.log(createLongBuildIdError(buildId));
@@ -167,5 +168,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
             await uploader.waitUploads();
             await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId });
         }
-    };
+    }, reporterPluginObject);
+
+    return reporterPluginObject;
 };

@@ -12,8 +12,7 @@ export default function assignReporterMethods (reporterMethods: ReporterMethods,
                 await reporterMethods[methodName].apply(this, args);
             }
             catch (e) {
-                //logger.error(e);
-                throw e;
+                logger.error(`${methodName} failed. Error: ${ENABLE_LOG ? e : e.message }`);
             }
         };
     }
