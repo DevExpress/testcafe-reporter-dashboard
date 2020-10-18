@@ -180,13 +180,13 @@ export interface ReportedTestStructureItem {
 }
 
 export type ReporterMethods = {
-    reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
-    reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
+    reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
+    reportFixtureStart: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
     reportTestActionStart?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
     reportTestActionDone?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
-    reportTestDone?: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
-    reportTaskDone?: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
+    reportTestDone: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
+    reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
 };
 
 export type ReporterPluginObject = ReporterMethods & {
