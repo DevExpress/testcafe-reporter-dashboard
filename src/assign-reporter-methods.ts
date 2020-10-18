@@ -1,19 +1,18 @@
 import { ReporterMethods, ReporterPluginObject } from './types/testcafe';
 import logger from './logger';
-import { ENABLE_LOG } from './env-variables';
 import { createReporterMethodName } from './texts';
 
-export default function assignReporterMethods (reporterObject: ReporterPluginObject, reporterMethods: ReporterMethods) {
+export default function assignReporterMethods (reporterObject: ReporterPluginObject, reporterMethods: ReporterMethods, isLogEnabled: boolean) {
     for (const methodName of Object.keys(reporterMethods)) {
         reporterObject[methodName] = async function (...args) {
-            if (ENABLE_LOG)
+            if (isLogEnabled)
                 logger.log(`${methodName}: ${JSON.stringify(args)}`);
 
             try {
                 await reporterMethods[methodName].apply(this, args);
             }
             catch (e) {
-                logger.error(createReporterMethodName(methodName, e.toString()));
+                logger.error(createReporterMethodName(methodName, e && e.toString()));
             }
         };
     }

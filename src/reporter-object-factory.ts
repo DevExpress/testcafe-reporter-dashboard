@@ -165,7 +165,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
             await uploader.waitUploads();
             await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId });
         }
-    });
+    }, isLogEnabled);
 
     return reporterPluginObject;
 };
