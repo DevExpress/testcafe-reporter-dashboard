@@ -22,3 +22,6 @@ export const createGetUploadInfoError = (uploadEntityId: string, response: strin
 
 export const createLongBuildIdError = (buildId: string): string =>
    `Build ID cannot be longer than ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${buildId}.`;
+
+export const createReporterMethodName = (reporterMethodName: string, errorDetails: string): string =>
+   `Error occurred in the "dashboard" reporter's "${reporterMethodName}" method. Error details: ${errorDetails}`;

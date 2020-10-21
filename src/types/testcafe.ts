@@ -179,13 +179,16 @@ export interface ReportedTestStructureItem {
     fixture: ReportedFixtureItem;
 }
 
-export type ReporterPluginObject = {
-    createErrorDecorator: () => Record<string, decoratorFn>;
-    reportTaskStart?: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
-    reportFixtureStart?: (name: string, path: string, meta: Meta) => Promise<void>;
+export type ReporterMethods = {
+    reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
+    reportFixtureStart: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
     reportTestActionStart?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
     reportTestActionDone?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
-    reportTestDone?: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
-    reportTaskDone?: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
+    reportTestDone: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
+    reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
+};
+
+export type ReporterPluginObject = ReporterMethods & {
+    createErrorDecorator: () => Record<string, decoratorFn>;
 };

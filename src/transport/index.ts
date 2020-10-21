@@ -30,7 +30,7 @@ export default class Transport {
     }
 
     async _sendCommand (command: ResolveCommand): Promise<FetchResponse> {
-        return this._fetch(`${this._dashboardUrl}/api/commands/`, {
+        return this.fetch(`${this._dashboardUrl}/api/commands/`, {
             method:  'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export default class Transport {
     }
 
     async fetchFromDashboard (relativeUrl: string) {
-        return await this._fetch(`${this._dashboardUrl}/${relativeUrl}`, {
+        return await this.fetch(`${this._dashboardUrl}/${relativeUrl}`, {
             method:  'GET',
             headers: {
                 authorization: `Bearer ${this._authenticationToken}`

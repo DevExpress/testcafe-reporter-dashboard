@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 
-import { createReportUrlMessage, createLongBuildIdError } from './texts';
+import { createReportUrlMessage } from './texts';
 import {
     BrowserRunInfo,
     createDashboardTestRunInfo,
@@ -15,14 +15,19 @@ import { Uploader } from './upload';
 import { ReporterPluginObject, Error, ReportedTestStructureItem } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
-import { MAX_BUILD_ID_LENGTH } from './consts';
 import Transport from './transport';
+import assignReporterMethods from './assign-reporter-methods';
+import validateSettings from './validate-settings';
+import BLANK_REPORTER from './blank-reporter';
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
 export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: FetchMethod, settings: DashboardSettings, logger: Logger): ReporterPluginObject {
+    if (!validateSettings(settings, logger))
+        return BLANK_REPORTER;
+
     const {
         authenticationToken,
         buildId,
@@ -41,19 +46,12 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
 
-    return {
-        createErrorDecorator: errorDecorator,
+    const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
+    assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
-            if (buildId && buildId.length > MAX_BUILD_ID_LENGTH) {
-                logger.log(createLongBuildIdError(buildId));
-
-                throw new Error(createLongBuildIdError(buildId));
-            }
-
-            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId, taskStructure });
-
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
+            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId, taskStructure });
         },
 
         async reportFixtureStart (): Promise<void> {
@@ -167,5 +165,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
             await uploader.waitUploads();
             await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId });
         }
-    };
+    }, isLogEnabled);
+
+    return reporterPluginObject;
 };
