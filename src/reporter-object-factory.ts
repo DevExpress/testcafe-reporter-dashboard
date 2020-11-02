@@ -42,7 +42,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
     const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger);
     const uploader       = new Uploader(id, readFile, transport, logger);
-    const projectId      = getProjectId(buildId || id, authenticationToken);
+    const projectId      = getProjectId(authenticationToken);
     const reportCommands = reportCommandsFactory(id, projectId, transport);
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
