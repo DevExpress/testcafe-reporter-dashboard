@@ -22,6 +22,7 @@ export enum AggregateCommandType {
 
 export enum AggregateNames {
     Run = 'Run',
+    Project = 'Project',
     Upload = 'Upload'
 };
 
@@ -72,6 +73,7 @@ export type TaskStartArgs = {
     userAgents: string[];
     testCount: number;
     buildId: string;
+    runId: string;
     taskStructure: ReportedTestStructureItem[];
 };
 

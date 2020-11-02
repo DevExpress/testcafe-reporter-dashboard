@@ -5,10 +5,16 @@ export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' e
 export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable is not defined.';
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
-export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
+export const getProjectId = (reportId: string, authenticationToken: string): string => {
     const token = decode(authenticationToken);
 
-    return `Task execution report: ${dashboardUrl}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
+    return token.projectId;
+};
+
+export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
+    const projectId = getProjectId(reportId, authenticationToken);
+
+    return `Task execution report: ${dashboardUrl}/runs/${projectId}/${encodeURIComponent(reportId)}`;
 };
 
 export const createFileUploadError = (uploadId: string, filePath: string): string =>

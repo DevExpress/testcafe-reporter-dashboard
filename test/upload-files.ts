@@ -1,5 +1,6 @@
 import uuid from 'uuid';
 import assert from 'assert';
+import { sign } from 'jsonwebtoken';
 import { Screenshot } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
 import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/dashboard';
@@ -10,7 +11,7 @@ import logger from '../src/logger';
 const UPLOAD_URL_PREFIX           = 'http://upload_url/';
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const SETTINGS: DashboardSettings = {
-    authenticationToken: 'authentication_token',
+    authenticationToken: sign({ projectId: 'mock_project_id' }, 'secret'),
     buildId:             '',
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,

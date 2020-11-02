@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 
-import { createReportUrlMessage } from './texts';
+import { createReportUrlMessage, getProjectId } from './texts';
 import {
     BrowserRunInfo,
     createDashboardTestRunInfo,
@@ -42,7 +42,8 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
     const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger);
     const uploader       = new Uploader(id, readFile, transport, logger);
-    const reportCommands = reportCommandsFactory(id, transport);
+    const projectId      = getProjectId(buildId || id, authenticationToken);
+    const reportCommands = reportCommandsFactory(id, projectId, transport);
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
 
@@ -51,7 +52,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
-            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId, taskStructure });
+            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, runId: id, buildId, taskStructure });
         },
 
         async reportFixtureStart (): Promise<void> {

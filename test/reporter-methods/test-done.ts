@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { sign } from 'jsonwebtoken';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 
 import { DashboardTestRunInfo, AggregateCommandType, DashboardSettings } from './../../src/types/dashboard';
@@ -8,9 +9,8 @@ import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
-const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
-    authenticationToken: AUTHENTICATION_TOKEN,
+    authenticationToken: sign({ projectId: 'mock_project_id' }, 'secret'),
     buildId:             '',
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
