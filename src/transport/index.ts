@@ -46,7 +46,6 @@ export default class Transport {
 
         do {
             try {
-                console.log(`Retry count: ${retryCount}`);
                 return new FetchResponse(await this._fetch(url, requestOptions));
             }
             catch (e) {
