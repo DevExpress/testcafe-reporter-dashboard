@@ -4,7 +4,7 @@ import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
 import { FetchMethod, Logger } from '../types/dashboard';
 import { ResolveCommand } from '../types/resolve';
 
-const MAX_RETRY_COUNT   = 10;
+const MAX_RETRY_COUNT = 10;
 
 function removeNullValues (key, value) {
     if (value !== null) return value;
@@ -43,24 +43,22 @@ export default class Transport {
 
     async fetch (url: string, requestOptions): Promise<FetchResponse> {
         let retryCount = 0;
-        let error      = null;
 
         do {
             try {
+                console.log(`Retry count: ${retryCount}`);
                 return new FetchResponse(await this._fetch(url, requestOptions));
             }
             catch (e) {
                 if (this._isLogEnabled)
                     this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
 
-                if (RETRY_ERROR_CODES.includes(e.code))
+                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < MAX_RETRY_COUNT)
                     continue;
-
-                error = e;
+                else
+                    return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
             }
-        } while (retryCount++ <= MAX_RETRY_COUNT);
-
-        return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, error);
+        } while (true);
     }
 
     async fetchFromDashboard (relativeUrl: string) {
