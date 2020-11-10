@@ -1,10 +1,10 @@
-import { CONCURRENT_ERROR_CODE } from '../consts';
+import { CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../consts';
 import FetchResponse from './fetch-response';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
 import { FetchMethod, Logger } from '../types/dashboard';
 import { ResolveCommand } from '../types/resolve';
 
-const MAX_RETRY_COUNT = 5;
+const MAX_RETRY_COUNT = 10;
 
 function removeNullValues (key, value) {
     if (value !== null) return value;
@@ -42,14 +42,22 @@ export default class Transport {
     }
 
     async fetch (url: string, requestOptions): Promise<FetchResponse> {
-        try {
-            const response = await this._fetch(url, requestOptions);
+        let retryCount = 0;
 
-            return new FetchResponse(response);
-        }
-        catch (error) {
-            return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, error);
-        }
+        do {
+            try {
+                return new FetchResponse(await this._fetch(url, requestOptions));
+            }
+            catch (e) {
+                if (this._isLogEnabled)
+                    this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
+
+                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < MAX_RETRY_COUNT)
+                    continue;
+                else
+                    return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
+            }
+        } while (true);
     }
 
     async fetchFromDashboard (relativeUrl: string) {
@@ -79,7 +87,7 @@ export default class Transport {
             if (!response.ok)
                 this._logger.error(`${aggregateId} ${commandType} ${response}`);
             else if (this._isLogEnabled)
-                this._logger.log(response);
+                this._logger.log(`${aggregateId} ${commandType} ${response}`);
 
         } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= MAX_RETRY_COUNT);
     }

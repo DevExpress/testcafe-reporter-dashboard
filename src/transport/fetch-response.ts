@@ -20,13 +20,13 @@ export default class FetchResponse {
     }
 
     toString (): string {
-        let result = `${this.status}: ${this.statusText}`;
+        let result = `${this.status} - ${this.statusText}`;
 
-        if (this._error && this._error.hasOwnProperty('toString'))
-            result += `. Error: ${this._error}`;
+        if (this._error)
+            result += `. ${this._error}`;
 
         if (this._response)
-            result += `. Original response: ${this._response}`;
+            result += `. Original response: ${JSON.stringify(this._response)}`;
 
         return result;
     }
