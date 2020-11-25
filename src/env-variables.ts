@@ -3,7 +3,7 @@ function parseBooleanVariable (value): boolean {
 }
 
 export const ENABLE_LOG             = parseBooleanVariable(process.env.ENABLE_LOG);
-export const TESTCAFE_DASHBOARD_URL = process.env.TESTCAFE_DASHBOARD_URL || 'https://td-dev.testcafe.io';
+export const TESTCAFE_DASHBOARD_URL = process.env.TESTCAFE_DASHBOARD_URL || 'https://ddev.testcafe.io';
 
 export const NO_SCREENSHOT_UPLOAD = parseBooleanVariable(process.env.NO_SCREENSHOT_UPLOAD);
 export const NO_VIDEO_UPLOAD      = parseBooleanVariable(process.env.NO_VIDEO_UPLOAD);
