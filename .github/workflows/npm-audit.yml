@@ -30,6 +30,6 @@ jobs:
           node-version: '12.x'
           #registry-url: 'http://npmproxy:4873'
       - name: cat
-        run: cat ./package.lock  
+        run: cat ./package-lock.json
       - name: npm 
         run: npm audit
