@@ -9,7 +9,7 @@ import {
     TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_BUILD_ID,
     TESTCAFE_DASHBOARD_URL
-} from './env-variables';
+} from './env';
 
 import { ReporterPluginObject } from './types/testcafe';
 import reporterObjectFactory from './reporter-object-factory';

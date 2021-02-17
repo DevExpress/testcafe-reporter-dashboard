@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD } from '../src/env-variables';
+import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD } from '../src/env';
 
 describe('enviroment variables', () => {
     describe('enviroment variables', () => {
