@@ -1,6 +1,4 @@
-function parseBooleanVariable (value): boolean {
-    return value === 'false' || value === '0' ? false : !!value;
-}
+import { parseBooleanVariable } from './utils';
 
 export const ENABLE_LOG             = parseBooleanVariable(process.env.ENABLE_LOG);
 export const TESTCAFE_DASHBOARD_URL = process.env.TESTCAFE_DASHBOARD_URL || 'https://ddev.testcafe.io';
