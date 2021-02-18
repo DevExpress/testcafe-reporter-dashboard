@@ -19,7 +19,7 @@ import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import validateSettings from './validate-settings';
 import BLANK_REPORTER from './blank-reporter';
-import { getCommitAuthor } from './env/get-commit-author';
+import { getCIInfo } from './env/get-ci-info';
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
@@ -52,7 +52,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
-            const author = await getCommitAuthor();
+            const { author } = await getCIInfo();
 
             await reportCommands.sendTaskStartCommand({
                 startTime, userAgents, testCount, buildId, taskStructure, author
