@@ -73,6 +73,7 @@ export type TaskStartArgs = {
     testCount: number;
     buildId: string;
     taskStructure: ReportedTestStructureItem[];
+    author: string;
 };
 
 export type TestStartArgs = {

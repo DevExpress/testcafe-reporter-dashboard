@@ -2,7 +2,10 @@ import { AggregateCommandType, AggregateNames, TaskStartArgs, TestStartArgs, Tes
 import Transport from './transport';
 
 export default function reportCommandsFactory (reportId: string, transport: Transport) {
-    async function sendReportCommand (type: AggregateCommandType, payload: Record<string, any>): Promise<void> {
+    async function sendReportCommand (
+        type: AggregateCommandType,
+        payload: Record<string, unknown>
+    ): Promise<void> {
         return transport.sendResolveCommand({
             aggregateId:   reportId,
             aggregateName: AggregateNames.Run,
