@@ -122,3 +122,7 @@ export type Logger = {
     warn (...params): void;
     error (...params): void;
 };
+
+export interface CIInfo {
+    author: string;
+}
