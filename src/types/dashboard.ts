@@ -107,6 +107,10 @@ export interface ReadFileMethod {
     (path: string): Promise<Buffer>;
 };
 
+export interface CIInfo {
+    author: string;
+}
+
 export type DashboardSettings = {
     authenticationToken: string;
     buildId: string;
@@ -115,6 +119,7 @@ export type DashboardSettings = {
     noScreenshotUpload: boolean;
     noVideoUpload: boolean;
     runId?: string;
+    ciInfo: CIInfo;
 };
 
 export type Logger = {
@@ -123,6 +128,3 @@ export type Logger = {
     error (...params): void;
 };
 
-export interface CIInfo {
-    author: string;
-}

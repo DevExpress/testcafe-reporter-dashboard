@@ -1,4 +1,4 @@
-import { promiseReadFile } from './utils';
+import { readFileSync } from 'fs';
 import { CIInfo } from '../types/dashboard';
 
 const { env } = process;
@@ -11,14 +11,14 @@ interface EventInfo {
     };
 }
 
-async function getEventInfo (): Promise<EventInfo> {
-    const rawEvent = await promiseReadFile(env.GITHUB_EVENT_PATH, 'utf8');
+function getEventInfo (): EventInfo {
+    const rawEvent = readFileSync(env.GITHUB_EVENT_PATH, 'utf8');
 
     return JSON.parse(rawEvent);
 }
 
-export async function getGithubActionsInfo (): Promise<CIInfo> {
-    const event = await getEventInfo();
+export function getGithubActionsInfo (): CIInfo {
+    const event = getEventInfo();
 
     return {
         author: event.pull_request.user.login

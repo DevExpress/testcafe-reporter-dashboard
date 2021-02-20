@@ -4,13 +4,13 @@ import {
     isGithubActions,
 } from './ci-detection';
 
-export async function getCIInfo (): Promise<CIInfo> {
+export function getCIInfo (): CIInfo {
     let info = {
         author: ''
     };
 
     if (isGithubActions)
-        info = await getGithubActionsInfo();
+        info = getGithubActionsInfo();
 
     return info;
 }

@@ -19,13 +19,17 @@ import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import validateSettings from './validate-settings';
 import BLANK_REPORTER from './blank-reporter';
-import { getCIInfo } from './env/get-ci-info';
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
-export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: FetchMethod, settings: DashboardSettings, logger: Logger): ReporterPluginObject {
+export default function reporterObjectFactory (
+    readFile: ReadFileMethod,
+    fetch: FetchMethod,
+    settings: DashboardSettings,
+    logger: Logger
+): ReporterPluginObject {
     if (!validateSettings(settings, logger))
         return BLANK_REPORTER;
 
@@ -36,7 +40,8 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
         isLogEnabled,
         noScreenshotUpload,
         noVideoUpload,
-        runId
+        runId,
+        ciInfo
     } = settings;
 
     const id: string = runId || uuid();
@@ -52,7 +57,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
-            const { author } = await getCIInfo();
+            const { author } = ciInfo;
 
             await reportCommands.sendTaskStartCommand({
                 startTime, userAgents, testCount, buildId, taskStructure, author

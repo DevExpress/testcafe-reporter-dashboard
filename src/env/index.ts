@@ -1,4 +1,5 @@
 import { parseBooleanVariable } from './utils';
+import { getCIInfo } from './get-ci-info';
 
 const { env } = process;
 
@@ -10,3 +11,5 @@ export const NO_VIDEO_UPLOAD      = parseBooleanVariable(env.NO_VIDEO_UPLOAD);
 
 export const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = env.TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN;
 export const TESTCAFE_DASHBOARD_BUILD_ID: string | undefined = env.TESTCAFE_DASHBOARD_BUILD_ID;
+
+export const CI_INFO = getCIInfo();

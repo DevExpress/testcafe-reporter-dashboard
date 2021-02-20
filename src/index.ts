@@ -8,7 +8,8 @@ import {
     NO_VIDEO_UPLOAD,
     TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_BUILD_ID,
-    TESTCAFE_DASHBOARD_URL
+    TESTCAFE_DASHBOARD_URL,
+    CI_INFO
 } from './env';
 
 import { ReporterPluginObject } from './types/testcafe';
@@ -22,7 +23,8 @@ module.exports = function pluginFactory (): ReporterPluginObject {
         dashboardUrl:        TESTCAFE_DASHBOARD_URL,
         isLogEnabled:        ENABLE_LOG,
         noScreenshotUpload:  NO_SCREENSHOT_UPLOAD,
-        noVideoUpload:       NO_VIDEO_UPLOAD
+        noVideoUpload:       NO_VIDEO_UPLOAD,
+        ciInfo:              CI_INFO
     };
 
     return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger);
