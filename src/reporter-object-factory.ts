@@ -7,12 +7,12 @@ import {
     createTestError,
     ActionInfo,
     TestError,
-    TestDoneArgs,
     FetchMethod,
     ReadFileMethod, DashboardSettings, Logger
 } from './types/dashboard';
+import { TestDoneArgs, ReportedTestStructureItem } from './types/command-args';
 import { Uploader } from './upload';
-import { ReporterPluginObject, Error, ReportedTestStructureItem } from './types/testcafe';
+import { ReporterPluginObject, Error } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
 import Transport from './transport';
@@ -59,6 +59,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
+
             const { testId } = testStartInfo;
 
             await reportCommands.sendTestStartCommand({ testId });

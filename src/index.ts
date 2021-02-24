@@ -14,11 +14,12 @@ import {
 import { ReporterPluginObject } from './types/testcafe';
 import reporterObjectFactory from './reporter-object-factory';
 import logger from './logger';
+import { BuildId } from './types/general';
 
 module.exports = function pluginFactory (): ReporterPluginObject {
     const settings = {
         authenticationToken: AUTHENTICATION_TOKEN,
-        buildId:             TESTCAFE_DASHBOARD_BUILD_ID,
+        buildId:             TESTCAFE_DASHBOARD_BUILD_ID as BuildId,
         dashboardUrl:        TESTCAFE_DASHBOARD_URL,
         isLogEnabled:        ENABLE_LOG,
         noScreenshotUpload:  NO_SCREENSHOT_UPLOAD,

@@ -1,3 +1,7 @@
+import { Name } from './../general';
+import { ReportedTestStructureItem, TestResult } from '../command-args';
+import { TestStartInfo } from './test-start-info';
+
 export enum CommandType {
     click = 'click',
     rightClick = 'right-click',
@@ -88,10 +92,6 @@ export type BrowserInfo = {
     version: string;
 }
 
-type TestStartInfo = {
-    testRunIds: string[];
-    testId: string;
-}
 
 export type TestCafeActionInfo = {
     browser: BrowserInfo;
@@ -137,7 +137,7 @@ export type TestRunInfo = {
     screenshotPath: string;
     screenshots: Screenshot[];
     skipped: boolean;
-    testId: string;
+    testId: Name;
     unstable: boolean;
     videos: Video[];
     warnings: string[];
@@ -155,29 +155,7 @@ export type DashboardBrowserRunInfo = {
 }
 
 
-export type TestResult = {
-    failedCount: number;
-    passedCount: number;
-    skippedCount: number;
-}
-
 export type decoratorFn = (str: string) => string;
-
-interface ReportedTestItem {
-    id: string;
-    name: string;
-    skip: boolean;
-}
-
-interface ReportedFixtureItem {
-    id: string;
-    name: string;
-    tests: ReportedTestItem[];
-}
-
-export interface ReportedTestStructureItem {
-    fixture: ReportedFixtureItem;
-}
 
 export type ReporterMethods = {
     reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;

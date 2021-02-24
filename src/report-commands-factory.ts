@@ -1,4 +1,5 @@
-import { AggregateCommandType, AggregateNames, TaskStartArgs, TestStartArgs, TestDoneArgs, TaskDoneArgs } from './types/dashboard';
+import { AggregateCommandType, AggregateNames } from './types/dashboard';
+import { TaskStartArgs, TestStartArgs, TestDoneArgs, TaskDoneArgs } from './types/command-args';
 import Transport from './transport';
 
 export default function reportCommandsFactory (reportId: string, transport: Transport) {

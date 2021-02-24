@@ -1,3 +1,4 @@
+import { BuildId } from './general';
 import fetch from 'isomorphic-fetch';
 
 import {
@@ -7,8 +8,6 @@ import {
     Quarantine,
     Error,
     TestRunInfo,
-    TestResult,
-    ReportedTestStructureItem
 } from './testcafe';
 
 export enum AggregateCommandType {
@@ -67,34 +66,6 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns
     browserRuns: browserRuns
 });
 
-export type TaskStartArgs = {
-    startTime: Date;
-    userAgents: string[];
-    testCount: number;
-    buildId: string;
-    taskStructure: ReportedTestStructureItem[];
-};
-
-export type TestStartArgs = {
-    testId: string;
-};
-
-export type TestDoneArgs = {
-    testId: string;
-    skipped: boolean;
-    errorCount: number;
-    duration: number;
-    uploadId: string;
-};
-
-export type TaskDoneArgs = {
-     endTime: Date;
-     passed: number;
-     warnings: string[];
-     result: TestResult;
-     buildId: string;
-};
-
 export enum UploadStatus {
     Completed = 'Completed',
     Failed = 'Failed'
@@ -108,7 +79,7 @@ export interface ReadFileMethod {
 
 export type DashboardSettings = {
     authenticationToken: string;
-    buildId: string;
+    buildId: BuildId;
     dashboardUrl: string;
     isLogEnabled: boolean;
     noScreenshotUpload: boolean;
