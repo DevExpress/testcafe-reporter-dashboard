@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD } from '../src/env';
+import mock from 'mock-require';
 
 describe('enviroment variables', () => {
     it('Screenshots and videos upload should be enabled by default', () => {
@@ -21,5 +22,23 @@ describe('enviroment variables', () => {
 
         assert.equal(NO_SCREENSHOT_UPLOAD, false);
         assert.equal(NO_VIDEO_UPLOAD, false);
+    });
+
+    describe('CI detection', () => {
+        beforeEach(() => {
+            process.env = {};
+        });
+
+        it('Should detect Github Actions', () => {
+            let { isGithubActions } = mock.reRequire('../src/env/ci-detection');
+
+            assert.equal(isGithubActions, false);
+
+            process.env.GITHUB_ACTIONS = 'true';
+
+            isGithubActions = mock.reRequire('../src/env/ci-detection').isGithubActions;
+
+            assert.equal(isGithubActions, true);
+        });
     });
 });
