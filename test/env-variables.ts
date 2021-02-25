@@ -43,6 +43,9 @@ describe('enviroment variables', () => {
     });
 
     it('Should set author name to empty string by default', () => {
+        mock.reRequire('../src/env/ci-detection');
+        mock.reRequire('../src/env/github-actions');
+        mock.reRequire('../src/env/get-ci-info');
         const { CI_INFO } = mock.reRequire('../src/env');
 
         assert.deepEqual(CI_INFO, {
