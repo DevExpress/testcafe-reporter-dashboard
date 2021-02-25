@@ -11,7 +11,10 @@ const SETTINGS: DashboardSettings = {
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,
-    noVideoUpload:       false
+    noVideoUpload:       false,
+    ciInfo:              {
+        author: ''
+    }
 };
 
 describe('reportTaskStart', () => {
