@@ -1,9 +1,9 @@
 
 import * as t from 'io-ts';
-import { NameSchema } from '../general';
+import { NameSchema } from './common';
 
 
-export const TestDoneSchema = t.readonly(
+export const TestDoneArgsSchema = t.readonly(
     t.exact(
         t.type({
             testId:     NameSchema,
@@ -15,5 +15,5 @@ export const TestDoneSchema = t.readonly(
     )
 );
 
-export type TestDoneArgs = t.TypeOf<typeof TestDoneSchema>;
+export type TestDoneArgs = t.TypeOf<typeof TestDoneArgsSchema>;
 

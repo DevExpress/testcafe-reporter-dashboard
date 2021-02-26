@@ -2,10 +2,10 @@ import { DateFromISOString } from 'io-ts-types';
 
 
 import * as t from 'io-ts';
-import { BuildIdSchema } from '../general';
+import { BuildIdSchema } from './common';
 
 
-export const TestResultSchema = t.readonly(
+export const TaskResultSchema = t.readonly(
     t.exact(
         t.type({
             failedCount:  t.number,
@@ -15,7 +15,7 @@ export const TestResultSchema = t.readonly(
     )
 );
 
-export type TestResult = t.TypeOf<typeof TestResultSchema>;
+export type TaskResult = t.TypeOf<typeof TaskResultSchema>;
 
 export const TaskDoneArgsSchema = t.readonly(
     t.exact(
@@ -23,7 +23,7 @@ export const TaskDoneArgsSchema = t.readonly(
             endTime:  DateFromISOString,
             passed:   t.number,
             warnings: t.array(t.string),
-            result:   TestResultSchema,
+            result:   TaskResultSchema,
             buildId:  BuildIdSchema
         })
     )

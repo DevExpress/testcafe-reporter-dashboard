@@ -2,17 +2,16 @@ import uuid from 'uuid';
 
 import { createReportUrlMessage } from './texts';
 import {
-    BrowserRunInfo,
     createDashboardTestRunInfo,
     createTestError,
-    ActionInfo,
-    TestError,
     FetchMethod,
-    ReadFileMethod, DashboardSettings, Logger
-} from './types/dashboard';
-import { TestDoneArgs, ReportedTestStructureItem } from './types/command-args';
+    ReadFileMethod,
+    DashboardSettings,
+    Logger,
+    ReporterPluginObject
+} from './types/internal/';
+import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error } from './types';
 import { Uploader } from './upload';
-import { ReporterPluginObject, Error } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
 import Transport from './transport';

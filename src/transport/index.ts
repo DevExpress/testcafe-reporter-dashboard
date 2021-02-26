@@ -1,8 +1,8 @@
 import { CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../consts';
 import FetchResponse from './fetch-response';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
-import { FetchMethod, Logger } from '../types/dashboard';
-import { ResolveCommand } from '../types/resolve';
+import { FetchMethod, Logger, ResolveCommand } from '../types/internal/';
+
 
 const MAX_RETRY_COUNT = 10;
 

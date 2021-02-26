@@ -1,8 +1,8 @@
 import uuid from 'uuid';
 import assert from 'assert';
-import { Screenshot } from '../src/types/testcafe';
+import { Screenshot, DashboardTestRunInfo } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { DashboardTestRunInfo, AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/dashboard';
+import { AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/internal/';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';

@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 
-import { DashboardTestRunInfo, AggregateCommandType, DashboardSettings } from './../../src/types/dashboard';
+import { DashboardTestRunInfo, AggregateCommandType, DashboardSettings } from '../../src/types/internal/dashboard';
 import { CHROME } from './../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';

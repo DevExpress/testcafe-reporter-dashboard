@@ -1,12 +1,11 @@
-
 import * as t from 'io-ts';
-import { NameSchema } from '../general';
+import { NameSchema } from './common';
 
 
 export const TestStartArgsSchema = t.readonly(
     t.exact(
         t.type({
-            testId: NameSchema
+            testId: NameSchema,
         })
     )
 );

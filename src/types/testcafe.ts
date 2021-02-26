@@ -1,0 +1,160 @@
+import { Name } from './common';
+
+export type BrowserInfo = {
+    alias: string;
+    engine: { name: string; version: string };
+    headless: boolean;
+    name: string;
+    os: { name: string; version: string };
+    platform: string;
+    prettyUserAgent: string;
+    userAgent: string;
+    version: string;
+}
+
+export type TestError = {
+    testRunPhase: string;
+    code: string;
+    errorModel: string;
+};
+
+
+export type Error = {
+    apiFnChain?: string[];
+    apiFnIndex?: number;
+    callsite: {
+        filename: string;
+        lineNum: number;
+        callsiteFrameIdx: number;
+        stackFrames: any[];
+        isV8Frames: boolean;
+    };
+    code: string;
+    errMsg: string;
+    isTestCafeError: boolean;
+    screenshotPath: string;
+    testRunId: string;
+    testRunPhase: string;
+    userAgent: string;
+};
+
+export type TestRunInfo = {
+    browsers: (BrowserInfo & { testRunId: string })[];
+    durationMs: number;
+    errs: Error[];
+    quarantine: Quarantine;
+    screenshotPath: string;
+    screenshots: Screenshot[];
+    skipped: boolean;
+    testId: Name;
+    unstable: boolean;
+    videos: Video[];
+    warnings: string[];
+}
+
+export type DashboardTestRunInfo = {
+    warnings: string[];
+    unstable: boolean;
+    quarantine: Quarantine;
+    browserRuns: Record<string, BrowserRunInfo>;
+}
+
+
+export type Meta = Record<string, string>;
+
+export type Quarantine = {
+    [key: number]: {
+        passed: boolean;
+    };
+}
+
+export type Screenshot = Readonly<{
+    testRunId: string;
+    screenshotPath: string;
+    thumbnailPath: string;
+    userAgent: string;
+    quarantineAttempt: number;
+    takenOnFail: boolean;
+}>;
+
+export type Video = Readonly<{
+    userAgent: string;
+    quarantineAttempt: number;
+    videoPath: string;
+    testRunId: string;
+}>;
+
+export type BrowserRunInfo = {
+    browser: BrowserInfo;
+    screenshotUploadIds?: string[];
+    videoUploadIds?: string[];
+    actions?: ActionInfo[];
+    thirdPartyError?: TestError;
+}
+
+export type ActionInfo = {
+    duration: number;
+    apiName: string;
+    testPhase: TestPhase;
+    command: Record<string, any> & { type: CommandType };
+    error?: TestError;
+}
+
+export enum TestPhase {
+    initial = 'initial',
+    inFixtureBeforeHook = 'inFixtureBeforeHook',
+    inFixtureBeforeEachHook = 'inFixtureBeforeEachHook',
+    inTestBeforeHook = 'inTestBeforeHook',
+    inTest = 'inTest',
+    inTestAfterHook = 'inTestAfterHook',
+    inFixtureAfterEachHook = 'inFixtureAfterEachHook',
+    inFixtureAfterHook = 'inFixtureAfterHook',
+    inRoleInitializer = 'inRoleInitializer',
+    inBookmarkRestore = 'inBookmarkRestore'
+};
+
+export enum CommandType {
+    click = 'click',
+    rightClick = 'right-click',
+    doubleClick = 'double-click',
+    drag = 'drag',
+    dragToElement = 'drag-to-element',
+    hover = 'hover',
+    typeText = 'type-text',
+    selectText = 'select-text',
+    selectTextAreaContent = 'select-text-area-content',
+    selectEditableContent = 'select-editable-content',
+    pressKey = 'press-key',
+    wait = 'wait',
+    navigateTo = 'navigate-to',
+    setFilesToUpload = 'set-files-to-upload',
+    clearUpload = 'clear-upload',
+    executeClientFunction = 'execute-client-function',
+    executeSelector = 'execute-selector',
+    takeScreenshot = 'take-screenshot',
+    takeElementScreenshot = 'take-element-screenshot',
+    takeScreenshotOnFail = 'take-screenshot-on-fail',
+    prepareBrowserManipulation = 'prepare-browser-manipulation',
+    showAssertionRetriesStatus = 'show-assertion-retries-status',
+    hideAssertionRetriesStatus = 'hide-assertion-retries-status',
+    setBreakpoint = 'set-breakpoint',
+    resizeWindow = 'resize-window',
+    resizeWindowToFitDevice = 'resize-window-to-fit-device',
+    maximizeWindow = 'maximize-window',
+    switchToIframe = 'switch-to-iframe',
+    switchToMainWindow = 'switch-to-main-window',
+    setNativeDialogHandler = 'set-native-dialog-handler',
+    getNativeDialogHistory = 'get-native-dialog-history',
+    getBrowserConsoleMessages = 'get-browser-console-messages',
+    setTestSpeed = 'set-test-speed',
+    setPageLoadTimeout = 'set-page-load-timeout',
+    debug = 'debug',
+    assertion = 'assertion',
+    useRole = 'useRole',
+    testDone = 'test-done',
+    backupStorages = 'backup-storages',
+    executeExpression = 'execute-expression',
+    executeAsyncExpression = 'execute-async-expression',
+    unlockPage = 'unlock-page',
+    recorder = 'recorder'
+};

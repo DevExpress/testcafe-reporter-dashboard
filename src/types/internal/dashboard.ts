@@ -1,14 +1,5 @@
-import { BuildId } from './general';
 import fetch from 'isomorphic-fetch';
-
-import {
-    TestPhase,
-    CommandType,
-    BrowserInfo,
-    Quarantine,
-    Error,
-    TestRunInfo,
-} from './testcafe';
+import { TestError, TestRunInfo, Error, BrowserRunInfo, DashboardTestRunInfo, BuildId } from '../';
 
 export enum AggregateCommandType {
     reportTaskStart = 'reportTaskStart',
@@ -24,34 +15,6 @@ export enum AggregateNames {
     Upload = 'Upload'
 };
 
-export type BrowserRunInfo = {
-    browser: BrowserInfo;
-    screenshotUploadIds?: string[];
-    videoUploadIds?: string[];
-    actions?: ActionInfo[];
-    thirdPartyError?: TestError;
-}
-
-export type ActionInfo = {
-    duration: number;
-    apiName: string;
-    testPhase: TestPhase;
-    command: Record<string, any> & { type: CommandType };
-    error?: TestError;
-}
-
-export type TestError = {
-    testRunPhase: string;
-    code: string;
-    errorModel: string;
-}
-
-export type DashboardTestRunInfo = {
-    warnings: string[];
-    unstable: boolean;
-    quarantine: Quarantine;
-    browserRuns: Record<string, BrowserRunInfo>;
-}
 
 export const createTestError = (error: Error, errorModel: string): TestError => ({
     code:         error.code,

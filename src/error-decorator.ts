@@ -1,4 +1,4 @@
-import { decoratorFn } from './types/testcafe';
+import { decoratorFn } from './types/internal/';
 
 const empty = (): string => '';
 const raw = (str: string): string => str;

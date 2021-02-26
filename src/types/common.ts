@@ -1,4 +1,4 @@
-import { MAX_BUILD_ID_LENGTH } from './../consts';
+import { MAX_BUILD_ID_LENGTH } from '../consts';
 import * as t from 'io-ts';
 
 export interface MaxLengthString<N> {
@@ -20,6 +20,6 @@ export const NameSchema = MaxLengthString(300);
 
 export type Name = t.TypeOf<typeof NameSchema>;
 
-export const BuildIdSchema = MaxLengthString(MAX_BUILD_ID_LENGTH);
+export const BuildIdSchema = t.union([MaxLengthString(MAX_BUILD_ID_LENGTH), t.undefined]);
 
 export type BuildId = t.TypeOf<typeof BuildIdSchema>;

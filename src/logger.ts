@@ -1,4 +1,4 @@
-import { Logger } from './types/dashboard';
+import { Logger } from './types/internal/dashboard';
 
 function log (...params): void {
     console.log(...params);

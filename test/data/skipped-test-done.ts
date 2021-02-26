@@ -1,4 +1,5 @@
-import { TestRunInfo } from '../../src/types/testcafe';
+
+import { TestRunInfo } from '../../src/types/';
 import { CHROME } from './test-browser-info';
 
 export const skippedTestDone: TestRunInfo = {

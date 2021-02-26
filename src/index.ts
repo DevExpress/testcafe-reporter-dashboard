@@ -11,10 +11,10 @@ import {
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
 
-import { ReporterPluginObject } from './types/testcafe';
+import { ReporterPluginObject } from './types/internal';
 import reporterObjectFactory from './reporter-object-factory';
 import logger from './logger';
-import { BuildId } from './types/general';
+import { BuildId } from './types/common';
 
 module.exports = function pluginFactory (): ReporterPluginObject {
     const settings = {

@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import { DateFromISOString } from 'io-ts-types';
-import { BuildIdSchema, NameSchema } from '../general';
+import { BuildIdSchema, NameSchema } from './common';
 
 export const ReportedTestItemSchema = t.readonly(
     t.exact(
