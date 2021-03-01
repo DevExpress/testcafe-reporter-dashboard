@@ -16,9 +16,6 @@ const SETTINGS: DashboardSettings = {
     isLogEnabled:        false,
     noScreenshotUpload:  false,
     noVideoUpload:       false,
-    ciInfo:              {
-        author: ''
-    }
 };
 
 const noop  = () => void 0;

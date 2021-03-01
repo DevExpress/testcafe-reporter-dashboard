@@ -12,9 +12,6 @@ const SETTINGS: DashboardSettings = {
     isLogEnabled:        false,
     noScreenshotUpload:  false,
     noVideoUpload:       false,
-    ciInfo:              {
-        author: ''
-    }
 };
 
 describe('reportTaskStart', () => {

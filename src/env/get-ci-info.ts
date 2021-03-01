@@ -4,10 +4,8 @@ import {
     isGithubActions,
 } from './ci-detection';
 
-export function getCIInfo (): CIInfo {
-    let info = {
-        author: ''
-    };
+export function getCIInfo (): CIInfo | undefined {
+    let info: CIInfo | undefined;
 
     if (isGithubActions)
         info = getGithubActionsInfo();

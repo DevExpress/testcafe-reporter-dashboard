@@ -73,7 +73,7 @@ export type TaskStartArgs = {
     testCount: number;
     buildId: string;
     taskStructure: ReportedTestStructureItem[];
-    author: string;
+    author: string | undefined;
 };
 
 export type TestStartArgs = {
@@ -119,7 +119,7 @@ export type DashboardSettings = {
     noScreenshotUpload: boolean;
     noVideoUpload: boolean;
     runId?: string;
-    ciInfo: CIInfo;
+    ciInfo?: CIInfo;
 };
 
 export type Logger = {
