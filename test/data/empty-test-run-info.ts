@@ -1,3 +1,4 @@
+import { Name } from '../../src/types';
 import { TestRunInfo } from '../../src/types/testcafe';
 
 export const EMPTY_TEST_RUN_INFO: TestRunInfo = {
@@ -8,7 +9,7 @@ export const EMPTY_TEST_RUN_INFO: TestRunInfo = {
     screenshotPath: '',
     screenshots:    [],
     skipped:        false,
-    testId:         'test_1',
+    testId:         'test_1' as Name,
     unstable:       false,
     videos:         [],
     warnings:       []

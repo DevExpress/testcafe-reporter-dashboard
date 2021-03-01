@@ -1,11 +1,12 @@
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 
-import { DashboardTestRunInfo, AggregateCommandType, DashboardSettings } from '../../src/types/internal/dashboard';
+import { AggregateCommandType, DashboardSettings } from '../../src/types/internal/dashboard';
 import { CHROME } from './../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
+import { DashboardTestRunInfo } from '../../src/types';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';

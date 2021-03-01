@@ -10,7 +10,7 @@ import {
     Logger,
     ReporterPluginObject
 } from './types/internal/';
-import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error } from './types';
+import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error, BuildId } from './types';
 import { Uploader } from './upload';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
@@ -50,7 +50,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
-            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId, taskStructure });
+            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId: buildId as BuildId, taskStructure });
         },
 
         async reportFixtureStart (): Promise<void> {
@@ -163,7 +163,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await uploader.waitUploads();
-            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId });
+            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId: buildId as BuildId });
         }
     }, isLogEnabled);
 

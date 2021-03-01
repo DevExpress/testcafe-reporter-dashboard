@@ -33,13 +33,13 @@ export type Error = {
     errMsg: string;
     isTestCafeError: boolean;
     screenshotPath: string;
-    testRunId: string;
+    testRunId: Name;
     testRunPhase: string;
     userAgent: string;
 };
 
 export type TestRunInfo = {
-    browsers: (BrowserInfo & { testRunId: string })[];
+    browsers: (BrowserInfo & { testRunId: Name })[];
     durationMs: number;
     errs: Error[];
     quarantine: Quarantine;
@@ -69,7 +69,7 @@ export type Quarantine = {
 }
 
 export type Screenshot = Readonly<{
-    testRunId: string;
+    testRunId: Name;
     screenshotPath: string;
     thumbnailPath: string;
     userAgent: string;
@@ -81,7 +81,7 @@ export type Video = Readonly<{
     userAgent: string;
     quarantineAttempt: number;
     videoPath: string;
-    testRunId: string;
+    testRunId: Name;
 }>;
 
 export type BrowserRunInfo = {

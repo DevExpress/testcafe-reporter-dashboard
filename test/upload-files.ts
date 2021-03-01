@@ -6,6 +6,7 @@ import { AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings }
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
+import { Name } from '../src/types';
 
 const UPLOAD_URL_PREFIX           = 'http://upload_url/';
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
@@ -19,6 +20,10 @@ const SETTINGS: DashboardSettings = {
 };
 
 const noop  = () => void 0;
+
+const testRunIdChrome = 'chrome_headless' as Name;
+const testRunId1 = 'testRun_1' as Name;
+const testRunId2 = 'testRun_2' as Name;
 
 describe('Uploads', () => {
     const aggregateCommands = [];
@@ -67,7 +72,7 @@ describe('Uploads', () => {
 
             const screenshots: Screenshot[] = [
                 {
-                    testRunId:         'chrome_headless',
+                    testRunId:         testRunIdChrome,
                     screenshotPath:    'C:\\screenshots\\1.png',
                     thumbnailPath:     'C:\\screenshots\\thumbnails\\1.png',
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
@@ -75,7 +80,7 @@ describe('Uploads', () => {
                     quarantineAttempt: 0
                 },
                 {
-                    testRunId:         'chrome_headless',
+                    testRunId:         testRunIdChrome,
                     screenshotPath:    'C:\\screenshots\\errors\\1.png',
                     thumbnailPath:     'C:\\screenshots\\errors\\thumbnails\\1.png',
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
@@ -104,7 +109,7 @@ describe('Uploads', () => {
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
                 screenshots,
-                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ]
+                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' as Name } ]
             });
 
             const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
@@ -149,7 +154,7 @@ describe('Uploads', () => {
         it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
             const screenshots: Screenshot[] = [
                 {
-                    testRunId:         'chrome_headless',
+                    testRunId:         testRunIdChrome,
                     screenshotPath:    'C:\\screenshots\\1.png',
                     thumbnailPath:     'C:\\screenshots\\thumbnails\\1.png',
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
@@ -157,7 +162,7 @@ describe('Uploads', () => {
                     quarantineAttempt: 0
                 },
                 {
-                    testRunId:         'chrome_headless',
+                    testRunId:         testRunIdChrome,
                     screenshotPath:    'C:\\screenshots\\errors\\1.png',
                     thumbnailPath:     'C:\\screenshots\\errors\\thumbnails\\1.png',
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
@@ -171,7 +176,7 @@ describe('Uploads', () => {
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
                 screenshots,
-                browsers: [ { ...CHROME, testRunId: 'chrome_headless' } ]
+                browsers: [ { ...CHROME, testRunId: testRunIdChrome } ]
             });
 
             assert.equal(uploadInfos.length, 1);
@@ -207,17 +212,17 @@ describe('Uploads', () => {
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
-                browsers: [ { ...CHROME, testRunId: 'testRun_1' }, { ...FIREFOX, testRunId: 'testRun_2' } ],
+                browsers: [ { ...CHROME, testRunId: testRunId1 }, { ...FIREFOX, testRunId: testRunId2 } ],
                 videos:   [
                     {
                         quarantineAttempt: null,
-                        testRunId:         'testRun_1',
+                        testRunId:         testRunId1,
                         userAgent:         CHROME.prettyUserAgent,
                         videoPath:         '1.mp4'
                     },
                     {
                         quarantineAttempt: null,
-                        testRunId:         'testRun_2',
+                        testRunId:         testRunId2,
                         userAgent:         FIREFOX.prettyUserAgent,
                         videoPath:         '2.mp4'
                     }
@@ -268,17 +273,17 @@ describe('Uploads', () => {
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
-                browsers: [ { ...CHROME, testRunId: 'testRun_1' }, { ...FIREFOX, testRunId: 'testRun_2' } ],
+                browsers: [ { ...CHROME, testRunId: testRunId1 }, { ...FIREFOX, testRunId: testRunId2 } ],
                 videos:   [
                     {
                         quarantineAttempt: null,
-                        testRunId:         'testRun_1',
+                        testRunId:         testRunId1,
                         userAgent:         CHROME.prettyUserAgent,
                         videoPath:         '1.mp4'
                     },
                     {
                         quarantineAttempt: null,
-                        testRunId:         'testRun_2',
+                        testRunId:         testRunId2,
                         userAgent:         FIREFOX.prettyUserAgent,
                         videoPath:         '2.mp4'
                     }

@@ -27,6 +27,15 @@ function build () {
         .pipe(gulp.dest('lib'));
 }
 
+function buildTypes () {
+    const tsConfig = gulpTypeScript({declaration: true})
+
+    return gulp
+        .src('src/types/*.ts')
+        .pipe(tsConfig).dts
+        .pipe(gulp.dest('lib/types/'));
+}
+
 function preview () {
     var buildReporterPlugin = require('testcafe').embeddingUtils.buildReporterPlugin;
     var pluginFactory       = require('./lib');
@@ -44,5 +53,5 @@ function preview () {
 
 exports.clean = clean;
 exports.test = gulp.series(clean, build);
-exports.build = gulp.series(clean, build);
+exports.build = gulp.series(clean, build, buildTypes);
 exports.preview = gulp.series(clean, build, preview);

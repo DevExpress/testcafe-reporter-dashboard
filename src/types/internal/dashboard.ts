@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import { TestError, TestRunInfo, Error, BrowserRunInfo, DashboardTestRunInfo, BuildId } from '../';
+import { TestError, TestRunInfo, Error, BrowserRunInfo, DashboardTestRunInfo } from '../';
 
 export enum AggregateCommandType {
     reportTaskStart = 'reportTaskStart',
@@ -42,7 +42,7 @@ export interface ReadFileMethod {
 
 export type DashboardSettings = {
     authenticationToken: string;
-    buildId: BuildId;
+    buildId: string;
     dashboardUrl: string;
     isLogEnabled: boolean;
     noScreenshotUpload: boolean;
