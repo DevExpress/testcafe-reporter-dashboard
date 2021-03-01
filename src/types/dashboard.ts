@@ -73,7 +73,7 @@ export type TaskStartArgs = {
     testCount: number;
     buildId: string;
     taskStructure: ReportedTestStructureItem[];
-    author: string | undefined;
+    ciInfo?: CIInfo;
 };
 
 export type TestStartArgs = {

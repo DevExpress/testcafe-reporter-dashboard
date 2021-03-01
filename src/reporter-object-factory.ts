@@ -57,10 +57,9 @@ export default function reporterObjectFactory (
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
-            const author = ciInfo?.author;
 
             await reportCommands.sendTaskStartCommand({
-                startTime, userAgents, testCount, buildId, taskStructure, author
+                startTime, userAgents, testCount, buildId, taskStructure, ciInfo
             });
         },
 
