@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD } from '../src/env';
+import { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD } from '../../src/env';
 import mock from 'mock-require';
 
 describe('enviroment variables', () => {
@@ -26,20 +26,6 @@ describe('enviroment variables', () => {
 
         assert.equal(NO_SCREENSHOT_UPLOAD, false);
         assert.equal(NO_VIDEO_UPLOAD, false);
-    });
-
-    describe('CI detection', () => {
-        it('Should detect Github Actions', () => {
-            let { isGithubActions } = mock.reRequire('../src/env/ci-detection');
-
-            assert.equal(isGithubActions, false);
-
-            process.env.GITHUB_ACTIONS = 'true';
-
-            isGithubActions = mock.reRequire('../src/env/ci-detection').isGithubActions;
-
-            assert.equal(isGithubActions, true);
-        });
     });
 
     it('Should set CI_INFO to undefined by default', () => {
