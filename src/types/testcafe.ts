@@ -1,5 +1,3 @@
-import { Name } from './common';
-
 export type BrowserInfo = {
     alias: string;
     engine: { name: string; version: string };
@@ -33,20 +31,20 @@ export type Error = {
     errMsg: string;
     isTestCafeError: boolean;
     screenshotPath: string;
-    testRunId: Name;
+    testRunId: string;
     testRunPhase: string;
     userAgent: string;
 };
 
 export type TestRunInfo = {
-    browsers: (BrowserInfo & { testRunId: Name })[];
+    browsers: (BrowserInfo & { testRunId: string })[];
     durationMs: number;
     errs: Error[];
     quarantine: Quarantine;
     screenshotPath: string;
     screenshots: Screenshot[];
     skipped: boolean;
-    testId: Name;
+    testId: string;
     unstable: boolean;
     videos: Video[];
     warnings: string[];
@@ -69,7 +67,7 @@ export type Quarantine = {
 }
 
 export type Screenshot = Readonly<{
-    testRunId: Name;
+    testRunId: string;
     screenshotPath: string;
     thumbnailPath: string;
     userAgent: string;
@@ -81,7 +79,7 @@ export type Video = Readonly<{
     userAgent: string;
     quarantineAttempt: number;
     videoPath: string;
-    testRunId: Name;
+    testRunId: string;
 }>;
 
 export type BrowserRunInfo = {

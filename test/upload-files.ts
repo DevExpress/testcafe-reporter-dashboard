@@ -6,7 +6,6 @@ import { AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings }
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
-import { Name } from '../src/types';
 
 const UPLOAD_URL_PREFIX           = 'http://upload_url/';
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
@@ -21,9 +20,9 @@ const SETTINGS: DashboardSettings = {
 
 const noop  = () => void 0;
 
-const testRunIdChrome = 'chrome_headless' as Name;
-const testRunId1 = 'testRun_1' as Name;
-const testRunId2 = 'testRun_2' as Name;
+const testRunIdChrome = 'chrome_headless';
+const testRunId1 = 'testRun_1';
+const testRunId2 = 'testRun_2';
 
 describe('Uploads', () => {
     const aggregateCommands = [];
@@ -109,7 +108,7 @@ describe('Uploads', () => {
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
                 screenshots,
-                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' as Name } ]
+                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ]
             });
 
             const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;

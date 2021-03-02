@@ -1,11 +1,11 @@
 import { FIREFOX, CHROME } from './test-browser-info';
 
 import { TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { Name, TestPhase, TestRunInfo } from '../../src/types/';
+import { TestPhase, TestRunInfo } from '../../src/types/';
 
-const testRunId1 = 'firefox_1' as Name;
-const testRunId2 = 'chrome_1' as Name;
-const testId = '1' as Name;
+const testRunId1 = 'firefox_1';
+const testRunId2 = 'chrome_1';
+const testId = '1';
 
 export const testDoneInfo: TestRunInfo = {
     browsers:   [ { ...FIREFOX, testRunId: testRunId1 }, { ...CHROME, testRunId: testRunId2 } ],

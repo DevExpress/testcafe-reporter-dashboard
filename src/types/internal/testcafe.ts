@@ -1,16 +1,9 @@
-import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult, NameSchema } from '../';
-import * as t from 'io-ts';
+import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult } from '../';
 
-
-export const TestStartInfoSchema = t.readonly(
-    t.type({
-        testId:    NameSchema,
-        testRunId: t.array(NameSchema)
-    }),
-);
-
-
-export type TestStartInfo = t.TypeOf<typeof TestStartInfoSchema>;
+export type TestStartInfo = {
+    testId: string;
+    testRunId: string[];
+}
 
 export type TestCafeActionInfo = {
     browser: BrowserInfo;

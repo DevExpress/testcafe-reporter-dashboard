@@ -1,12 +1,12 @@
 
 import * as t from 'io-ts';
-import { NameSchema } from './common';
+import { ShortIdSchema } from './common';
 
 
 export const TestDoneArgsSchema = t.readonly(
     t.exact(
         t.type({
-            testId:     NameSchema,
+            testId:     ShortIdSchema,
             skipped:    t.boolean,
             errorCount: t.number,
             duration:   t.number,

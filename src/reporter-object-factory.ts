@@ -10,7 +10,7 @@ import {
     Logger,
     ReporterPluginObject
 } from './types/internal/';
-import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error, BuildId } from './types';
+import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error, BuildId, ShortId } from './types';
 import { Uploader } from './upload';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
@@ -59,7 +59,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
 
-            const { testId } = testStartInfo;
+            const testId = testStartInfo.testId as ShortId;
 
             await reportCommands.sendTestStartCommand({ testId });
         },
@@ -151,7 +151,7 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
             }, {} as Record<string, BrowserRunInfo>);
 
             const testDonePayload: TestDoneArgs = {
-                testId,
+                testId:     testId as ShortId,
                 skipped,
                 errorCount: errs.length,
                 duration:   durationMs,

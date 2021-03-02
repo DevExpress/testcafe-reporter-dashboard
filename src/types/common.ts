@@ -16,6 +16,10 @@ export const MaxLengthString = <N extends number>(len: N) =>
 
 export const AggregateId = MaxLengthString(190);
 
+export const ShortIdSchema = MaxLengthString(10);
+
+export type ShortId = t.TypeOf<typeof ShortIdSchema>;
+
 export const NameSchema = MaxLengthString(300);
 
 export type Name = t.TypeOf<typeof NameSchema>;

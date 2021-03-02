@@ -1,11 +1,11 @@
 import * as t from 'io-ts';
 import { DateFromISOString } from 'io-ts-types';
-import { BuildIdSchema, NameSchema } from './common';
+import { BuildIdSchema, NameSchema, ShortIdSchema } from './common';
 
 export const ReportedTestItemSchema = t.readonly(
     t.exact(
         t.type({
-            id:   NameSchema,
+            id:   ShortIdSchema,
             name: NameSchema,
             skip: t.boolean
         })
