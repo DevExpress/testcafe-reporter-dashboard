@@ -1,4 +1,4 @@
-import { ReporterPluginObject } from './types/testcafe';
+import { ReporterPluginObject } from './types/internal';
 
 const noop = () => void 0;
 

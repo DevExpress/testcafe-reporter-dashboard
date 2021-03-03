@@ -11,14 +11,15 @@ import {
     TESTCAFE_DASHBOARD_URL
 } from './env-variables';
 
-import { ReporterPluginObject } from './types/testcafe';
+import { ReporterPluginObject } from './types/internal';
 import reporterObjectFactory from './reporter-object-factory';
 import logger from './logger';
+import { BuildId } from './types/common';
 
 module.exports = function pluginFactory (): ReporterPluginObject {
     const settings = {
         authenticationToken: AUTHENTICATION_TOKEN,
-        buildId:             TESTCAFE_DASHBOARD_BUILD_ID,
+        buildId:             TESTCAFE_DASHBOARD_BUILD_ID as BuildId,
         dashboardUrl:        TESTCAFE_DASHBOARD_URL,
         isLogEnabled:        ENABLE_LOG,
         noScreenshotUpload:  NO_SCREENSHOT_UPLOAD,

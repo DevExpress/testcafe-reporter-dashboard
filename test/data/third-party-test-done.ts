@@ -3,6 +3,7 @@ import { TestRunInfo, TestPhase } from '../../src/types/testcafe';
 import { CHROME } from './test-browser-info';
 
 const TEST_RUN_ID = 'Xsa6hZIR5';
+const testId = '';
 
 export const thirdPartyTestDone: TestRunInfo = {
     browsers:   [{ testRunId: TEST_RUN_ID, ...CHROME }],
@@ -47,7 +48,7 @@ export const thirdPartyTestDone: TestRunInfo = {
     screenshotPath: null,
     screenshots:    [],
     skipped:        false,
-    testId:         '',
+    testId,
     unstable:       false,
     videos:         [],
     warnings:       []

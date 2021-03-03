@@ -1,5 +1,6 @@
 import { TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { TestCafeActionInfo, CommandType, TestPhase } from '../../src/types/testcafe';
+import { TestCafeActionInfo } from '../../src/types/internal';
+import { CommandType, TestPhase } from '../../src/types/testcafe';
 import { FIREFOX, CHROME, CHROME_HEADLESS } from './test-browser-info';
 
 export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: TestCafeActionInfo }[] = [

@@ -1,3 +1,116 @@
+export type BrowserInfo = {
+    alias: string;
+    engine: { name: string; version: string };
+    headless: boolean;
+    name: string;
+    os: { name: string; version: string };
+    platform: string;
+    prettyUserAgent: string;
+    userAgent: string;
+    version: string;
+}
+
+export type TestError = {
+    testRunPhase: string;
+    code: string;
+    errorModel: string;
+};
+
+
+export type Error = {
+    apiFnChain?: string[];
+    apiFnIndex?: number;
+    callsite: {
+        filename: string;
+        lineNum: number;
+        callsiteFrameIdx: number;
+        stackFrames: any[];
+        isV8Frames: boolean;
+    };
+    code: string;
+    errMsg: string;
+    isTestCafeError: boolean;
+    screenshotPath: string;
+    testRunId: string;
+    testRunPhase: string;
+    userAgent: string;
+};
+
+export type TestRunInfo = {
+    browsers: (BrowserInfo & { testRunId: string })[];
+    durationMs: number;
+    errs: Error[];
+    quarantine: Quarantine;
+    screenshotPath: string;
+    screenshots: Screenshot[];
+    skipped: boolean;
+    testId: string;
+    unstable: boolean;
+    videos: Video[];
+    warnings: string[];
+}
+
+export type DashboardTestRunInfo = {
+    warnings: string[];
+    unstable: boolean;
+    quarantine: Quarantine;
+    browserRuns: Record<string, BrowserRunInfo>;
+}
+
+
+export type Meta = Record<string, string>;
+
+export type Quarantine = {
+    [key: number]: {
+        passed: boolean;
+    };
+}
+
+export type Screenshot = Readonly<{
+    testRunId: string;
+    screenshotPath: string;
+    thumbnailPath: string;
+    userAgent: string;
+    quarantineAttempt: number;
+    takenOnFail: boolean;
+}>;
+
+export type Video = Readonly<{
+    userAgent: string;
+    quarantineAttempt: number;
+    videoPath: string;
+    testRunId: string;
+}>;
+
+export type BrowserRunInfo = {
+    browser: BrowserInfo;
+    screenshotUploadIds?: string[];
+    videoUploadIds?: string[];
+    actions?: ActionInfo[];
+    thirdPartyError?: TestError;
+}
+
+export type ActionInfo = {
+    duration: number;
+    apiName: string;
+    testPhase: TestPhase;
+    command: Record<string, any> & { type: CommandType };
+    error?: TestError;
+}
+
+export enum TestPhase {
+    initial = 'initial',
+    inFixtureBeforeHook = 'inFixtureBeforeHook',
+    inFixtureBeforeEachHook = 'inFixtureBeforeEachHook',
+    inTestBeforeHook = 'inTestBeforeHook',
+    inTest = 'inTest',
+    inTestAfterHook = 'inTestAfterHook',
+    inFixtureAfterEachHook = 'inFixtureAfterEachHook',
+    inFixtureAfterHook = 'inFixtureAfterHook',
+    inRoleInitializer = 'inRoleInitializer',
+    inBookmarkRestore = 'inBookmarkRestore'
+};
+
 export enum CommandType {
     click = 'click',
     rightClick = 'right-click',
@@ -42,153 +155,4 @@ export enum CommandType {
     executeAsyncExpression = 'execute-async-expression',
     unlockPage = 'unlock-page',
     recorder = 'recorder'
-};
-
-export enum TestPhase {
-    initial = 'initial',
-    inFixtureBeforeHook = 'inFixtureBeforeHook',
-    inFixtureBeforeEachHook = 'inFixtureBeforeEachHook',
-    inTestBeforeHook = 'inTestBeforeHook',
-    inTest = 'inTest',
-    inTestAfterHook = 'inTestAfterHook',
-    inFixtureAfterEachHook = 'inFixtureAfterEachHook',
-    inFixtureAfterHook = 'inFixtureAfterHook',
-    inRoleInitializer = 'inRoleInitializer',
-    inBookmarkRestore = 'inBookmarkRestore'
-};
-
-export type Error = {
-    apiFnChain?: string[];
-    apiFnIndex?: number;
-    callsite: {
-        filename: string;
-        lineNum: number;
-        callsiteFrameIdx: number;
-        stackFrames: any[];
-        isV8Frames: boolean;
-    };
-    code: string;
-    errMsg: string;
-    isTestCafeError: boolean;
-    screenshotPath: string;
-    testRunId: string;
-    testRunPhase: string;
-    userAgent: string;
-};
-
-export type BrowserInfo = {
-    alias: string;
-    engine: { name: string; version: string };
-    headless: boolean;
-    name: string;
-    os: { name: string; version: string };
-    platform: string;
-    prettyUserAgent: string;
-    userAgent: string;
-    version: string;
-}
-
-type TestStartInfo = {
-    testRunIds: string[];
-    testId: string;
-}
-
-export type TestCafeActionInfo = {
-    browser: BrowserInfo;
-    command: Record<string, any> & { type: CommandType };
-    duration?: number;
-    err?: Error;
-    test: {
-        name: string;
-        phase: TestPhase;
-    };
-    testRunId: string;
-};
-
-type Meta = Record<string, string>;
-
-export type Quarantine = {
-    [key: number]: {
-        passed: boolean;
-    };
-}
-
-export type Screenshot = {
-    testRunId: string;
-    screenshotPath: string;
-    thumbnailPath: string;
-    userAgent: string;
-    quarantineAttempt: number;
-    takenOnFail: boolean;
-}
-
-export type Video = {
-    userAgent: string;
-    quarantineAttempt: number;
-    videoPath: string;
-    testRunId: string;
-}
-
-export type TestRunInfo = {
-    browsers: (BrowserInfo & { testRunId: string })[];
-    durationMs: number;
-    errs: Error[];
-    quarantine: Quarantine;
-    screenshotPath: string;
-    screenshots: Screenshot[];
-    skipped: boolean;
-    testId: string;
-    unstable: boolean;
-    videos: Video[];
-    warnings: string[];
-}
-
-
-export type DashboardBrowserRunInfo = {
-    browser: BrowserInfo;
-    actions: {
-        apiName: string;
-        testPhase: TestPhase;
-        command: Record<string, any> & { type: CommandType };
-        errors: Error[];
-    }[];
-}
-
-
-export type TestResult = {
-    failedCount: number;
-    passedCount: number;
-    skippedCount: number;
-}
-
-export type decoratorFn = (str: string) => string;
-
-interface ReportedTestItem {
-    id: string;
-    name: string;
-    skip: boolean;
-}
-
-interface ReportedFixtureItem {
-    id: string;
-    name: string;
-    tests: ReportedTestItem[];
-}
-
-export interface ReportedTestStructureItem {
-    fixture: ReportedFixtureItem;
-}
-
-export type ReporterMethods = {
-    reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
-    reportFixtureStart: (name: string, path: string, meta: Meta) => Promise<void>;
-    reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
-    reportTestActionStart?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
-    reportTestActionDone?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
-    reportTestDone: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
-    reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TestResult) => Promise<void>;
-};
-
-export type ReporterPluginObject = ReporterMethods & {
-    createErrorDecorator: () => Record<string, decoratorFn>;
 };

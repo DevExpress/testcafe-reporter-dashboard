@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { DashboardSettings } from './../src/types/dashboard';
+import { DashboardSettings } from '../src/types/internal/dashboard';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
 import { AUTHENTICATION_TOKEN_NOT_DEFINED, createLongBuildIdError, DASHBOARD_LOCATION_NOT_DEFINED } from '../src/texts';

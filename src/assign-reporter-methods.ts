@@ -1,4 +1,4 @@
-import { ReporterMethods, ReporterPluginObject } from './types/testcafe';
+import { ReporterMethods, ReporterPluginObject } from './types/internal';
 import logger from './logger';
 import { createReporterMethodName } from './texts';
 
