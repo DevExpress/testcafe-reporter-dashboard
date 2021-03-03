@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { getGithubActionsInfo } from './github-actions';
 import { CIInfo } from '../types/dashboard';
 import {
@@ -8,7 +9,7 @@ export function getCIInfo (): CIInfo | undefined {
     let info: CIInfo | undefined;
 
     if (isGithubActions)
-        info = getGithubActionsInfo();
+        info = getGithubActionsInfo(readFileSync);
 
     return info;
 }

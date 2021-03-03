@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync as fsReadFileSync } from 'fs';
 import { CIInfo } from '../types/dashboard';
 
 const { env } = process;
@@ -11,14 +11,11 @@ interface EventInfo {
     };
 }
 
-function getEventInfo (): EventInfo {
+export function getGithubActionsInfo (
+    readFileSync: typeof fsReadFileSync
+): CIInfo {
     const rawEvent = readFileSync(env.GITHUB_EVENT_PATH, 'utf8');
-
-    return JSON.parse(rawEvent);
-}
-
-export function getGithubActionsInfo (): CIInfo {
-    const event = getEventInfo();
+    const event = JSON.parse(rawEvent) as EventInfo;
 
     return {
         author: event.pull_request.user.login

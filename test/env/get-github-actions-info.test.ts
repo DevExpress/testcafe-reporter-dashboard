@@ -1,33 +1,30 @@
+import { readFileSync as fsReadFileSync } from 'fs';
 import assert from 'assert';
-import mock from 'mock-require';
 
 describe('getGithubActionsInfo()', () => {
-    const modulePath = '../../src/env/github-actions';
-    let getGithubActionsInfo = mock.reRequire(modulePath);
-    let readResult = '';
-
-    before(() => {
-        mock('fs', { readFileSync: () => readResult });
-        getGithubActionsInfo = mock.reRequire(modulePath).getGithubActionsInfo;
-    });
-
-    afterEach(() => {
-        readResult = '';
-    });
-
-    after(() => {
-        mock.stopAll();
-    });
-
     it('Should detect author name', () => {
         const name = 'Luke';
+        const eventPath = 'testPath';
+        let path = '';
+        let encoding = '';
 
-        readResult = JSON.stringify({
-            'pull_request': { user: { login: name } }
-        });
+        process.env.GITHUB_EVENT_PATH = eventPath;
 
-        assert.deepEqual(getGithubActionsInfo(), {
+        const getGithubActionsInfo = require('../../src/env/github-actions').getGithubActionsInfo;
+
+        const readFileSync = ((filePath, enc) => {
+            path = filePath;
+            encoding = enc;
+
+            return JSON.stringify({
+                'pull_request': { user: { login: name } }
+            });
+        }) as typeof fsReadFileSync;
+
+        assert.deepEqual(getGithubActionsInfo(readFileSync), {
             author: name
         });
+        assert.equal(path, eventPath);
+        assert.equal(encoding, 'utf8');
     });
 });
