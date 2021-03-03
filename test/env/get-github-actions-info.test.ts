@@ -4,6 +4,8 @@ import assert from 'assert';
 describe('getGithubActionsInfo()', () => {
     it('Should detect author name', () => {
         const name = 'Luke';
+        const sha = 'commit sha';
+        const branchName = 'branchName';
         const eventPath = 'testPath';
         let path = '';
         let encoding = '';
@@ -17,12 +19,20 @@ describe('getGithubActionsInfo()', () => {
             encoding = enc;
 
             return JSON.stringify({
-                'pull_request': { user: { login: name } }
+                'pull_request': {
+                    user: { login: name },
+                    head: {
+                        ref: branchName,
+                        sha
+                    }
+                }
             });
         }) as typeof fsReadFileSync;
 
         assert.deepEqual(getGithubActionsInfo(readFileSync), {
-            author: name
+            commitSHA: sha,
+            author:    name,
+            branchName
         });
         assert.equal(path, eventPath);
         assert.equal(encoding, 'utf8');

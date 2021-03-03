@@ -8,6 +8,10 @@ interface EventInfo {
         user: {
             login: string;
         };
+        head: {
+            ref: string;
+            sha: string;
+        };
     };
 }
 
@@ -18,6 +22,8 @@ export function getGithubActionsInfo (
     const event = JSON.parse(rawEvent) as EventInfo;
 
     return {
-        author: event.pull_request.user.login
+        commitSHA:  event.pull_request.head.sha,
+        author:     event.pull_request.user.login,
+        branchName: event.pull_request.head.ref
     };
 }

@@ -108,7 +108,9 @@ export interface ReadFileMethod {
 };
 
 export interface CIInfo {
+    commitSHA: string;
     author: string;
+    branchName: string;
 }
 
 export type DashboardSettings = {
