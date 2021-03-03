@@ -1,5 +1,12 @@
 import fetch from 'isomorphic-fetch';
-import { TestError, TestRunInfo, Error, BrowserRunInfo, DashboardTestRunInfo } from '../';
+import {
+    TestError,
+    TestRunInfo,
+    Error,
+    BrowserRunInfo,
+    DashboardTestRunInfo
+} from '../';
+import { CIInfo } from '../task-start-args';
 
 export enum AggregateCommandType {
     reportTaskStart = 'reportTaskStart',
@@ -15,7 +22,6 @@ export enum AggregateNames {
     Upload = 'Upload'
 };
 
-
 export const createTestError = (error: Error, errorModel: string): TestError => ({
     code:         error.code,
     testRunPhase: error.testRunPhase,
@@ -29,7 +35,6 @@ export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns
     browserRuns: browserRuns
 });
 
-    ciInfo?: CIInfo;
 export enum UploadStatus {
     Completed = 'Completed',
     Failed = 'Failed'
@@ -40,12 +45,6 @@ export type FetchMethod = typeof fetch;
 export interface ReadFileMethod {
     (path: string): Promise<Buffer>;
 };
-
-export interface CIInfo {
-    commitSHA: string;
-    author: string;
-    branchName: string;
-}
 
 export type DashboardSettings = {
     authenticationToken: string;
@@ -63,4 +62,3 @@ export type Logger = {
     warn (...params): void;
     error (...params): void;
 };
-

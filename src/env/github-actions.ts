@@ -1,5 +1,5 @@
 import { readFileSync as fsReadFileSync } from 'fs';
-import { CIInfo } from '../types/dashboard';
+import { CIInfo } from '../types/task-start-args';
 
 const { env } = process;
 

@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { getGithubActionsInfo } from './github-actions';
-import { CIInfo } from '../types/dashboard';
+import { CIInfo } from '../types/task-start-args';
 import {
     isGithubActions,
 } from './ci-detection';
