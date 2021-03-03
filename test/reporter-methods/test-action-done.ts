@@ -1,12 +1,12 @@
 import assert from 'assert';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-
-import { DashboardTestRunInfo, AggregateCommandType, DashboardSettings } from './../../src/types/dashboard';
+import { AggregateCommandType, DashboardSettings } from '../../src/types/internal/';
 import { reportTestActionDoneCalls } from './../data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from './../data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
+import { DashboardTestRunInfo } from '../../src/types';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';

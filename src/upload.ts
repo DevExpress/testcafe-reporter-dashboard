@@ -1,7 +1,8 @@
-import { AggregateCommandType, AggregateNames, DashboardTestRunInfo, Logger, ReadFileMethod, UploadStatus } from './types/dashboard';
-import { UploadInfo } from './types/resolve';
+import { AggregateCommandType, AggregateNames, Logger, ReadFileMethod, UploadStatus } from './types/internal';
+import { UploadInfo } from './types/internal/resolve';
 import { createGetUploadInfoError, createFileUploadError, createTestUploadError } from './texts';
 import Transport from './transport';
+import { DashboardTestRunInfo } from './types/';
 
 export class Uploader {
     private _runId: string;

@@ -2,17 +2,16 @@ import uuid from 'uuid';
 
 import { createReportUrlMessage } from './texts';
 import {
-    BrowserRunInfo,
     createDashboardTestRunInfo,
     createTestError,
-    ActionInfo,
-    TestError,
-    TestDoneArgs,
     FetchMethod,
-    ReadFileMethod, DashboardSettings, Logger
-} from './types/dashboard';
+    ReadFileMethod,
+    DashboardSettings,
+    Logger,
+    ReporterPluginObject
+} from './types/internal/';
+import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error, BuildId, ShortId } from './types';
 import { Uploader } from './upload';
-import { ReporterPluginObject, Error, ReportedTestStructureItem } from './types/testcafe';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
 import Transport from './transport';
@@ -59,7 +58,7 @@ export default function reporterObjectFactory (
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
 
             await reportCommands.sendTaskStartCommand({
-                startTime, userAgents, testCount, buildId, taskStructure, ciInfo
+                startTime, userAgents, testCount, buildId: buildId as BuildId, taskStructure, ciInfo
             });
         },
 
@@ -68,7 +67,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            const { testId } = testStartInfo;
+
+            const testId = testStartInfo.testId as ShortId;
 
             await reportCommands.sendTestStartCommand({ testId });
         },
@@ -160,7 +160,7 @@ export default function reporterObjectFactory (
             }, {} as Record<string, BrowserRunInfo>);
 
             const testDonePayload: TestDoneArgs = {
-                testId,
+                testId:     testId as ShortId,
                 skipped,
                 errorCount: errs.length,
                 duration:   durationMs,
@@ -172,7 +172,7 @@ export default function reporterObjectFactory (
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await uploader.waitUploads();
-            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId });
+            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId: buildId as BuildId });
         }
     }, isLogEnabled);
 

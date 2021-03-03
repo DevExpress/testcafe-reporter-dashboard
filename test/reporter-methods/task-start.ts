@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { sign } from 'jsonwebtoken';
-import { DashboardSettings } from './../../src/types/dashboard';
+import { DashboardSettings } from '../../src/types/internal/dashboard';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';

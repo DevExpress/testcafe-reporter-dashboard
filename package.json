@@ -1,7 +1,7 @@
 {
   "name": "testcafe-reporter-dashboard",
   "version": "0.1.0",
-  "description": "dashboard TestCafe reporter plugin.",
+  "description": "Dashboard TestCafe reporter plugin.",
   "repository": "https://github.com/DevExpress/testcafe-reporter-dashboard",
   "author": {
     "name": "aleks-pro",
@@ -56,8 +56,13 @@
   },
   "dependencies": {
     "es6-promise": "^4.2.8",
+    "fp-ts": "^2.9.5",
+    "io-ts": "^2.2.14",
+    "io-ts-types": "^0.5.15",
     "isomorphic-fetch": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
+    "monocle-ts": "^2.3.5",
+    "newtype-ts": "^0.3.4",
     "uuid": "3.3.3"
   }
 }

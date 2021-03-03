@@ -3,7 +3,7 @@ import assert from 'assert';
 
 import { CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../src/consts';
 import Transport from '../src/transport';
-import { AggregateCommandType, AggregateNames } from '../src/types/dashboard';
+import { AggregateCommandType, AggregateNames } from '../src/types/internal/dashboard';
 import logger from '../src/logger';
 
 describe('sendResolveCommand', () => {
