@@ -5,6 +5,10 @@ describe('CI detection', () => {
     const modulePath = '../../src/env/ci-detection';
 
     it('Should detect Github Actions', () => {
+        const originalValue = process.env.GITHUB_ACTIONS;
+
+        process.env.GITHUB_ACTIONS = '';
+
         let { isGithubActions } = mock.reRequire(modulePath);
 
         assert.equal(isGithubActions, false);
@@ -14,5 +18,7 @@ describe('CI detection', () => {
         isGithubActions = mock.reRequire(modulePath).isGithubActions;
 
         assert.equal(isGithubActions, true);
+
+        process.env.GITHUB_ACTIONS = originalValue;
     });
 });
