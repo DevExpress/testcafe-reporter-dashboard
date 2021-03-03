@@ -29,45 +29,11 @@ describe('enviroment variables', () => {
     });
 
     it('Should set CI_INFO to undefined by default', () => {
-        mock.reRequire('../src/env/ci-detection');
-        mock.reRequire('../src/env/github-actions');
-        mock.reRequire('../src/env/get-ci-info');
-        const { CI_INFO } = mock.reRequire('../src/env');
+        mock.reRequire('../../src/env/ci-detection');
+        mock.reRequire('../../src/env/github-actions');
+        mock.reRequire('../../src/env/get-ci-info');
+        const { CI_INFO } = mock.reRequire('../../src/env');
 
         assert.deepEqual(CI_INFO, void 0);
-    });
-
-    describe('Github Actions CI info', () => {
-        let readResult = '';
-
-        before(() => {
-            process.env.GITHUB_ACTIONS = 'true';
-            mock('fs', { readFileSync: () => readResult });
-            mock.reRequire('../src/env/ci-detection');
-            mock.reRequire('../src/env/github-actions');
-            mock.reRequire('../src/env/get-ci-info');
-        });
-
-        afterEach(() => {
-            readResult = '';
-        });
-
-        after(() => {
-            mock.stopAll();
-        });
-
-        it('Should detect author name', () => {
-            const name = 'Luke';
-
-            readResult = JSON.stringify({
-                'pull_request': { user: { login: name } }
-            });
-
-            const { CI_INFO } = mock.reRequire('../src/env');
-
-            assert.deepEqual(CI_INFO, {
-                author: name
-            });
-        });
     });
 });
