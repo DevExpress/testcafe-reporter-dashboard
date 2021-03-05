@@ -8,6 +8,7 @@
     "email": "prokhor.aleks@gmail.com"
   },
   "main": "lib/index",
+  "types": "./lib/types/index.d.ts",
   "files": [
     "lib"
   ],
