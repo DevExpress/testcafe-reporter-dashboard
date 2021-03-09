@@ -1,5 +1,7 @@
 import { readFileSync as fsReadFileSync } from 'fs';
 import { CIInfo } from '../types/task-start-args';
+import reporterLogger from '../logger';
+import { createGithubInfoError } from '../texts';
 
 const { env } = process;
 
@@ -16,10 +18,24 @@ interface EventInfo {
 }
 
 export function getGithubActionsInfo (
-    readFileSync: typeof fsReadFileSync
+    readFileSync: typeof fsReadFileSync,
+    logger: typeof reporterLogger
 ): CIInfo {
-    const rawEvent = readFileSync(env.GITHUB_EVENT_PATH, 'utf8');
-    const event = JSON.parse(rawEvent) as EventInfo;
+    let event: EventInfo = {
+        'pull_request': {
+            head: { sha: '', ref: '' },
+            user: { login: '' }
+        }
+    };
+
+    try {
+        const rawEvent = readFileSync(env.GITHUB_EVENT_PATH, 'utf8');
+
+        event = JSON.parse(rawEvent) as EventInfo;
+    }
+    catch (error) {
+        logger.error(createGithubInfoError(error.toString()));
+    }
 
     return {
         commitSHA:  event.pull_request.head.sha,

@@ -1,5 +1,9 @@
 import { MAX_BUILD_ID_LENGTH } from './consts';
-import { AUTHENTICATION_TOKEN_NOT_DEFINED, createLongBuildIdError, DASHBOARD_LOCATION_NOT_DEFINED } from './texts';
+import {
+    AUTHENTICATION_TOKEN_NOT_DEFINED,
+    createLongBuildIdError,
+    DASHBOARD_LOCATION_NOT_DEFINED
+} from './texts';
 import { DashboardSettings, Logger } from './types/internal/dashboard';
 
 export default function validateSettings (settings: DashboardSettings, logger: Logger) {
