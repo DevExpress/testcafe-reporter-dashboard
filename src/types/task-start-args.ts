@@ -40,13 +40,11 @@ export type ReportedTestStructureItem = t.TypeOf<typeof ReportedTestStructureIte
 
 
 export const CIInfoSchema = t.readonly(
-    t.exact(
-        t.type({
-            commitSHA:  t.string,
-            author:     t.string,
-            branchName: t.string
-        })
-    )
+    t.partial({
+        commitSHA:  t.string,
+        author:     t.string,
+        branchName: t.string
+    })
 );
 
 export type CIInfo = t.TypeOf<typeof CIInfoSchema>
