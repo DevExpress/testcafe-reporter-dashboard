@@ -1,5 +1,12 @@
 import fetch from 'isomorphic-fetch';
-import { TestError, TestRunInfo, Error, BrowserRunInfo, DashboardTestRunInfo } from '../';
+import {
+    TestError,
+    TestRunInfo,
+    Error,
+    BrowserRunInfo,
+    DashboardTestRunInfo
+} from '../';
+import { CIInfo } from '../task-start-args';
 
 export enum AggregateCommandType {
     reportTaskStart = 'reportTaskStart',
@@ -14,7 +21,6 @@ export enum AggregateNames {
     Run = 'Run',
     Upload = 'Upload'
 };
-
 
 export const createTestError = (error: Error, errorModel: string): TestError => ({
     code:         error.code,
@@ -48,6 +54,7 @@ export type DashboardSettings = {
     noScreenshotUpload: boolean;
     noVideoUpload: boolean;
     runId?: string;
+    ciInfo?: CIInfo;
 };
 
 export type Logger = {

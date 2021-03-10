@@ -23,7 +23,12 @@ function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
-export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: FetchMethod, settings: DashboardSettings, logger: Logger): ReporterPluginObject {
+export default function reporterObjectFactory (
+    readFile: ReadFileMethod,
+    fetch: FetchMethod,
+    settings: DashboardSettings,
+    logger: Logger
+): ReporterPluginObject {
     if (!validateSettings(settings, logger))
         return BLANK_REPORTER;
 
@@ -34,7 +39,8 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
         isLogEnabled,
         noScreenshotUpload,
         noVideoUpload,
-        runId
+        runId,
+        ciInfo
     } = settings;
 
     const id: string = runId || uuid();
@@ -50,7 +56,10 @@ export default function reporterObjectFactory (readFile: ReadFileMethod, fetch: 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
-            await reportCommands.sendTaskStartCommand({ startTime, userAgents, testCount, buildId: buildId as BuildId, taskStructure });
+
+            await reportCommands.sendTaskStartCommand({
+                startTime, userAgents, testCount, buildId: buildId as BuildId, taskStructure, ciInfo
+            });
         },
 
         async reportFixtureStart (): Promise<void> {

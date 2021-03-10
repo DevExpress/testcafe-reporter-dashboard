@@ -11,6 +11,7 @@ export const ReportedTestItemSchema = t.readonly(
         })
     )
 );
+
 export type ReportedTestItem = t.TypeOf<typeof ReportedTestItemSchema>
 
 
@@ -26,6 +27,7 @@ export const ReportedFixtureItemSchema = t.readonly(
 
 export type ReportedFixtureItem = t.TypeOf<typeof ReportedFixtureItemSchema>
 
+
 export const ReportedTestStructureItemSchema = t.readonly(
     t.exact(
         t.type({
@@ -37,13 +39,27 @@ export const ReportedTestStructureItemSchema = t.readonly(
 export type ReportedTestStructureItem = t.TypeOf<typeof ReportedTestStructureItemSchema>
 
 
+export const CIInfoSchema = t.readonly(
+    t.exact(
+        t.partial({
+            commitSHA:  t.string,
+            author:     t.string,
+            branchName: t.string
+        })
+    )
+);
+
+export type CIInfo = t.TypeOf<typeof CIInfoSchema>
+
+
 export const TaskStartArgsSchema  = t.readonly(
     t.type({
         startTime:     DateFromISOString,
         userAgents:    t.array(t.string),
         testCount:     t.number,
         buildId:       BuildIdSchema,
-        taskStructure: t.array(ReportedTestStructureItemSchema)
+        taskStructure: t.array(ReportedTestStructureItemSchema),
+        ciInfo:        CIInfoSchema
     })
 );
 

@@ -25,3 +25,6 @@ export const createLongBuildIdError = (buildId: string): string =>
 
 export const createReporterMethodName = (reporterMethodName: string, errorDetails: string): string =>
    `Error occurred in the "dashboard" reporter's "${reporterMethodName}" method. Error details: ${errorDetails}`;
+
+export const createGithubInfoError = (error: string): string =>
+   `Could not retrieve information from Github Actions environment due to an error: ${error}`;
