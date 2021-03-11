@@ -58,7 +58,7 @@ describe('getGithubActionsInfo()', () => {
         getGithubActionsInfo(readFileSync, loggerMock);
 
         assert.deepEqual(errors, [
-            `Could not retrieve information from Github Actions environment due to an error: ${error.toString()}`
+            `Could not retrieve information from the Github Actions environment due to an error: ${error.toString()}`
         ]);
     });
 });

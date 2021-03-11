@@ -27,4 +27,4 @@ export const createReporterMethodName = (reporterMethodName: string, errorDetail
    `Error occurred in the "dashboard" reporter's "${reporterMethodName}" method. Error details: ${errorDetails}`;
 
 export const createGithubInfoError = (error: string): string =>
-   `Could not retrieve information from Github Actions environment due to an error: ${error}`;
+   `Could not retrieve information from the Github Actions environment due to an error: ${error}`;
