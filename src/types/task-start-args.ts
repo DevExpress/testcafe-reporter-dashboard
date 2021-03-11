@@ -59,7 +59,7 @@ export const TaskStartArgsSchema  = t.readonly(
         testCount:     t.number,
         buildId:       BuildIdSchema,
         taskStructure: t.array(ReportedTestStructureItemSchema),
-        ciInfo:        CIInfoSchema
+        ciInfo:        t.union([t.undefined, CIInfoSchema])
     })
 );
 
