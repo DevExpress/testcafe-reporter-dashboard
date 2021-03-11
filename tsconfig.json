@@ -9,6 +9,7 @@
     "checkJs": false,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true
   }
 }
