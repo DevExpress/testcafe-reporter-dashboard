@@ -6,7 +6,10 @@ import {
 } from './texts';
 import { DashboardSettings, Logger } from './types/internal/dashboard';
 
-export default function validateSettings (settings: DashboardSettings, logger: Logger) {
+export default function validateSettings (
+    settings: DashboardSettings,
+    logger: Logger
+): boolean {
     const { authenticationToken, buildId, dashboardUrl } = settings;
 
     let areSettingsValid = true;

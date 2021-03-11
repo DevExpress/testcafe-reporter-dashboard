@@ -19,7 +19,7 @@ import { BuildId } from './types/common';
 
 module.exports = function pluginFactory (): ReporterPluginObject {
     const settings = {
-        authenticationToken: AUTHENTICATION_TOKEN,
+        authenticationToken: AUTHENTICATION_TOKEN as string, //is validated in factory
         buildId:             TESTCAFE_DASHBOARD_BUILD_ID as BuildId,
         dashboardUrl:        TESTCAFE_DASHBOARD_URL,
         isLogEnabled:        ENABLE_LOG,

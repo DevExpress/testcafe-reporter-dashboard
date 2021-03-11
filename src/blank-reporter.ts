@@ -1,6 +1,6 @@
 import { ReporterPluginObject } from './types/internal';
 
-const noop = () => void 0;
+const noop = () => Promise.resolve();
 
 const BLANK_REPORTER: ReporterPluginObject = {
     reportTaskStart:    noop,
@@ -8,7 +8,7 @@ const BLANK_REPORTER: ReporterPluginObject = {
     reportTestDone:     noop,
     reportTaskDone:     noop,
 
-    createErrorDecorator: noop
+    createErrorDecorator: () => ({})
 };
 
 export default BLANK_REPORTER;

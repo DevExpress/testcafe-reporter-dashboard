@@ -2,12 +2,14 @@ import assert from 'assert';
 import { sign } from 'jsonwebtoken';
 import { DashboardSettings } from '../../src/types/internal/dashboard';
 import reporterObjectFactory from '../../src/reporter-object-factory';
+import { BuildId } from '../../src/types';
+import { mockReadFile } from '../mocks';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             '',
+    buildId:             '' as BuildId,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,
@@ -18,8 +20,8 @@ describe('reportTaskStart', () => {
     const buildId = 'test_build_id/:?&"=;+$';
 
     async function assertReporterMessage (expected: string, settings: DashboardSettings): Promise<void> {
-        const logs       = [];
-        const loggerMock = {
+        const logs: string[] = [];
+        const loggerMock     = {
             log:   message => logs.push(message),
             warn:  message => logs.push(message),
             error: message => logs.push(message)
@@ -29,7 +31,7 @@ describe('reportTaskStart', () => {
             return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
         };
 
-        const reporter = reporterObjectFactory(() => void 0, fetchMock, settings, loggerMock);
+        const reporter = reporterObjectFactory(mockReadFile, fetchMock, settings, loggerMock);
 
         await reporter.reportTaskStart(new Date(), [], 1, []);
 
@@ -50,7 +52,7 @@ describe('reportTaskStart', () => {
 
         await assertReporterMessage(
             `Task execution report: ${TESTCAFE_DASHBOARD_URL}/runs/${projectId}/${encodeURIComponent(buildId)}`,
-            { ...SETTINGS, authenticationToken, runId: reportId, buildId }
+            { ...SETTINGS, authenticationToken, runId: reportId, buildId: buildId as BuildId }
         );
     });
 });

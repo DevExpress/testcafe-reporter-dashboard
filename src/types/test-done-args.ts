@@ -10,7 +10,7 @@ export const TestDoneArgsSchema = t.readonly(
             skipped:    t.boolean,
             errorCount: t.number,
             duration:   t.number,
-            uploadId:   t.string
+            uploadId:   t.union([t.string, t.undefined])
         })
     )
 );

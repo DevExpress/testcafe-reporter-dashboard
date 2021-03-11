@@ -21,7 +21,7 @@ export class Uploader {
         this._readFile = readFile;
     }
 
-    private async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo> {
+    private async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo | null> {
         const response = await this._transport.fetchFromDashboard(`api/uploader/getUploadUrl?dir=${this._runId}`);
 
         if (response.ok)
@@ -48,14 +48,17 @@ export class Uploader {
             aggregateName: AggregateNames.Upload,
             type:          AggregateCommandType.createUpload,
 
-            payload: { reportId: this._runId, status: response.ok ? UploadStatus.Completed : UploadStatus.Failed }
+            payload: {
+                reportId: this._runId,
+                status:   response.ok ? UploadStatus.Completed : UploadStatus.Failed
+            }
         });
 
         if (!response.ok)
             this._logger.error(`${uploadError}. Response: ${response}`);
     }
 
-    async uploadFile (filePath: string): Promise<string> {
+    async uploadFile (filePath: string): Promise<string | null> {
         const uploadInfo = await this._getUploadInfo(filePath);
 
         if (!uploadInfo) return null;
@@ -67,10 +70,10 @@ export class Uploader {
         return uploadInfo.uploadId;
     }
 
-    async uploadTest (testName: string, testRunInfo: DashboardTestRunInfo): Promise<string> {
+    async uploadTest (testName: string, testRunInfo: DashboardTestRunInfo): Promise<string | undefined> {
         const uploadInfo = await this._getUploadInfo(testName);
 
-        if (!uploadInfo) return null;
+        if (!uploadInfo) return void 0;
 
         const buffer = Buffer.from(JSON.stringify(testRunInfo, (key, value) => value instanceof RegExp ? value.toString() : value));
 

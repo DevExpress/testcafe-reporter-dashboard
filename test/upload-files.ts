@@ -6,29 +6,29 @@ import { AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings }
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
+import { mockReadFile } from './mocks';
+import { BuildId } from '../src/types';
 
 const UPLOAD_URL_PREFIX           = 'http://upload_url/';
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const SETTINGS: DashboardSettings = {
     authenticationToken: 'authentication_token',
-    buildId:             '',
+    buildId:             '' as BuildId,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,
     noVideoUpload:       false,
 };
 
-const noop  = () => void 0;
-
 const testRunIdChrome = 'chrome_headless';
 const testRunId1 = 'testRun_1';
 const testRunId2 = 'testRun_2';
 
 describe('Uploads', () => {
-    const aggregateCommands = [];
-    const uploadedFiles     = [];
-    const uploadedUrls      = [];
-    const uploadInfos       = [];
+    const aggregateCommands: any[] = [];
+    const uploadedFiles: any[]     = [];
+    const uploadedUrls: any[]      = [];
+    const uploadInfos: any[]       = [];
 
     function fetch (url, request) {
         if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=`)) {
@@ -67,7 +67,7 @@ describe('Uploads', () => {
 
     describe('Screenshots', () => {
         it('Smoke test', async () => {
-            const screenshotPaths = [];
+            const screenshotPaths: string[] = [];
 
             const screenshots: Screenshot[] = [
                 {
@@ -111,7 +111,7 @@ describe('Uploads', () => {
                 browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ]
             });
 
-            const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
+            const { browserRuns } = JSON.parse(uploadedFiles[2].toString());
             const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
 
             assert.equal(runCommands.length, 1);
@@ -170,7 +170,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            const reporter = reporterObjectFactory(noop, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger);
+            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -199,7 +199,7 @@ describe('Uploads', () => {
 
     describe('Videos', () => {
         it('Smoke test', async () => {
-            const videoPaths = [];
+            const videoPaths: string[] = [];
 
             function readFile (path: string): Promise<Buffer> {
                 videoPaths.push(path);
@@ -214,21 +214,19 @@ describe('Uploads', () => {
                 browsers: [ { ...CHROME, testRunId: testRunId1 }, { ...FIREFOX, testRunId: testRunId2 } ],
                 videos:   [
                     {
-                        quarantineAttempt: null,
-                        testRunId:         testRunId1,
-                        userAgent:         CHROME.prettyUserAgent,
-                        videoPath:         '1.mp4'
+                        testRunId: testRunId1,
+                        userAgent: CHROME.prettyUserAgent,
+                        videoPath: '1.mp4'
                     },
                     {
-                        quarantineAttempt: null,
-                        testRunId:         testRunId2,
-                        userAgent:         FIREFOX.prettyUserAgent,
-                        videoPath:         '2.mp4'
+                        testRunId: testRunId2,
+                        userAgent: FIREFOX.prettyUserAgent,
+                        videoPath: '2.mp4'
                     }
                 ]
             });
 
-            const { browserRuns } = JSON.parse(uploadedFiles[2].toString()) as DashboardTestRunInfo;
+            const { browserRuns } = JSON.parse(uploadedFiles[2].toString());
             const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
 
             assert.equal(runCommands.length, 1);
@@ -268,23 +266,21 @@ describe('Uploads', () => {
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
-            const reporter = reporterObjectFactory(noop, fetch, { ...SETTINGS, noVideoUpload: true }, logger);
+            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noVideoUpload: true }, logger);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
                 browsers: [ { ...CHROME, testRunId: testRunId1 }, { ...FIREFOX, testRunId: testRunId2 } ],
                 videos:   [
                     {
-                        quarantineAttempt: null,
-                        testRunId:         testRunId1,
-                        userAgent:         CHROME.prettyUserAgent,
-                        videoPath:         '1.mp4'
+                        testRunId: testRunId1,
+                        userAgent: CHROME.prettyUserAgent,
+                        videoPath: '1.mp4'
                     },
                     {
-                        quarantineAttempt: null,
-                        testRunId:         testRunId2,
-                        userAgent:         FIREFOX.prettyUserAgent,
-                        videoPath:         '2.mp4'
+                        testRunId: testRunId2,
+                        userAgent: FIREFOX.prettyUserAgent,
+                        videoPath: '2.mp4'
                     }
                 ]
             });

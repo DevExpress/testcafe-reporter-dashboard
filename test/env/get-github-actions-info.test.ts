@@ -2,7 +2,7 @@ import { readFileSync as fsReadFileSync } from 'fs';
 import assert from 'assert';
 
 describe('getGithubActionsInfo()', () => {
-    const errors = [];
+    const errors: string[] = [];
     const loggerMock = {
         error: err => errors.push(err)
     };

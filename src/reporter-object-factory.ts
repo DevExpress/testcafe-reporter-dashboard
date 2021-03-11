@@ -164,7 +164,9 @@ export default function reporterObjectFactory (
                 skipped,
                 errorCount: errs.length,
                 duration:   durationMs,
-                uploadId:   await uploader.uploadTest(name, createDashboardTestRunInfo(testRunInfo, browserRuns))
+                uploadId:   await uploader.uploadTest(name,
+                    createDashboardTestRunInfo(testRunInfo, browserRuns)
+                )
             };
 
             await reportCommands.sendTestDoneCommand(testDonePayload);
@@ -172,7 +174,9 @@ export default function reporterObjectFactory (
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
             await uploader.waitUploads();
-            await reportCommands.sendTaskDoneCommand({ endTime, passed, warnings, result, buildId: buildId as BuildId });
+            await reportCommands.sendTaskDoneCommand({
+                endTime, passed, warnings, result, buildId: buildId as BuildId
+            });
         }
     }, isLogEnabled);
 
