@@ -4,8 +4,7 @@ import {
     TestRunInfo,
     Error,
     BrowserRunInfo,
-    DashboardTestRunInfo,
-    BuildId
+    DashboardTestRunInfo
 } from '../';
 import { CIInfo } from '../task-start-args';
 
