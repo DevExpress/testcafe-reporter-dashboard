@@ -52,7 +52,7 @@ export interface ReadFileMethod {
 
 export type DashboardSettings = {
     authenticationToken: string;
-    buildId: BuildId;
+    buildId?: string;
     dashboardUrl: string;
     isLogEnabled: boolean;
     noScreenshotUpload: boolean;

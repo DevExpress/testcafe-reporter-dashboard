@@ -6,14 +6,14 @@ import { CHROME } from './../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
-import { DashboardTestRunInfo, TestDoneArgs, BuildId } from '../../src/types';
+import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
 import { mockReadFile } from '../mocks';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             '' as BuildId,
+    buildId:             void 0,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,

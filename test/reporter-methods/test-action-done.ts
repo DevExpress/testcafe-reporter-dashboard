@@ -6,14 +6,14 @@ import { CHROME, FIREFOX, CHROME_HEADLESS } from './../data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
-import { DashboardTestRunInfo, BuildId } from '../../src/types';
+import { DashboardTestRunInfo } from '../../src/types';
 import { mockReadFile } from '../mocks';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             '' as BuildId,
+    buildId:             void 0,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,

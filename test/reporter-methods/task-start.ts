@@ -9,7 +9,7 @@ const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             '' as BuildId,
+    buildId:             void 0,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,

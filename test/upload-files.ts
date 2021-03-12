@@ -7,13 +7,12 @@ import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
 import { mockReadFile } from './mocks';
-import { BuildId } from '../src/types';
 
 const UPLOAD_URL_PREFIX           = 'http://upload_url/';
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const SETTINGS: DashboardSettings = {
     authenticationToken: 'authentication_token',
-    buildId:             '' as BuildId,
+    buildId:             void 0,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,
