@@ -40,8 +40,8 @@ export type TestRunInfo = {
     browsers: (BrowserInfo & { testRunId: string })[];
     durationMs: number;
     errs: Error[];
-    quarantine: Quarantine;
-    screenshotPath: string;
+    quarantine: Quarantine | null;
+    screenshotPath: string | null;
     screenshots: Screenshot[];
     skipped: boolean;
     testId: string;
@@ -53,7 +53,7 @@ export type TestRunInfo = {
 export type DashboardTestRunInfo = {
     warnings: string[];
     unstable: boolean;
-    quarantine: Quarantine;
+    quarantine: Quarantine | null;
     browserRuns: Record<string, BrowserRunInfo>;
 }
 
@@ -77,7 +77,6 @@ export type Screenshot = Readonly<{
 
 export type Video = Readonly<{
     userAgent: string;
-    quarantineAttempt: number;
     videoPath: string;
     testRunId: string;
 }>;
@@ -91,7 +90,7 @@ export type BrowserRunInfo = {
 }
 
 export type ActionInfo = {
-    duration: number;
+    duration?: number;
     apiName: string;
     testPhase: TestPhase;
     command: Record<string, any> & { type: CommandType };

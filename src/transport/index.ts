@@ -75,7 +75,7 @@ export default class Transport {
         if (!this._authenticationToken)
             return;
 
-        let response = null;
+        let response: FetchResponse;
 
         let retryCount = 0;
 

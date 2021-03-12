@@ -7,12 +7,13 @@ import { testDoneInfo, twoErrorsTestActionDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo } from '../../src/types';
+import { mockReadFile } from '../mocks';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             '',
+    buildId:             void 0,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,
@@ -52,15 +53,15 @@ describe('reportTestActionDone', () => {
     }
 
     it('Should add test actions info to uploaded testRunInfo', async () => {
-        let testRunInfo: DashboardTestRunInfo = null;
+        let testRunInfo;
         let testDonePayload = null;
 
         function fetchMock (url, request) {
-            const response  = { ok: true, status: 200, statusText: 'OK', json: null };
+            const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
             const uploadUrl = 'upload_url';
 
             if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
-                response.json = () => ({ uploadId: 'upload_id', uploadUrl });
+                response.json = () => Promise.resolve({ uploadId: 'upload_id', uploadUrl });
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString()) as DashboardTestRunInfo;
             else if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/commands`)) {
@@ -70,10 +71,10 @@ describe('reportTestActionDone', () => {
                     testDonePayload = payload;
             }
 
-            return Promise.resolve(response as Response);
+            return Promise.resolve(response as unknown as Response);
         }
 
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(mockReadFile, fetchMock, SETTINGS, logger), process.stdout);
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
         const testId     = 'test_1';
@@ -115,21 +116,21 @@ describe('reportTestActionDone', () => {
     });
 
     it('Format error on test done', async () => {
-        let testRunInfo: DashboardTestRunInfo = null;
+        let testRunInfo;
 
         function fetchMock (url: string, request) {
-            const response  = { ok: true, status: 200, statusText: 'OK', json: null };
+            const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
             const uploadUrl = 'upload_url';
 
             if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
-                response.json = () => ({ uploadId: 'upload_id', uploadUrl });
+                response.json = () => Promise.resolve({ uploadId: 'upload_id', uploadUrl });
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString());
 
-            return Promise.resolve(response as Response);
+            return Promise.resolve(response as unknown as Response);
         }
 
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(mockReadFile, fetchMock, SETTINGS, logger), process.stdout);
 
         const testRunIds = twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId);
 

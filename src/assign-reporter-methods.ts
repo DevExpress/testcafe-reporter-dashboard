@@ -2,7 +2,11 @@ import { ReporterMethods, ReporterPluginObject } from './types/internal';
 import logger from './logger';
 import { createReporterMethodName } from './texts';
 
-export default function assignReporterMethods (reporterObject: ReporterPluginObject, reporterMethods: ReporterMethods, isLogEnabled: boolean) {
+export default function assignReporterMethods (
+    reporterObject: ReporterPluginObject,
+    reporterMethods: ReporterMethods,
+    isLogEnabled: boolean
+): void {
     for (const methodName of Object.keys(reporterMethods)) {
         reporterObject[methodName] = async function (...args) {
             if (isLogEnabled)

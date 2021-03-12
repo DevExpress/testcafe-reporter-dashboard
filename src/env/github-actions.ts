@@ -29,7 +29,7 @@ export function getGithubActionsInfo (
     };
 
     try {
-        const rawEvent = readFileSync(env.GITHUB_EVENT_PATH, 'utf8');
+        const rawEvent = readFileSync(env.GITHUB_EVENT_PATH as string, 'utf8');
 
         event = JSON.parse(rawEvent) as EventInfo;
     }

@@ -28,11 +28,14 @@ export const createTestError = (error: Error, errorModel: string): TestError => 
     errorModel:   errorModel
 });
 
-export const createDashboardTestRunInfo = (testRunInfo: TestRunInfo, browserRuns: Record<string, BrowserRunInfo>): DashboardTestRunInfo => ({
-    quarantine:  testRunInfo.quarantine,
-    unstable:    testRunInfo.unstable,
-    warnings:    testRunInfo.warnings,
-    browserRuns: browserRuns
+export const createDashboardTestRunInfo = (
+    { quarantine, unstable, warnings }: TestRunInfo,
+    browserRuns: Record<string, BrowserRunInfo>
+): DashboardTestRunInfo => ({
+    quarantine,
+    unstable,
+    warnings,
+    browserRuns
 });
 
 export enum UploadStatus {
@@ -48,7 +51,7 @@ export interface ReadFileMethod {
 
 export type DashboardSettings = {
     authenticationToken: string;
-    buildId: string;
+    buildId?: string;
     dashboardUrl: string;
     isLogEnabled: boolean;
     noScreenshotUpload: boolean;

@@ -6,13 +6,14 @@ import { CHROME } from './../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
-import { DashboardTestRunInfo } from '../../src/types';
+import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
+import { mockReadFile } from '../mocks';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             '',
+    buildId:             void 0,
     dashboardUrl:        TESTCAFE_DASHBOARD_URL,
     isLogEnabled:        false,
     noScreenshotUpload:  false,
@@ -21,20 +22,23 @@ const SETTINGS: DashboardSettings = {
 
 describe('reportTestDone', () => {
     it('Should process errors originated not from actions', async () => {
-        let testRunInfo: DashboardTestRunInfo = null;
+        let testRunInfo = {} as DashboardTestRunInfo;
 
         function fetchMock (url: string, request) {
-            const response  = { ok: true, status: 200, statusText: 'OK', json: null };
+            const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
             const uploadUrl = 'upload_url';
 
             if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
-                response.json = () => ({ uploadId: 'upload_id', uploadUrl });
+                response.json = () => Promise.resolve({ uploadId: 'upload_id', uploadUrl });
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString());
 
-            return Promise.resolve(response as Response);
+            return Promise.resolve(response as unknown as Response);
         }
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
+
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(
+            mockReadFile, fetchMock, SETTINGS, logger), process.stdout
+        );
 
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
@@ -53,7 +57,7 @@ describe('reportTestDone', () => {
     });
 
     it('Should send skipped prop in test done command', async () => {
-        let testDonePayload = null;
+        let testDonePayload = null as unknown as TestDoneArgs;
 
         function fetchMock (url: string, request) {
             const response  = { ok: true, status: 200, statusText: 'OK', json: () => Promise.resolve('') };
@@ -68,7 +72,7 @@ describe('reportTestDone', () => {
             return Promise.resolve(response as Response);
         }
 
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(() => void 0, fetchMock, SETTINGS, logger), process.stdout);
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(mockReadFile, fetchMock, SETTINGS, logger), process.stdout);
 
         await reporter.reportTestDone('Test 1', skippedTestDone);
 

@@ -2,7 +2,7 @@ import { readFileSync as fsReadFileSync } from 'fs';
 import assert from 'assert';
 
 describe('getGithubActionsInfo()', () => {
-    const errors = [];
+    const errors: string[] = [];
     const loggerMock = {
         error: err => errors.push(err)
     };
@@ -58,7 +58,7 @@ describe('getGithubActionsInfo()', () => {
         getGithubActionsInfo(readFileSync, loggerMock);
 
         assert.deepEqual(errors, [
-            `Could not retrieve information from Github Actions environment due to an error: ${error.toString()}`
+            `Could not retrieve information from the Github Actions environment due to an error: ${error.toString()}`
         ]);
     });
 });
