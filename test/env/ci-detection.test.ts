@@ -21,4 +21,8 @@ describe('CI detection', () => {
 
         process.env.GITHUB_ACTIONS = originalValue;
     });
+
+    it('Should detect Bitbucket Pipelines', () => {
+
+    });
 });

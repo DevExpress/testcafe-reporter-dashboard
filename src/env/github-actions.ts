@@ -1,7 +1,7 @@
-import { readFileSync as fsReadFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { CIInfo } from '../types/task-start-args';
-import reporterLogger from '../logger';
 import { createGithubInfoError } from '../texts';
+import logger from '../logger';
 
 const { env } = process;
 
@@ -17,10 +17,7 @@ interface EventInfo {
     };
 }
 
-export function getGithubActionsInfo (
-    readFileSync: typeof fsReadFileSync,
-    logger: typeof reporterLogger
-): CIInfo {
+export function getGithubActionsInfo (): CIInfo {
     let event: EventInfo = {
         'pull_request': {
             head: { sha: '', ref: '' },
