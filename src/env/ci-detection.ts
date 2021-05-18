@@ -1,7 +1,23 @@
 import { parseBooleanVariable } from './utils';
 
-const { env } = process;
+export enum CISystems {
+    githubActions = 'GithubActions',
+    bitbucketPipelines = 'BitbucketPipelines'
+};
 
-export const isGithubActions = parseBooleanVariable(env.GITHUB_ACTIONS);
+export function detectCISystem () {
+    const ciDetectors = {
+        [CISystems.githubActions]:      parseBooleanVariable(process.env.GITHUB_ACTIONS),
+        [CISystems.bitbucketPipelines]: process.env.BITBUCKET_BUILD_NUMBER
+    };
 
-export const isBitbucketPipelines = env.BITBUCKET_BUILD_NUMBER !== void 0;
+    let result;
+
+    Object.values(CISystems).forEach(ciSystem => {
+        if (ciDetectors[ciSystem]) {
+            result = ciSystem;
+        }
+    });
+
+    return result;
+};
