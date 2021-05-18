@@ -11,13 +11,10 @@ export function detectCISystem () {
         [CISystems.bitbucketPipelines]: process.env.BITBUCKET_BUILD_NUMBER
     };
 
-    let result;
+    for (const ciSystem of Object.values(CISystems)) {
+        if (ciDetectors[ciSystem])
+            return ciSystem;
+    };
 
-    Object.values(CISystems).forEach(ciSystem => {
-        if (ciDetectors[ciSystem]) {
-            result = ciSystem;
-        }
-    });
-
-    return result;
+    return null;
 };
