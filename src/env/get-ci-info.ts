@@ -1,5 +1,6 @@
 import { getGithubActionsInfo } from './github-actions';
 import { getBitbucketPipelinesInfo } from './bitbucket-pipelines';
+import { getJenkinsInfo } from './jenkins';
 import { CIInfo } from '../types/task-start-args';
 import {
     CISystems,
@@ -8,7 +9,8 @@ import {
 
 const CIInfoGetters = {
     [CISystems.githubActions]:      getGithubActionsInfo,
-    [CISystems.bitbucketPipelines]: getBitbucketPipelinesInfo
+    [CISystems.bitbucketPipelines]: getBitbucketPipelinesInfo,
+    [CISystems.jenkins]:            getJenkinsInfo
 };
 
 export function getCIInfo (): CIInfo | undefined {
