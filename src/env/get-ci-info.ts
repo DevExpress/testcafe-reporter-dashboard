@@ -1,6 +1,9 @@
-import { getGithubActionsInfo } from './github-actions';
-import { getCircleCIInfo } from './circle-ci';
+import { getAppVeyorInfo } from './app-veyor';
+import { getAWSCodeBuildInfo } from './aws-code-build';
+import { getBambooInfo } from './bamboo';
 import { getBitbucketPipelinesInfo } from './bitbucket-pipelines';
+import { getCircleCIInfo } from './circle-ci';
+import { getGithubActionsInfo } from './github-actions';
 import { getJenkinsInfo } from './jenkins';
 import { CIInfo } from '../types/task-start-args';
 import {
@@ -9,8 +12,11 @@ import {
 } from './ci-detection';
 
 const CIInfoGetters = {
-    [CISystems.githubActions]:      getGithubActionsInfo,
+    [CISystems.appVeyor]:           getAppVeyorInfo,
+    [CISystems.awsCodeBuild]:       getAWSCodeBuildInfo,
+    [CISystems.bamboo]:             getBambooInfo,
     [CISystems.bitbucketPipelines]: getBitbucketPipelinesInfo,
+    [CISystems.githubActions]:      getGithubActionsInfo,
     [CISystems.circleCI]:           getCircleCIInfo,
     [CISystems.jenkins]:            getJenkinsInfo
 };

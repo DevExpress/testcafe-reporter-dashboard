@@ -1,15 +1,15 @@
 import assert from 'assert';
 import mock from 'mock-require';
 
-import { CI_VARIABLES } from '../data/ci-variables';
-import { clearCIVariables, restoreCIVariables } from '../mocks';
+import { CI_DETECTION_VARIABLES } from '../data/ci-variables';
+import { clearCIDetectionVariables, restoreCIDetectionVariables } from '../mocks';
 
 describe('CI detection', () => {
-    beforeEach(clearCIVariables);
+    beforeEach(clearCIDetectionVariables);
 
-    afterEach(restoreCIVariables);
+    afterEach(restoreCIDetectionVariables);
 
-    for (const CIVariable of CI_VARIABLES) {
+    for (const CIVariable of CI_DETECTION_VARIABLES) {
         it(`Should detect ${CIVariable.CISystem} CI system`, () => {
             const modulePath = '../../src/env/ci-detection';
 
