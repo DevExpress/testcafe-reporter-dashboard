@@ -1,5 +1,5 @@
 import assert from 'assert';
-
+import { CIInfoProviders } from '../../src/env/ci-info-providers';
 import { CI_INFO_VARIABLES } from '../data/ci-variables';
 import { clearCIInfoVariables, restoreCIInfoVariables } from '../mocks';
 
@@ -13,7 +13,7 @@ describe('getCIInfo', () => {
             for (const variable in CI.variables)
                 process.env[variable] = CI.variables[variable];
 
-            assert.deepEqual(CI.getter(), CI.expectedCIInfo);
+            assert.deepEqual(CIInfoProviders[CI.CISystem](), CI.expectedCIInfo);
         });
     });
 });
