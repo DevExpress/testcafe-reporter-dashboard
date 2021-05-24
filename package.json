@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "lint": "eslint --ext .ts src test",
+    "preinstall": "npx npm-force-resolutions",
     "publish-please": "publish-please",
     "prepublish": "publish-please guard",
     "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
@@ -65,5 +66,8 @@
     "monocle-ts": "^2.3.5",
     "newtype-ts": "^0.3.4",
     "uuid": "3.3.3"
+  },
+  "resolutions": {
+    "lodash": "4.17.21"
   }
 }
