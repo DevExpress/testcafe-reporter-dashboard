@@ -1,20 +1,15 @@
+import { readFileSync as fsReadFileSync } from 'fs';
 import assert from 'assert';
-import mock from 'mock-require';
 
 describe('getGithubActionsInfo()', () => {
     const errors: string[] = [];
-
     const loggerMock = {
         error: err => errors.push(err)
     };
 
-    mock('../../src/logger', loggerMock);
-
     afterEach(() => {
         errors.length = 0;
     });
-
-    after(mock.stopAll);
 
     it('Should detect author name', () => {
         const name = 'Luke';
@@ -26,7 +21,9 @@ describe('getGithubActionsInfo()', () => {
 
         process.env.GITHUB_EVENT_PATH = eventPath;
 
-        const readFileSync = (filePath, enc) => {
+        const getGithubActionsInfo = require('../../src/env/github-actions').getGithubActionsInfo;
+
+        const readFileSync = ((filePath, enc) => {
             path = filePath;
             encoding = enc;
 
@@ -39,11 +36,7 @@ describe('getGithubActionsInfo()', () => {
                     }
                 }
             });
-        };
-
-        mock('fs', { readFileSync });
-
-        const getGithubActionsInfo = mock.reRequire('../../src/env/github-actions').getGithubActionsInfo;
+        }) as typeof fsReadFileSync;
 
         assert.deepEqual(getGithubActionsInfo(readFileSync, loggerMock), {
             commitSHA: sha,
@@ -55,15 +48,14 @@ describe('getGithubActionsInfo()', () => {
     });
 
     it('Should log errors', () => {
-        const error        = new Error('Some error');
-        const readFileSync = () => {
+        const error = new Error('Some error');
+        const getGithubActionsInfo = require('../../src/env/github-actions').getGithubActionsInfo;
+
+        const readFileSync = (() => {
             throw error;
-        };
+        }) as typeof fsReadFileSync;
 
-        mock('fs', { readFileSync });
-        const getGithubActionsInfo = mock.reRequire('../../src/env/github-actions').getGithubActionsInfo;
-
-        getGithubActionsInfo();
+        getGithubActionsInfo(readFileSync, loggerMock);
 
         assert.deepEqual(errors, [
             `Could not retrieve information from the Github Actions environment due to an error: ${error.toString()}`
