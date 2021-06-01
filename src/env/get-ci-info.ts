@@ -1,16 +1,16 @@
 import { readFileSync } from 'fs';
-import { getGithubActionsInfo } from './github-actions';
 import { CIInfo } from '../types/task-start-args';
-import {
-    isGithubActions,
-} from './ci-detection';
+import { detectCISystem } from './ci-detection';
+import { CIInfoProviders } from './ci-info-providers';
 import logger from '../logger';
 
 export function getCIInfo (): CIInfo | undefined {
     let info: CIInfo | undefined;
 
-    if (isGithubActions)
-        info = getGithubActionsInfo(readFileSync, logger);
+    const CISystem = detectCISystem();
+
+    if (CISystem)
+        return CIInfoProviders[CISystem](readFileSync, logger);
 
     return info;
 }

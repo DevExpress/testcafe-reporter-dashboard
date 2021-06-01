@@ -1,24 +1,27 @@
 import assert from 'assert';
 import mock from 'mock-require';
 
+import { CI_DETECTION_VARIABLES } from '../data/ci-variables';
+import { clearCIDetectionVariables, restoreCIDetectionVariables } from '../mocks';
+
 describe('CI detection', () => {
-    const modulePath = '../../src/env/ci-detection';
+    beforeEach(clearCIDetectionVariables);
 
-    it('Should detect Github Actions', () => {
-        const originalValue = process.env.GITHUB_ACTIONS;
+    afterEach(restoreCIDetectionVariables);
 
-        process.env.GITHUB_ACTIONS = '';
+    for (const CIVariable of CI_DETECTION_VARIABLES) {
+        it(`Should detect ${CIVariable.CISystem} CI system`, () => {
+            const modulePath = '../../src/env/ci-detection';
 
-        let { isGithubActions } = mock.reRequire(modulePath);
+            let { detectCISystem } = mock.reRequire(modulePath);
 
-        assert.equal(isGithubActions, false);
+            assert.equal(detectCISystem(), null);
 
-        process.env.GITHUB_ACTIONS = 'true';
+            process.env[CIVariable.name] = CIVariable.value;
 
-        isGithubActions = mock.reRequire(modulePath).isGithubActions;
+            detectCISystem = mock.reRequire(modulePath).detectCISystem;
 
-        assert.equal(isGithubActions, true);
-
-        process.env.GITHUB_ACTIONS = originalValue;
-    });
+            assert.equal(detectCISystem(), CIVariable.CISystem);
+        });
+    }
 });

@@ -1,17 +1,12 @@
 import assert from 'assert';
 import mock from 'mock-require';
 
-describe('Enviroment variables defaults', () => {
-    before(() => {
-        mock('../../src/env/ci-detection.ts', {
-            isGithubAcions: false
-        });
-        mock.reRequire('../../src/env/get-ci-info.ts');
-    });
+import { clearCIDetectionVariables, restoreCIDetectionVariables } from '../mocks';
 
-    after(() => {
-        mock.stopAll();
-    });
+describe('Enviroment variables defaults', () => {
+    beforeEach(clearCIDetectionVariables);
+
+    afterEach(restoreCIDetectionVariables);
 
     it('Screenshots and videos upload should be enabled by default', () => {
         const { NO_SCREENSHOT_UPLOAD, NO_VIDEO_UPLOAD, CI_INFO } = mock.reRequire('../../src/env');
