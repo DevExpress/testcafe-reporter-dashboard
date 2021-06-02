@@ -1,4 +1,4 @@
-import { CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../consts';
+import { CLIENTTIMEOUT_ERROR_MSG, CONCURRENT_ERROR_CODE, REQUEST_TIMEOUT, RETRY_ERROR_CODES } from '../consts';
 import FetchResponse from './fetch-response';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
 import { FetchMethod, Logger, ResolveCommand } from '../types/internal/';
@@ -38,14 +38,34 @@ export default class Transport {
             },
 
             body: JSON.stringify(command, removeNullValues)
-        });
+        }, REQUEST_TIMEOUT);
     }
 
-    async fetch (url: string, requestOptions): Promise<FetchResponse> {
+    async _fetchWithRequestTimeout (url: string, requestOptions, requestTimeout: number): Promise<Response> {
+        let timeout: NodeJS.Timeout | null = null;
+
+        const result = await new Promise<Response>((resolve, reject) => {
+            timeout = setTimeout(() => {
+                reject(new Error(CLIENTTIMEOUT_ERROR_MSG));
+            }, requestTimeout);
+
+            this._fetch(url, requestOptions).then(resolve, reject);
+        });
+
+        if (timeout)
+            clearTimeout(timeout);
+
+        return result;
+    }
+
+    async fetch (url: string, requestOptions, requestTimeout?: number): Promise<FetchResponse> {
         let retryCount = 0;
 
         do {
             try {
+                if (requestTimeout !== void 0)
+                    return new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
+
                 return new FetchResponse(await this._fetch(url, requestOptions));
             }
             catch (e) {
@@ -66,7 +86,7 @@ export default class Transport {
             headers: {
                 authorization: `Bearer ${this._authenticationToken}`
             }
-        });
+        }, REQUEST_TIMEOUT);
     }
 
     async sendResolveCommand (command: ResolveCommand): Promise<void> {

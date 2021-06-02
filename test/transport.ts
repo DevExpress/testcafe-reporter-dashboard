@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 import assert from 'assert';
 
-import { CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../src/consts';
+import { CLIENTTIMEOUT_ERROR_MSG, CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../src/consts';
 import Transport from '../src/transport';
 import { AggregateCommandType, AggregateNames } from '../src/types/internal/dashboard';
 import logger from '../src/logger';
@@ -68,5 +68,30 @@ describe('sendResolveCommand', () => {
         const response = await transport.fetch('http://localhost', {});
 
         assert.equal(response.toString(), '0 - Connection failed. code: ETIMEDOUT');
+    });
+
+    it('Should throw client timeout error if fetch hangs', async () => {
+        let timeout: NodeJS.Timeout | null = null;
+
+        let fetchReject = () => {}; //eslint-disable-line @typescript-eslint/no-empty-function
+
+        const fetchMock = function retryCommandTest () {
+            return new Promise<Response>((resolve, reject) => {
+                timeout = setTimeout(() => {
+                    resolve({ ok: true, status: 200 } as Response);
+                }, 2500);
+
+                fetchReject = reject;
+            });
+        };
+
+        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger);
+        const response  = await transport.fetch('http://localhost', {}, 1500);
+
+        assert.equal(response.toString(), `0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
+
+        fetchReject();
+
+        if (timeout) clearTimeout(timeout);
     });
 });
