@@ -18,6 +18,8 @@ const SETTINGS: DashboardSettings = {
     isLogEnabled:        false,
     noScreenshotUpload:  false,
     noVideoUpload:       false,
+    responseTimeout:     1000,
+    requestRetryCount:   10
 };
 
 describe('reportTestActionDone', () => {

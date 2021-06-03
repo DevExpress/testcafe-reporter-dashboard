@@ -18,7 +18,7 @@ describe('sendResolveCommand', () => {
             return Promise.resolve(response as Response);
         };
 
-        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger);
+        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
 
         await transport.sendResolveCommand({
             aggregateId:   uuid(),
@@ -40,7 +40,7 @@ describe('sendResolveCommand', () => {
                 return Promise.resolve({ status: 200, ok: true } as Response);
         };
 
-        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger);
+        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
 
         await transport.fetch('http://localhost', {});
 
@@ -63,18 +63,17 @@ describe('sendResolveCommand', () => {
                 return Promise.resolve({ status: 200, ok: true } as Response);
         };
 
-        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger);
+        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
 
         const response = await transport.fetch('http://localhost', {});
 
         assert.equal(response.toString(), '0 - Connection failed. code: ETIMEDOUT');
     });
 
-    it('Should throw client timeout error if fetch hangs', async () => {
+    describe('Should throw client timeout error if fetch hangs', () => {
         let timeout: NodeJS.Timeout | null = null;
 
         let fetchReject = () => {}; //eslint-disable-line @typescript-eslint/no-empty-function
-
         const fetchMock = function retryCommandTest () {
             return new Promise<Response>((resolve, reject) => {
                 timeout = setTimeout(() => {
@@ -85,13 +84,33 @@ describe('sendResolveCommand', () => {
             });
         };
 
-        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger);
-        const response  = await transport.fetch('http://localhost', {}, 1500);
+        afterEach(() => {
+            fetchReject();
 
-        assert.equal(response.toString(), `0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
+            if (timeout) clearTimeout(timeout);
+        });
 
-        fetchReject();
+        it('Fetch from dashboard', async () => {
+            const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
+            const response  = await transport.fetchFromDashboard('api/uploader');
 
-        if (timeout) clearTimeout(timeout);
+            assert.equal(response.toString(), `0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
+        });
+
+        it('Send resolve command', async () => {
+            const errors     = [] as string[];
+            const loggerMock = { ...logger, error: (message: string) => errors.push(message) };
+            const transport  = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, loggerMock, 1000, 10);
+
+            await transport.sendResolveCommand({
+                aggregateId:   'report_1',
+                aggregateName: AggregateNames.Run,
+                type:          AggregateCommandType.reportTestStart,
+                payload:       { testId: 'test_1' }
+            });
+
+            assert.equal(errors.length, 1);
+            assert.equal(errors[0], `report_1 reportTestStart 0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
+        });
     });
 });

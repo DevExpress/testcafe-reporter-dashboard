@@ -9,7 +9,9 @@ import {
     TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN as AUTHENTICATION_TOKEN,
     TESTCAFE_DASHBOARD_BUILD_ID,
     TESTCAFE_DASHBOARD_URL,
-    CI_INFO
+    CI_INFO,
+    RESPONSE_TIMEOUT,
+    REQUEST_RETRY_COUNT
 } from './env';
 
 import { ReporterPluginObject } from './types/internal';
@@ -24,6 +26,8 @@ module.exports = function pluginFactory (): ReporterPluginObject {
         isLogEnabled:        ENABLE_LOG,
         noScreenshotUpload:  NO_SCREENSHOT_UPLOAD,
         noVideoUpload:       NO_VIDEO_UPLOAD,
+        responseTimeout:     RESPONSE_TIMEOUT,
+        requestRetryCount:   REQUEST_RETRY_COUNT,
         ciInfo:              CI_INFO
     };
 

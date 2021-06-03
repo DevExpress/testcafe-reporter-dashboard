@@ -56,6 +56,8 @@ export type DashboardSettings = {
     isLogEnabled: boolean;
     noScreenshotUpload: boolean;
     noVideoUpload: boolean;
+    responseTimeout: number;
+    requestRetryCount: number;
     runId?: string;
     ciInfo?: CIInfo;
 };

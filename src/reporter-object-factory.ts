@@ -10,7 +10,16 @@ import {
     Logger,
     ReporterPluginObject
 } from './types/internal/';
-import { TestDoneArgs, ReportedTestStructureItem, TestError, BrowserRunInfo, ActionInfo, Error, BuildId, ShortId } from './types';
+import {
+    ActionInfo,
+    BrowserRunInfo,
+    BuildId,
+    Error,
+    ReportedTestStructureItem,
+    ShortId,
+    TestDoneArgs,
+    TestError
+} from './types';
 import { Uploader } from './upload';
 import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
@@ -40,12 +49,14 @@ export default function reporterObjectFactory (
         noScreenshotUpload,
         noVideoUpload,
         runId,
+        responseTimeout,
+        requestRetryCount,
         ciInfo
     } = settings;
 
     const id: string = runId || uuid();
 
-    const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger);
+    const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger, responseTimeout, requestRetryCount);
     const uploader       = new Uploader(id, readFile, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 

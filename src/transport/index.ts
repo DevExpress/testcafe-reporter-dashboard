@@ -1,10 +1,7 @@
-import { CLIENTTIMEOUT_ERROR_MSG, CONCURRENT_ERROR_CODE, REQUEST_TIMEOUT, RETRY_ERROR_CODES } from '../consts';
+import { CLIENTTIMEOUT_ERROR_MSG, CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../consts';
 import FetchResponse from './fetch-response';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
 import { FetchMethod, Logger, ResolveCommand } from '../types/internal/';
-
-
-const MAX_RETRY_COUNT = 10;
 
 function removeNullValues (key, value) {
     if (value !== null) return value;
@@ -17,14 +14,18 @@ export default class Transport {
     private _dashboardUrl: string;
     private _isLogEnabled: boolean;
     private _logger: Logger;
+    private _responseTimeout: number;
+    private _requestRetryCount: number;
 
     private _fetch: FetchMethod;
 
-    constructor (fetch: FetchMethod, dashboardUrl: string, authenticationToken: string, isLogEnabled: boolean, logger: Logger) {
+    constructor (fetch: FetchMethod, dashboardUrl: string, authenticationToken: string, isLogEnabled: boolean, logger: Logger, responseTimeout: number, requestRetryCount: number) {
         this._authenticationToken = authenticationToken;
         this._dashboardUrl        = dashboardUrl;
         this._isLogEnabled        = isLogEnabled;
         this._logger              = logger;
+        this._responseTimeout     = responseTimeout;
+        this._requestRetryCount   = requestRetryCount;
 
         this._fetch = fetch;
     }
@@ -38,7 +39,7 @@ export default class Transport {
             },
 
             body: JSON.stringify(command, removeNullValues)
-        }, REQUEST_TIMEOUT);
+        }, this._responseTimeout);
     }
 
     async _fetchWithRequestTimeout (url: string, requestOptions, requestTimeout: number): Promise<Response> {
@@ -72,7 +73,7 @@ export default class Transport {
                 if (this._isLogEnabled)
                     this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
 
-                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < MAX_RETRY_COUNT)
+                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
                     continue;
                 else
                     return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
@@ -86,7 +87,7 @@ export default class Transport {
             headers: {
                 authorization: `Bearer ${this._authenticationToken}`
             }
-        }, REQUEST_TIMEOUT);
+        }, this._responseTimeout);
     }
 
     async sendResolveCommand (command: ResolveCommand): Promise<void> {
@@ -109,6 +110,6 @@ export default class Transport {
             else if (this._isLogEnabled)
                 this._logger.log(`${aggregateId} ${commandType} ${response}`);
 
-        } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= MAX_RETRY_COUNT);
+        } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= this._requestRetryCount);
     }
 }
