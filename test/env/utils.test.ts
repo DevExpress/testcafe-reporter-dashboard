@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { parseBooleanVariable } from '../../src/env/utils';
+import { parseBooleanVariable, parseNumber } from '../../src/env/utils';
 
 describe('Env utils', () => {
     describe('parseBooleanVariable()', () => {
@@ -17,6 +17,16 @@ describe('Env utils', () => {
 
         it('Should return true if value is truthy ', () => {
             assert.equal(parseBooleanVariable('true'), true);
+        });
+    });
+
+    describe('parseNumber()', () => {
+        it('Should return null if value is not specified', () => {
+            assert.equal(parseNumber(void 0), null);
+        });
+
+        it('Should return number if value is a string representatnion of number', () => {
+            assert.equal(parseNumber('60000'), 60000);
         });
     });
 });
