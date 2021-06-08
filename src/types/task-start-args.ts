@@ -53,16 +53,14 @@ export type CIInfo = t.TypeOf<typeof CIInfoSchema>
 
 
 export const TaskStartArgsSchema  = t.readonly(
-    t.exact(
-        t.type({
-            startTime:     DateFromISOString,
-            userAgents:    t.array(t.string),
-            testCount:     t.number,
-            buildId:       BuildIdSchema,
-            taskStructure: t.array(ReportedTestStructureItemSchema),
-            ciInfo:        t.union([t.undefined, CIInfoSchema])
-        })
-    )
+    t.type({
+        startTime:     DateFromISOString,
+        userAgents:    t.array(t.string),
+        testCount:     t.number,
+        buildId:       BuildIdSchema,
+        taskStructure: t.array(ReportedTestStructureItemSchema),
+        ciInfo:        t.union([t.undefined, CIInfoSchema])
+    })
 );
 
 export type TaskStartArgs = t.TypeOf<typeof TaskStartArgsSchema>;
