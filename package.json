@@ -68,7 +68,6 @@
     "uuid": "3.3.3"
   },
   "resolutions": {
-    "lodash": "4.17.21",
-    "glob-parent": "5.1.2"
+    "lodash": "4.17.21"
   }
 }
