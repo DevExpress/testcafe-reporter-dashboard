@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Dashboard TestCafe reporter plugin.",
   "repository": "https://github.com/DevExpress/testcafe-reporter-dashboard",
   "author": {
@@ -14,7 +14,6 @@
   ],
   "scripts": {
     "lint": "eslint --ext .ts src test",
-    "preinstall": "npx npm-force-resolutions",
     "publish-please": "publish-please",
     "prepublish": "publish-please guard",
     "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
@@ -52,7 +51,7 @@
     "normalize-newline": "^1.0.2",
     "publish-please": "^5.5.2",
     "read-file-relative": "^1.2.0",
-    "testcafe": "1.14.2",
+    "testcafe": "^1.14.2",
     "ts-node": "^8.7.0",
     "typescript": "^3.8.3"
   },
@@ -69,6 +68,7 @@
   },
   "resolutions": {
     "lodash": "4.17.21",
-    "glob-parent": "5.1.2"
+    "glob-parent": "5.1.2",
+    "yargs-parser": "13.1.2"
   }
 }
