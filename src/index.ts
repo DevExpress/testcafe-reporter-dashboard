@@ -31,5 +31,5 @@ module.exports = function pluginFactory (): ReporterPluginObject {
         ciInfo:              CI_INFO
     };
 
-    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger);
+    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, require('testcafe/package').version);
 };

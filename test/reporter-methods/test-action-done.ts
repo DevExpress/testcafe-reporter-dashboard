@@ -8,6 +8,7 @@ import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo } from '../../src/types';
 import { mockReadFile } from '../mocks';
+import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
@@ -76,7 +77,9 @@ describe('reportTestActionDone', () => {
             return Promise.resolve(response as unknown as Response);
         }
 
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(mockReadFile, fetchMock, SETTINGS, logger), process.stdout);
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(
+                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+            ), process.stdout);
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
         const testId     = 'test_1';
@@ -132,7 +135,9 @@ describe('reportTestActionDone', () => {
             return Promise.resolve(response as unknown as Response);
         }
 
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(mockReadFile, fetchMock, SETTINGS, logger), process.stdout);
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(
+                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+            ), process.stdout);
 
         const testRunIds = twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId);
 

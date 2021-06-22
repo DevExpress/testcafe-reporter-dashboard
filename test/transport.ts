@@ -53,7 +53,7 @@ describe('sendResolveCommand', () => {
         const fetchMock = function retryCommandTest () {
             if (++sendCommandCount <= 11) {
                 throw {
-                    code:     RETRY_ERROR_CODES[sendCommandCount % 2],
+                    code:     RETRY_ERROR_CODES[sendCommandCount % 3],
                     toString: function toString () {
                         return `code: ${this.code}`;
                     }
@@ -67,7 +67,7 @@ describe('sendResolveCommand', () => {
 
         const response = await transport.fetch('http://localhost', {});
 
-        assert.equal(response.toString(), '0 - Connection failed. code: ETIMEDOUT');
+        assert.equal(response.toString(), '0 - Connection failed. code: ECONNREFUSED');
     });
 
     describe('Should throw client timeout error if fetch hangs', () => {

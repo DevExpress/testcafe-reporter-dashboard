@@ -25,7 +25,7 @@ import { errorDecorator, curly } from './error-decorator';
 import reportCommandsFactory from './report-commands-factory';
 import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
-import validateSettings from './validate-settings';
+import { validateSettings } from './validate-settings';
 import BLANK_REPORTER from './blank-reporter';
 
 function isThirdPartyError (error: Error): boolean {
@@ -36,9 +36,10 @@ export default function reporterObjectFactory (
     readFile: ReadFileMethod,
     fetch: FetchMethod,
     settings: DashboardSettings,
-    logger: Logger
+    logger: Logger,
+    tcVerion: string
 ): ReporterPluginObject {
-    if (!validateSettings(settings, logger))
+    if (!validateSettings(settings, tcVerion, logger))
         return BLANK_REPORTER;
 
     const {

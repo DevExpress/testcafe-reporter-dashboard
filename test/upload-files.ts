@@ -7,6 +7,7 @@ import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
 import { mockReadFile } from './mocks';
+import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
 
 const UPLOAD_URL_PREFIX           = 'http://upload_url/';
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
@@ -104,7 +105,7 @@ describe('Uploads', () => {
                 return Promise.resolve(Buffer.from(fileContent));
             }
 
-            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger);
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -171,7 +172,7 @@ describe('Uploads', () => {
                 }
             ];
 
-            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger);
+            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger, TC_OLDEST_COMPATIBLE_VERSION);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -208,7 +209,7 @@ describe('Uploads', () => {
                 return Promise.resolve(Buffer.from(`fileContent_${path}`));
             };
 
-            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger);
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -267,7 +268,7 @@ describe('Uploads', () => {
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
-            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noVideoUpload: true }, logger);
+            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noVideoUpload: true }, logger, TC_OLDEST_COMPATIBLE_VERSION);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
