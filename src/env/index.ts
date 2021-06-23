@@ -13,6 +13,6 @@ export const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = env.TESTCAFE_DASHBOARD_AU
 export const TESTCAFE_DASHBOARD_BUILD_ID: string | undefined = env.TESTCAFE_DASHBOARD_BUILD_ID;
 
 export const REQUEST_RETRY_COUNT = parseNumber(env.TESTCAFE_DASHBOARD_REQUEST_RETRY_COUNT) || 20;
-export const RESPONSE_TIMEOUT    = parseNumber(env.TESTCAFE_DASHBOARD_RESPONSE_TIMEOUT) || 60 * 1000; // CloudFront response timeout + 30 sec
+export const RESPONSE_TIMEOUT    = parseNumber(env.TESTCAFE_DASHBOARD_RESPONSE_TIMEOUT) || 40 * 1000; // CloudFront response timeout + 10 sec
 
 export const CI_INFO = getCIInfo();

@@ -37,9 +37,9 @@ export default function reporterObjectFactory (
     fetch: FetchMethod,
     settings: DashboardSettings,
     logger: Logger,
-    tcVerion: string
+    tcVersion: string
 ): ReporterPluginObject {
-    if (!validateSettings(settings, tcVerion, logger))
+    if (!validateSettings(settings, tcVersion, logger))
         return BLANK_REPORTER;
 
     const {
