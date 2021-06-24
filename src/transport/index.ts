@@ -1,4 +1,10 @@
-import { CLIENTTIMEOUT_ERROR_MSG, CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../consts';
+import {
+    CLIENTTIMEOUT_ERROR_MSG,
+    CONCURRENT_ERROR_CODE,
+    RETRY_ERROR_CODES,
+    SERVICE_UNAVAILABLE_ERROR_CODE
+} from '../consts';
+
 import FetchResponse from './fetch-response';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
 import { FetchMethod, Logger, ResolveCommand } from '../types/internal/';
@@ -61,24 +67,33 @@ export default class Transport {
 
     async fetch (url: string, requestOptions, requestTimeout?: number): Promise<FetchResponse> {
         let retryCount = 0;
+        let response: FetchResponse;
 
-        do {
-            try {
-                if (requestTimeout !== void 0)
-                    return new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
+        const fetchWithNetworkRetry = async (): Promise<FetchResponse> => {
+            do {
+                try {
+                    if (requestTimeout !== void 0)
+                        return new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
 
-                return new FetchResponse(await this._fetch(url, requestOptions));
-            }
-            catch (e) {
-                if (this._isLogEnabled)
-                    this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
+                    return new FetchResponse(await this._fetch(url, requestOptions));
+                }
+                catch (e) {
+                    if (this._isLogEnabled)
+                        this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
 
-                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
-                    continue;
-                else
-                    return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
-            }
-        } while (true);
+                    if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
+                        continue;
+                    else
+                        return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
+                }
+            } while (true);
+        };
+
+        do
+            response = await fetchWithNetworkRetry();
+        while (!response.ok && response.status === SERVICE_UNAVAILABLE_ERROR_CODE && retryCount++ < this._requestRetryCount);
+
+        return response;
     }
 
     async fetchFromDashboard (relativeUrl: string) {
