@@ -30,7 +30,7 @@ export const createGithubInfoError = (error: string): string =>
    `Could not retrieve information from the Github Actions environment due to an error: ${error}`;
 
 export const createTestCafeVersionInvalidError = (tcVersion: string): string =>
-   `TestCafe version is not valid: ${tcVersion}`;
+   `Unrecognized version of TestCafe: ${tcVersion}`;
 
 export const createTestCafeVersionIncompatibledError = (tcVersion: string): string =>
    `TestCafe version is not compatible with Dashboard: ${tcVersion}. Please update to the latest TestCafe version`;
