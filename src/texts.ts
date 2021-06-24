@@ -33,4 +33,4 @@ export const createTestCafeVersionInvalidError = (tcVersion: string): string =>
    `Unrecognized version of TestCafe: ${tcVersion}`;
 
 export const createTestCafeVersionIncompatibledError = (tcVersion: string): string =>
-   `TestCafe version is not compatible with Dashboard: ${tcVersion}. Please update to the latest TestCafe version`;
+   `TestCafe Dashboard does not support TestCafe ${tcVersion}. Please update the TestCafe package.`;
