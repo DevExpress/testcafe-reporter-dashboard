@@ -28,3 +28,9 @@ export const createReporterMethodName = (reporterMethodName: string, errorDetail
 
 export const createGithubInfoError = (error: string): string =>
    `Could not retrieve information from the Github Actions environment due to an error: ${error}`;
+
+export const createTestCafeVersionInvalidError = (tcVersion: string): string =>
+   `Unrecognized version of TestCafe: ${tcVersion}`;
+
+export const createTestCafeVersionIncompatibledError = (tcVersion: string): string =>
+   `TestCafe Dashboard does not support TestCafe ${tcVersion}. Please update the TestCafe package.`;

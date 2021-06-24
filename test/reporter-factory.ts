@@ -2,9 +2,10 @@ import assert from 'assert';
 import { DashboardSettings } from '../src/types/internal/dashboard';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
-import { AUTHENTICATION_TOKEN_NOT_DEFINED, createLongBuildIdError, DASHBOARD_LOCATION_NOT_DEFINED } from '../src/texts';
+import { AUTHENTICATION_TOKEN_NOT_DEFINED, createLongBuildIdError, createTestCafeVersionIncompatibledError, createTestCafeVersionInvalidError, DASHBOARD_LOCATION_NOT_DEFINED } from '../src/texts';
 import BLANK_REPORTER from '../src/blank-reporter';
 import { BuildId } from '../src/types';
+import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
 import { ReporterPluginObject } from '../src/types/internal';
 import { mockReadFile } from './mocks';
 
@@ -25,12 +26,13 @@ describe('Reporter factory', () => {
     let errors: string[];
     const loggerMock = { ...logger, error: message => errors.push(message) };
     const mockFetch = () => Promise.resolve({} as Response);
-    const createReporter = (settings: Partial<DashboardSettings>): ReporterPluginObject =>
+    const createReporter = (settings: Partial<DashboardSettings>, tcVersion = TC_OLDEST_COMPATIBLE_VERSION): ReporterPluginObject =>
         reporterObjectFactory(
             mockReadFile,
             mockFetch,
             { ...SETTINGS, ...settings },
-            loggerMock
+            loggerMock,
+            tcVersion
         );
 
     beforeEach(() => {
@@ -59,6 +61,22 @@ describe('Reporter factory', () => {
 
         assert.equal(errors.length, 1);
         assert.equal(errors[0], DASHBOARD_LOCATION_NOT_DEFINED);
+        assert.equal(reporter, BLANK_REPORTER);
+    });
+
+    it('Show TestCafe invalid version error', async () => {
+        const reporter = createReporter({ }, '1.asdfasd.2');
+
+        assert.equal(errors.length, 1);
+        assert.equal(errors[0], createTestCafeVersionInvalidError('1.asdfasd.2'));
+        assert.equal(reporter, BLANK_REPORTER);
+    });
+
+    it('Show TestCafe incompatible version error', async () => {
+        const reporter = createReporter({ }, '1.14.1');
+
+        assert.equal(errors.length, 1);
+        assert.equal(errors[0], createTestCafeVersionIncompatibledError('1.14.1'));
         assert.equal(reporter, BLANK_REPORTER);
     });
 });

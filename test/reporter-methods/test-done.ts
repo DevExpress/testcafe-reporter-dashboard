@@ -8,6 +8,7 @@ import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
 import { mockReadFile } from '../mocks';
+import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
@@ -39,7 +40,8 @@ describe('reportTestDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-            mockReadFile, fetchMock, SETTINGS, logger), process.stdout
+                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+            ), process.stdout
         );
 
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
@@ -74,7 +76,9 @@ describe('reportTestDone', () => {
             return Promise.resolve(response as Response);
         }
 
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(mockReadFile, fetchMock, SETTINGS, logger), process.stdout);
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(
+                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+            ), process.stdout);
 
         await reporter.reportTestDone('Test 1', skippedTestDone);
 

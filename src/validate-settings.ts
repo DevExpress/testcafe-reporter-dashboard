@@ -2,14 +2,17 @@ import { MAX_BUILD_ID_LENGTH } from './consts';
 import {
     AUTHENTICATION_TOKEN_NOT_DEFINED,
     createLongBuildIdError,
+    createTestCafeVersionIncompatibledError,
+    createTestCafeVersionInvalidError,
     DASHBOARD_LOCATION_NOT_DEFINED
 } from './texts';
 import { DashboardSettings, Logger } from './types/internal/dashboard';
+import semver from 'semver';
 
-export default function validateSettings (
-    settings: DashboardSettings,
-    logger: Logger
-): boolean {
+// TODO: we should ask TC Dashboard
+export const TC_OLDEST_COMPATIBLE_VERSION = '1.14.2';
+
+export function validateSettings (settings: DashboardSettings, tcVersion: string, logger: Logger): boolean {
     const { authenticationToken, buildId, dashboardUrl } = settings;
 
     let areSettingsValid = true;
@@ -28,6 +31,17 @@ export default function validateSettings (
 
     if (buildId && buildId.length > MAX_BUILD_ID_LENGTH) {
         logger.error(createLongBuildIdError(buildId));
+
+        areSettingsValid = false;
+    }
+
+    if (!semver.valid(tcVersion)) {
+        logger.error(createTestCafeVersionInvalidError(tcVersion));
+
+        areSettingsValid = false;
+    }
+    else if (semver.lt(tcVersion, TC_OLDEST_COMPATIBLE_VERSION)) {
+        logger.error(createTestCafeVersionIncompatibledError(tcVersion));
 
         areSettingsValid = false;
     }
