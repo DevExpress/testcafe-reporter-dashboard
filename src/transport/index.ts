@@ -91,7 +91,9 @@ export default class Transport {
 
         do
             response = await fetchWithNetworkRetry();
-        while (!response.ok && response.status === SERVICE_UNAVAILABLE_ERROR_CODE && retryCount++ < this._requestRetryCount);
+        while (!response.ok &&
+            [SERVICE_UNAVAILABLE_ERROR_CODE, CONCURRENT_ERROR_CODE].includes(response.status) &&
+            retryCount++ < this._requestRetryCount);
 
         return response;
     }
@@ -111,20 +113,11 @@ export default class Transport {
         if (!this._authenticationToken)
             return;
 
-        let response: FetchResponse;
+        const response = await this._sendCommand(command);
 
-        let retryCount = 0;
-
-        do {
-            response = await this._sendCommand(command);
-
-            retryCount++;
-
-            if (!response.ok)
-                this._logger.error(`${aggregateId} ${commandType} ${response}`);
-            else if (this._isLogEnabled)
-                this._logger.log(`${aggregateId} ${commandType} ${response}`);
-
-        } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= this._requestRetryCount);
+        if (!response.ok)
+            this._logger.error(`${aggregateId} ${commandType} ${response}`);
+        else if (this._isLogEnabled)
+            this._logger.log(`${aggregateId} ${commandType} ${response}`);
     }
 }

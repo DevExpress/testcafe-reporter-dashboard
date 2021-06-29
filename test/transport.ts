@@ -16,7 +16,7 @@ describe('Transport', () => {
     it('Retry command', async () => {
         let sendCommandCount = 0;
 
-        const fetchMock = function () {
+        const fetchMock = function retryCommandTest () {
             sendCommandCount++;
 
             const response = sendCommandCount === 1 ? { status: CONCURRENT_ERROR_CODE, ok: false } : { status: 200, ok: true };
@@ -39,7 +39,7 @@ describe('Transport', () => {
     it('Retry fetch on network error', async () => {
         let sendCommandCount = 0;
 
-        const fetchMock = function () {
+        const fetchMock = function retryCommandTest () {
             if (++sendCommandCount < 9)
                 throw { code: RETRY_ERROR_CODES[sendCommandCount % 2] };
             else
@@ -56,7 +56,7 @@ describe('Transport', () => {
     it('Retry fetch on server error', async () => {
         let sendCommandCount = 0;
 
-        const fetchMock = function () {
+        const fetchMock = function retryCommandTest () {
             sendCommandCount++;
 
             const response = sendCommandCount === 1 ? { status: SERVICE_UNAVAILABLE_ERROR_CODE, ok: false } : { status: 200, ok: true };
@@ -71,16 +71,39 @@ describe('Transport', () => {
         assert.equal(sendCommandCount, 2);
     });
 
+    it('Should return fetch response with error', async () => {
+        let sendCommandCount = 0;
+
+        const fetchMock = function retryCommandTest () {
+            if (++sendCommandCount <= 11) {
+                throw {
+                    code:     RETRY_ERROR_CODES[sendCommandCount % 3],
+                    toString: function toString () {
+                        return `code: ${this.code}`;
+                    }
+                };
+            }
+            else
+                return Promise.resolve({ status: 200, ok: true } as Response);
+        };
+
+        const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
+
+        const response = await transport.fetch('http://localhost', {});
+
+        assert.equal(response.toString(), '0 - Connection failed. code: ECONNREFUSED');
+    });
+
     it('Retry uses a shared retry counter for server and client errors', async () => {
         let sendCommandCount = 0;
 
-        const fetchMock = function () {
+        const fetchMock = function retryCommandTest () {
             sendCommandCount++;
 
             if (sendCommandCount === 1) {
                 throw {
                     code:     RETRY_ERROR_CODES[0],
-                    toString: function () {
+                    toString: function toString () {
                         return `code: ${this.code}`;
                     }
                 };
@@ -92,7 +115,7 @@ describe('Transport', () => {
             if (sendCommandCount === 3) {
                 throw {
                     code:     RETRY_ERROR_CODES[1],
-                    toString: function () {
+                    toString: function toString () {
                         return `code: ${this.code}`;
                     }
                 };
@@ -112,7 +135,7 @@ describe('Transport', () => {
         let timeout: NodeJS.Timeout | null = null;
 
         let fetchReject = () => {}; //eslint-disable-line @typescript-eslint/no-empty-function
-        const fetchMock = function () {
+        const fetchMock = function retryCommandTest () {
             return new Promise<Response>((resolve, reject) => {
                 timeout = setTimeout(() => {
                     resolve({ ok: true, status: 200 } as Response);
