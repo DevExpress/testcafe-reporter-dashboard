@@ -86,7 +86,7 @@ export default class Transport {
                 return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
             }
 
-            if (response.status === SERVICE_UNAVAILABLE_ERROR_CODE && retryCount++ < this._requestRetryCount) {
+            if ([SERVICE_UNAVAILABLE_ERROR_CODE, CONCURRENT_ERROR_CODE].includes(response.status) && retryCount++ < this._requestRetryCount) {
                 if (this._isLogEnabled)
                     this._logger.log(`${url} ${response}`);
 
