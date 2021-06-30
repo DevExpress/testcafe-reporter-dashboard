@@ -1,4 +1,10 @@
-import { CLIENTTIMEOUT_ERROR_MSG, CONCURRENT_ERROR_CODE, RETRY_ERROR_CODES } from '../consts';
+import {
+    CLIENTTIMEOUT_ERROR_MSG,
+    CONCURRENT_ERROR_CODE,
+    RETRY_ERROR_CODES,
+    SERVICE_UNAVAILABLE_ERROR_CODE
+} from '../consts';
+
 import FetchResponse from './fetch-response';
 import { FETCH_NETWORK_CONNECTION_ERROR } from '../texts';
 import { FetchMethod, Logger, ResolveCommand } from '../types/internal/';
@@ -61,13 +67,14 @@ export default class Transport {
 
     async fetch (url: string, requestOptions, requestTimeout?: number): Promise<FetchResponse> {
         let retryCount = 0;
+        let response: FetchResponse;
 
         do {
             try {
                 if (requestTimeout !== void 0)
-                    return new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
-
-                return new FetchResponse(await this._fetch(url, requestOptions));
+                    response = new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
+                else
+                    response = new FetchResponse(await this._fetch(url, requestOptions));
             }
             catch (e) {
                 if (this._isLogEnabled)
@@ -75,9 +82,18 @@ export default class Transport {
 
                 if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
                     continue;
-                else
-                    return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
+
+                return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
             }
+
+            if ([SERVICE_UNAVAILABLE_ERROR_CODE, CONCURRENT_ERROR_CODE].includes(response.status) && retryCount++ < this._requestRetryCount) {
+                if (this._isLogEnabled)
+                    this._logger.log(`${url} ${response}`);
+
+                continue;
+            }
+
+            return response;
         } while (true);
     }
 
@@ -96,20 +112,11 @@ export default class Transport {
         if (!this._authenticationToken)
             return;
 
-        let response: FetchResponse;
+        const response = await this._sendCommand(command);
 
-        let retryCount = 0;
-
-        do {
-            response = await this._sendCommand(command);
-
-            retryCount++;
-
-            if (!response.ok)
-                this._logger.error(`${aggregateId} ${commandType} ${response}`);
-            else if (this._isLogEnabled)
-                this._logger.log(`${aggregateId} ${commandType} ${response}`);
-
-        } while (response.status === CONCURRENT_ERROR_CODE && retryCount <= this._requestRetryCount);
+        if (!response.ok)
+            this._logger.error(`${aggregateId} ${commandType} ${response}`);
+        else if (this._isLogEnabled)
+            this._logger.log(`${aggregateId} ${commandType} ${response}`);
     }
 }
