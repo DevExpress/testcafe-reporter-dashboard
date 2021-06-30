@@ -69,33 +69,32 @@ export default class Transport {
         let retryCount = 0;
         let response: FetchResponse;
 
-        const fetchWithNetworkRetry = async (): Promise<FetchResponse> => {
-            do {
-                try {
-                    if (requestTimeout !== void 0)
-                        return new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
+        do {
+            try {
+                if (requestTimeout !== void 0)
+                    response = new FetchResponse(await this._fetchWithRequestTimeout(url, requestOptions, requestTimeout));
+                else
+                    response = new FetchResponse(await this._fetch(url, requestOptions));
+            }
+            catch (e) {
+                if (this._isLogEnabled)
+                    this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
 
-                    return new FetchResponse(await this._fetch(url, requestOptions));
-                }
-                catch (e) {
-                    if (this._isLogEnabled)
-                        this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
+                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
+                    continue;
 
-                    if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
-                        continue;
-                    else
-                        return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
-                }
-            } while (true);
-        };
+                return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
+            }
 
-        do
-            response = await fetchWithNetworkRetry();
-        while (!response.ok &&
-            [SERVICE_UNAVAILABLE_ERROR_CODE, CONCURRENT_ERROR_CODE].includes(response.status) &&
-            retryCount++ < this._requestRetryCount);
+            if (response.status === SERVICE_UNAVAILABLE_ERROR_CODE && retryCount++ < this._requestRetryCount) {
+                if (this._isLogEnabled)
+                    this._logger.log(`${url} ${response}`);
 
-        return response;
+                continue;
+            }
+
+            return response;
+        } while (true);
     }
 
     async fetchFromDashboard (relativeUrl: string) {
