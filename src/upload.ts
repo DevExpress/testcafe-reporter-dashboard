@@ -5,15 +5,13 @@ import Transport from './transport';
 import { DashboardTestRunInfo } from './types/';
 
 export class Uploader {
-    private _runId: string;
     private _transport: Transport;
     private _uploads: Promise<void>[];
     private _logger: Logger;
 
     private _readFile: ReadFileMethod;
 
-    constructor (runId: string, readFile: ReadFileMethod, transport: Transport, logger: Logger) {
-        this._runId     = runId;
+    constructor (readFile: ReadFileMethod, transport: Transport, logger: Logger) {
         this._transport = transport;
         this._uploads   = [];
         this._logger    = logger;
@@ -22,7 +20,7 @@ export class Uploader {
     }
 
     private async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo | null> {
-        const response = await this._transport.fetchFromDashboard(`api/uploader/getUploadUrl?dir=${this._runId}`);
+        const response = await this._transport.fetchFromDashboard('api/getUploadUrl');
 
         if (response.ok)
             return await response.json();
@@ -49,8 +47,7 @@ export class Uploader {
             type:          AggregateCommandType.createUpload,
 
             payload: {
-                reportId: this._runId,
-                status:   response.ok ? UploadStatus.Completed : UploadStatus.Failed
+                status: response.ok ? UploadStatus.Completed : UploadStatus.Failed
             }
         });
 

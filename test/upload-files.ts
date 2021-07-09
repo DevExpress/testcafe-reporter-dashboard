@@ -33,7 +33,7 @@ describe('Uploads', () => {
     const uploadInfos: any[]       = [];
 
     function fetch (url, request) {
-        if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl?dir=`)) {
+        if (url === `${TESTCAFE_DASHBOARD_URL}/api/getUploadUrl`) {
             const uploadInfo = { uploadId: uuid(), uploadUrl: `${UPLOAD_URL_PREFIX}${uuid()}` };
 
             uploadInfos.push(uploadInfo);
@@ -141,15 +141,15 @@ describe('Uploads', () => {
 
             assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
 
             assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
-            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
 
             assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
-            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
         });
 
         it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
@@ -195,7 +195,7 @@ describe('Uploads', () => {
 
             assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
             assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed, reportId: aggregateCommands[0].aggregateId });
+            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed });
         });
     });
 
@@ -256,15 +256,15 @@ describe('Uploads', () => {
 
             assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
 
             assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
-            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
 
             assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
-            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed, reportId: runCommands[0].aggregateId });
+            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
@@ -301,7 +301,7 @@ describe('Uploads', () => {
 
             assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
             assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed, reportId: aggregateCommands[0].aggregateId });
+            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed });
         });
     });
 });

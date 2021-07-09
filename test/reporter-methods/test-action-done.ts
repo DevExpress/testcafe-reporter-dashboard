@@ -63,7 +63,7 @@ describe('reportTestActionDone', () => {
             const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
             const uploadUrl = 'upload_url';
 
-            if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
+            if (url === `${TESTCAFE_DASHBOARD_URL}/api/getUploadUrl`)
                 response.json = () => Promise.resolve({ uploadId: 'upload_id', uploadUrl });
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString()) as DashboardTestRunInfo;
@@ -127,7 +127,7 @@ describe('reportTestActionDone', () => {
             const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
             const uploadUrl = 'upload_url';
 
-            if (url.startsWith(`${TESTCAFE_DASHBOARD_URL}/api/uploader/getUploadUrl`))
+            if (url === `${TESTCAFE_DASHBOARD_URL}/api/getUploadUrl`)
                 response.json = () => Promise.resolve({ uploadId: 'upload_id', uploadUrl });
             else if (url.startsWith(uploadUrl))
                 testRunInfo = JSON.parse(request.body.toString());

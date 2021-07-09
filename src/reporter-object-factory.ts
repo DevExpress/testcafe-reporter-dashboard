@@ -58,7 +58,7 @@ export default function reporterObjectFactory (
     const id: string = runId || uuid();
 
     const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger, responseTimeout, requestRetryCount);
-    const uploader       = new Uploader(id, readFile, transport, logger);
+    const uploader       = new Uploader(readFile, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
