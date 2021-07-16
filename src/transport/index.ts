@@ -1,7 +1,7 @@
 import {
     CLIENTTIMEOUT_ERROR_MSG,
     CONCURRENT_ERROR_CODE,
-    RETRY_ERROR_CODES,
+    RETRY_ERRORS,
     SERVICE_UNAVAILABLE_ERROR_CODE
 } from '../consts';
 
@@ -80,7 +80,9 @@ export default class Transport {
                 if (this._isLogEnabled)
                     this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
 
-                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
+                const errorCode = e.code || e.message;
+
+                if (RETRY_ERRORS.includes(errorCode) && retryCount++ < this._requestRetryCount)
                     continue;
 
                 return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);

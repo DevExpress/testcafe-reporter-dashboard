@@ -4,7 +4,7 @@ import assert from 'assert';
 import {
     CLIENTTIMEOUT_ERROR_MSG,
     CONCURRENT_ERROR_CODE,
-    RETRY_ERROR_CODES,
+    RETRY_ERRORS,
     SERVICE_UNAVAILABLE_ERROR_CODE
 } from '../src/consts';
 
@@ -41,7 +41,7 @@ describe('Transport', () => {
 
         const fetchMock = function retryCommandTest () {
             if (++sendCommandCount < 9)
-                throw { code: RETRY_ERROR_CODES[sendCommandCount % 2] };
+                throw { code: RETRY_ERRORS[sendCommandCount % 2] };
             else
                 return Promise.resolve({ status: 200, ok: true } as Response);
         };
@@ -77,7 +77,7 @@ describe('Transport', () => {
         const fetchMock = function retryCommandTest () {
             if (++sendCommandCount <= 11) {
                 throw {
-                    code:     RETRY_ERROR_CODES[sendCommandCount % 3],
+                    code:     RETRY_ERRORS[sendCommandCount % 3],
                     toString: function toString () {
                         return `code: ${this.code}`;
                     }
@@ -102,7 +102,7 @@ describe('Transport', () => {
 
             if (sendCommandCount === 1) {
                 throw {
-                    code:     RETRY_ERROR_CODES[0],
+                    code:     RETRY_ERRORS[0],
                     toString: function toString () {
                         return `code: ${this.code}`;
                     }
@@ -114,7 +114,7 @@ describe('Transport', () => {
 
             if (sendCommandCount === 3) {
                 throw {
-                    code:     RETRY_ERROR_CODES[1],
+                    code:     RETRY_ERRORS[1],
                     toString: function toString () {
                         return `code: ${this.code}`;
                     }
@@ -128,7 +128,7 @@ describe('Transport', () => {
 
         const response = await transport.fetch('http://localhost', {});
 
-        assert.equal(response.toString(), `0 - Connection failed. code: ${RETRY_ERROR_CODES[1]}`);
+        assert.equal(response.toString(), `0 - Connection failed. code: ${RETRY_ERRORS[1]}`);
     });
 
     describe('Should throw client timeout error if fetch hangs', () => {
@@ -152,16 +152,21 @@ describe('Transport', () => {
         });
 
         it('Fetch from dashboard', async () => {
-            const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
+            const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 100, 5);
             const response  = await transport.fetchFromDashboard('api/uploader');
 
             assert.equal(response.toString(), `0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
         });
 
         it('Send resolve command', async () => {
-            const errors     = [] as string[];
-            const loggerMock = { ...logger, error: (message: string) => errors.push(message) };
-            const transport  = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, loggerMock, 1000, 10);
+            const errors      = [] as string[];
+            const logMessages = [] as string[];
+            const loggerMock = {
+                ...logger,
+                error: (message: string) => errors.push(message),
+                log:   (message: string) => logMessages.push(message)
+            };
+            const transport  = new Transport(fetchMock, 'http://localhost', 'authentication_token', true, loggerMock, 100, 5);
 
             await transport.sendResolveCommand({
                 aggregateId:   'report_1',
@@ -172,6 +177,7 @@ describe('Transport', () => {
 
             assert.equal(errors.length, 1);
             assert.equal(errors[0], `report_1 reportTestStart 0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
+            assert.equal(logMessages.length, 6);
         });
     });
 });
