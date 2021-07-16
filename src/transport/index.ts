@@ -1,7 +1,7 @@
 import {
     CLIENTTIMEOUT_ERROR_MSG,
     CONCURRENT_ERROR_CODE,
-    RETRY_ERRORS,
+    RETRY_ERROR_CODES,
     SERVICE_UNAVAILABLE_ERROR_CODE
 } from '../consts';
 
@@ -53,7 +53,11 @@ export default class Transport {
 
         const result = await new Promise<Response>((resolve, reject) => {
             timeout = setTimeout(() => {
-                reject(new Error(CLIENTTIMEOUT_ERROR_MSG));
+                const error = new Error(CLIENTTIMEOUT_ERROR_MSG) as NodeJS.ErrnoException;
+
+                error.code = CLIENTTIMEOUT_ERROR_MSG;
+
+                reject(error);
             }, requestTimeout);
 
             this._fetch(url, requestOptions).then(resolve, reject);
@@ -80,9 +84,7 @@ export default class Transport {
                 if (this._isLogEnabled)
                     this._logger.log(`${FETCH_NETWORK_CONNECTION_ERROR} ${url}. Retry count: ${retryCount}`);
 
-                const errorCode = e.code || e.message;
-
-                if (RETRY_ERRORS.includes(errorCode) && retryCount++ < this._requestRetryCount)
+                if (RETRY_ERROR_CODES.includes(e.code) && retryCount++ < this._requestRetryCount)
                     continue;
 
                 return new FetchResponse(null, FETCH_NETWORK_CONNECTION_ERROR, e);
