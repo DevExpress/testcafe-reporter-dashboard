@@ -152,16 +152,21 @@ describe('Transport', () => {
         });
 
         it('Fetch from dashboard', async () => {
-            const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 1000, 10);
+            const transport = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, logger, 100, 5);
             const response  = await transport.fetchFromDashboard('api/uploader');
 
             assert.equal(response.toString(), `0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
         });
 
         it('Send resolve command', async () => {
-            const errors     = [] as string[];
-            const loggerMock = { ...logger, error: (message: string) => errors.push(message) };
-            const transport  = new Transport(fetchMock, 'http://localhost', 'authentication_token', false, loggerMock, 1000, 10);
+            const errors      = [] as string[];
+            const logMessages = [] as string[];
+            const loggerMock = {
+                ...logger,
+                error: (message: string) => errors.push(message),
+                log:   (message: string) => logMessages.push(message)
+            };
+            const transport  = new Transport(fetchMock, 'http://localhost', 'authentication_token', true, loggerMock, 100, 5);
 
             await transport.sendResolveCommand({
                 aggregateId:   'report_1',
@@ -172,6 +177,7 @@ describe('Transport', () => {
 
             assert.equal(errors.length, 1);
             assert.equal(errors[0], `report_1 reportTestStart 0 - Connection failed. Error: ${CLIENTTIMEOUT_ERROR_MSG}`);
+            assert.equal(logMessages.length, 6);
         });
     });
 });

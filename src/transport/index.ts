@@ -53,7 +53,11 @@ export default class Transport {
 
         const result = await new Promise<Response>((resolve, reject) => {
             timeout = setTimeout(() => {
-                reject(new Error(CLIENTTIMEOUT_ERROR_MSG));
+                const error = new Error(CLIENTTIMEOUT_ERROR_MSG) as NodeJS.ErrnoException;
+
+                error.code = CLIENTTIMEOUT_ERROR_MSG;
+
+                reject(error);
             }, requestTimeout);
 
             this._fetch(url, requestOptions).then(resolve, reject);
