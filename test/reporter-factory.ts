@@ -64,19 +64,29 @@ describe('Reporter factory', () => {
         assert.equal(reporter, BLANK_REPORTER);
     });
 
-    it('Show TestCafe invalid version error', async () => {
-        const reporter = createReporter({ }, '1.asdfasd.2');
+    it('Throw TestCafe invalid version error', async () => {
+        let error = null;
 
-        assert.equal(errors.length, 1);
-        assert.equal(errors[0], createTestCafeVersionInvalidError('1.asdfasd.2'));
-        assert.equal(reporter, BLANK_REPORTER);
+        try {
+            createReporter({ }, '1.asdfasd.2');
+        }
+        catch (e) {
+            error = e;
+        }
+
+        assert(error, new Error(createTestCafeVersionInvalidError('1.asdfasd.2')));
     });
 
-    it('Show TestCafe incompatible version error', async () => {
-        const reporter = createReporter({ }, '1.14.1');
+    it('Throw TestCafe incompatible version error', async () => {
+        let error = null;
 
-        assert.equal(errors.length, 1);
-        assert.equal(errors[0], createTestCafeVersionIncompatibledError('1.14.1'));
-        assert.equal(reporter, BLANK_REPORTER);
+        try {
+            createReporter({ }, '1.14.1');
+        }
+        catch (e) {
+            error = e;
+        }
+
+        assert(error, new Error(createTestCafeVersionIncompatibledError('1.14.1')));
     });
 });

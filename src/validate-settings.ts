@@ -35,16 +35,10 @@ export function validateSettings (settings: DashboardSettings, tcVersion: string
         areSettingsValid = false;
     }
 
-    if (!semver.valid(tcVersion)) {
-        logger.error(createTestCafeVersionInvalidError(tcVersion));
-
-        areSettingsValid = false;
-    }
-    else if (semver.lt(tcVersion, TC_OLDEST_COMPATIBLE_VERSION)) {
-        logger.error(createTestCafeVersionIncompatibledError(tcVersion));
-
-        areSettingsValid = false;
-    }
+    if (!semver.valid(tcVersion))
+        throw new Error(createTestCafeVersionInvalidError(tcVersion));
+    else if (semver.lt(tcVersion, TC_OLDEST_COMPATIBLE_VERSION))
+        throw new Error(createTestCafeVersionIncompatibledError(tcVersion));
 
     return areSettingsValid;
 };
