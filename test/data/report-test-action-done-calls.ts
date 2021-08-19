@@ -84,7 +84,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
     {
         apiActionName: 'match',
         actionInfo:    {
-            browser: CHROME,
+            browser: FIREFOX,
             command: {
                 type:          CommandType.assertion,
                 assertionType: 'match',
@@ -219,7 +219,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
     {
         apiActionName: 'typeText',
         actionInfo:    {
-            browser: CHROME,
+            browser: CHROME_HEADLESS,
             command: {
                 type:     CommandType.typeText,
                 selector: 'Selector(\'#developer-name\')',
@@ -235,7 +235,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
     {
         apiActionName: 'eql',
         actionInfo:    {
-            browser: CHROME,
+            browser: CHROME_HEADLESS,
             command: {
                 type:          CommandType.assertion,
                 assertionType: 'eql',
@@ -277,7 +277,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
     {
         apiActionName: 'match',
         actionInfo:    {
-            browser: CHROME,
+            browser: CHROME_HEADLESS,
             command: {
                 type:          CommandType.assertion,
                 assertionType: 'match',

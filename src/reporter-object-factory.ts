@@ -110,12 +110,12 @@ export default function reporterObjectFactory (
             if (!browser)
                 return;
 
-            const { name } = browser;
+            const { alias } = browser;
 
-            if (!browserToRunsMap[name])
-                browserToRunsMap[name] = [testRunId];
-            else if (!browserToRunsMap[name].includes(testRunId))
-                browserToRunsMap[name].push(testRunId);
+            if (!browserToRunsMap[alias])
+                browserToRunsMap[alias] = [testRunId];
+            else if (!browserToRunsMap[alias].includes(testRunId))
+                browserToRunsMap[alias].push(testRunId);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
@@ -167,27 +167,36 @@ export default function reporterObjectFactory (
             }
 
             const browserRuns = browsers.reduce((runs, browser) => {
-                const { name: browserName, testRunId } = browser;
+                const { alias, testRunId } = browser;
 
                 let quarantineAttempt = 1;
 
-                for (const attemptRunId of browserToRunsMap[browserName]) {
-                    runs[attemptRunId] = {
+                const getBrowserRunInfo = (attemptRunId: string, attempt: number): BrowserRunInfo => {
+                    const result = {
                         browser,
                         screenshotUploadIds: testRunToScreenshotsMap[attemptRunId],
                         videoUploadIds:      testRunToVideosMap[attemptRunId],
                         actions:             testRunToActionsMap[attemptRunId],
                         thirdPartyError:     testRunToErrorsMap[attemptRunId],
-                        quarantineAttempt,
+                        quarantineAttempt:   attempt,
                         isFinalAttempt:      attemptRunId === testRunId
                     };
 
-                    quarantineAttempt++;
-
                     delete testRunToActionsMap[attemptRunId];
-                }
 
-                delete browserToRunsMap[browserName];
+                    return result;
+                };
+
+                if (browserToRunsMap[alias] && browserToRunsMap[alias].length) {
+                    for (const attemptRunId of browserToRunsMap[alias])
+                        runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
+
+                    quarantineAttempt++;
+                }
+                else
+                    runs[testRunId] = getBrowserRunInfo(testRunId, quarantineAttempt);
+
+                delete browserToRunsMap[alias];
 
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
