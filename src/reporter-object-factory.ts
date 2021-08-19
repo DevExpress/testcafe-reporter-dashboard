@@ -62,6 +62,7 @@ export default function reporterObjectFactory (
     const reportCommands = reportCommandsFactory(id, transport);
 
     const testRunToActionsMap: Record<string, ActionInfo[]> = {};
+    const browserToRunsMap: Record<string, any[]>           = {};
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
@@ -86,7 +87,7 @@ export default function reporterObjectFactory (
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            const { test: { phase }, command, testRunId, err, duration } = actionInfo;
+            const { test: { phase }, command, testRunId, err, duration, browser } = actionInfo;
 
             if (!testRunToActionsMap[testRunId])
                 testRunToActionsMap[testRunId] = [];
@@ -95,7 +96,7 @@ export default function reporterObjectFactory (
                 duration,
                 apiName:   apiActionName,
                 testPhase: phase,
-                command,
+                command
             };
 
             if (err) {
@@ -105,6 +106,16 @@ export default function reporterObjectFactory (
             }
 
             testRunToActionsMap[testRunId].push(action);
+
+            if (!browser)
+                return;
+
+            const { name } = browser;
+
+            if (!browserToRunsMap[name])
+                browserToRunsMap[name] = [testRunId];
+            else if (!browserToRunsMap[name].includes(testRunId))
+                browserToRunsMap[name].push(testRunId);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
@@ -156,17 +167,27 @@ export default function reporterObjectFactory (
             }
 
             const browserRuns = browsers.reduce((runs, browser) => {
-                const { testRunId } = browser;
+                const { name: browserName, testRunId } = browser;
 
-                runs[testRunId] = {
-                    browser,
-                    screenshotUploadIds: testRunToScreenshotsMap[testRunId],
-                    videoUploadIds:      testRunToVideosMap[testRunId],
-                    actions:             testRunToActionsMap[testRunId],
-                    thirdPartyError:     testRunToErrorsMap[testRunId]
-                };
+                let quarantineAttempt = 1;
 
-                delete testRunToActionsMap[testRunId];
+                for (const attemptRunId of browserToRunsMap[browserName]) {
+                    runs[attemptRunId] = {
+                        browser,
+                        screenshotUploadIds: testRunToScreenshotsMap[attemptRunId],
+                        videoUploadIds:      testRunToVideosMap[attemptRunId],
+                        actions:             testRunToActionsMap[attemptRunId],
+                        thirdPartyError:     testRunToErrorsMap[attemptRunId],
+                        quarantineAttempt,
+                        isFinalAttempt:      attemptRunId === testRunId
+                    };
+
+                    quarantineAttempt++;
+
+                    delete testRunToActionsMap[attemptRunId];
+                }
+
+                delete browserToRunsMap[browserName];
 
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
