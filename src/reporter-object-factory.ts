@@ -168,14 +168,23 @@ export default function reporterObjectFactory (
 
             const browserRuns = browsers.reduce((runs, browser) => {
                 const { alias, testRunId } = browser;
+                const runIds               = browserToRunsMap[alias];
 
+                let videoUploadIds: string[] = [];
+
+                if (!noVideoUpload) {
+                    const videoTestRunId = runIds && runIds.find(videoRunId => testRunToVideosMap[videoRunId] && testRunToVideosMap[videoRunId].length) || testRunId;
+
+                    if (videoTestRunId)
+                        videoUploadIds = testRunToVideosMap[videoTestRunId];
+                }
                 let quarantineAttempt = 1;
 
                 const getBrowserRunInfo = (attemptRunId: string, attempt: number): BrowserRunInfo => {
                     const result = {
                         browser,
                         screenshotUploadIds: testRunToScreenshotsMap[attemptRunId],
-                        videoUploadIds:      testRunToVideosMap[attemptRunId],
+                        videoUploadIds,
                         actions:             testRunToActionsMap[attemptRunId],
                         thirdPartyError:     testRunToErrorsMap[attemptRunId],
                         quarantineAttempt:   attempt,
