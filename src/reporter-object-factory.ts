@@ -119,7 +119,7 @@ export default function reporterObjectFactory (
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            const { screenshots, videos, errs, durationMs, testId, browsers, skipped } = testRunInfo;
+            const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable } = testRunInfo;
 
             const testRunToScreenshotsMap: Record<string, string[]> = {};
             const testRunToVideosMap: Record<string, string[]>      = {};
@@ -215,6 +215,7 @@ export default function reporterObjectFactory (
                 skipped,
                 errorCount: errs.length,
                 duration:   durationMs,
+                unstable,
                 uploadId:   await uploader.uploadTest(name,
                     createDashboardTestRunInfo(testRunInfo, browserRuns)
                 )
