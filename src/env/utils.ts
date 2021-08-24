@@ -9,3 +9,9 @@ export function parseNumber (value: string | undefined): number | null {
 
     return parsed;
 }
+
+export function getEnvVariable (varName: string, onVarEmpty = () => void 0) {
+    const envVarValue = process.env[varName];
+
+    return envVarValue === void 0 ? onVarEmpty() : envVarValue;
+}
