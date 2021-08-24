@@ -42,6 +42,6 @@ export function getGithubActionsInfo (
     return {
         commitSHA:  getEnvVariable('GITHUB_SHA'),
         author:     getEnvVariable('GITHUB_ACTOR'),
-        branchName: getEnvVariable('GITHUB_HEAD_REF') || getEnvVariable('GITHUB_REF')
+        branchName: getEnvVariable('GITHUB_REF')
     };
 }
