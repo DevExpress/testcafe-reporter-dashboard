@@ -102,7 +102,7 @@ describe('reportTestActionDone', () => {
             screenshots:    [],
             skipped:        false,
             testId,
-            unstable:       false,
+            unstable:       true,
             videos:         [],
             warnings:       []
         }, {});
@@ -116,7 +116,8 @@ describe('reportTestActionDone', () => {
             errorCount: 0,
             duration:   100,
             uploadId:   'upload_id',
-            skipped:    false
+            skipped:    false,
+            unstable:   true
         });
     });
 
