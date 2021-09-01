@@ -13,6 +13,7 @@ export type TestCafeActionInfo = {
     test: {
         name: string;
         phase: TestPhase;
+        id: string;
     };
     testRunId: string;
 };

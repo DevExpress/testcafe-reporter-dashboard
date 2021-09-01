@@ -3,7 +3,7 @@ import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/li
 import { AggregateCommandType, DashboardSettings } from '../../src/types/internal/';
 import { reportTestActionDoneCalls } from './../data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from './../data/test-browser-info';
-import { testDoneInfo, twoErrorsTestActionDone } from './../data';
+import { testDoneInfo, twoErrorsTestActionDone, testId } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo } from '../../src/types';
@@ -82,7 +82,6 @@ describe('reportTestActionDone', () => {
             ), process.stdout);
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
-        const testId     = 'test_1';
 
         await reporter.reportTestStart('Test 1', {}, { testRunIds: [...testRunIds], testId });
 
@@ -142,7 +141,7 @@ describe('reportTestActionDone', () => {
 
         const testRunIds = twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId);
 
-        await reporter.reportTestStart('Test 1', {}, { testRunIds });
+        await reporter.reportTestStart('Test 1', {}, { testRunIds, testId });
 
         for (const actionInfo of twoErrorsTestActionDone) {
             actionInfo.err = new TestRunErrorFormattableAdapter(actionInfo.err,
@@ -156,7 +155,7 @@ describe('reportTestActionDone', () => {
             await reporter.reportTestActionDone('name', actionInfo);
         }
 
-        await reporter.reportTestDone('Test 1', testDoneInfo, {});
+        await reporter.reportTestDone('Test 1', { ...testDoneInfo, testId }, {});
 
         assert.equal(testRunInfo.browserRuns[testRunIds[1]].actions[0].error.errorModel,
                      '{\"message\": \"The specified selector does not match any element in the DOM tree.\\n\\n\u00A0> | Selector(\'#developer-name1\')\", \n\n \"user-agent\": \"Chrome 80.0.3987.132 / Windows 10\"}');

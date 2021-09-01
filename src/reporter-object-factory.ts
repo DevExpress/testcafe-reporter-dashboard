@@ -61,8 +61,8 @@ export default function reporterObjectFactory (
     const uploader       = new Uploader(readFile, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 
-    const testRunToActionsMap: Record<string, ActionInfo[]> = {};
-    const browserToRunsMap: Record<string, any[]>           = {};
+    const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
+    const browserToRunsMap: Record<string, Record<string, any[]>> = {};
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
@@ -80,14 +80,15 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-
             const testId = testStartInfo.testId as ShortId;
+
+            browserToRunsMap[testId] = {};
 
             await reportCommands.sendTestStartCommand({ testId });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            const { test: { phase }, command, testRunId, err, duration, browser } = actionInfo;
+            const { test: { phase, id: testId }, command, testRunId, err, duration, browser } = actionInfo;
 
             if (!testRunToActionsMap[testRunId])
                 testRunToActionsMap[testRunId] = [];
@@ -110,12 +111,13 @@ export default function reporterObjectFactory (
             if (!browser)
                 return;
 
-            const { alias } = browser;
+            const { alias }       = browser;
+            const testBrowserRuns = browserToRunsMap[testId];
 
-            if (!browserToRunsMap[alias])
-                browserToRunsMap[alias] = [testRunId];
-            else if (!browserToRunsMap[alias].includes(testRunId))
-                browserToRunsMap[alias].push(testRunId);
+            if (!testBrowserRuns[alias])
+                testBrowserRuns[alias] = [testRunId];
+            else if (!testBrowserRuns[alias].includes(testRunId))
+                testBrowserRuns[alias].push(testRunId);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
@@ -166,9 +168,11 @@ export default function reporterObjectFactory (
                 );
             }
 
+            const testBrowserRuns = browserToRunsMap[testId];
+
             const browserRuns = browsers.reduce((runs, browser) => {
                 const { alias, testRunId } = browser;
-                const runIds               = browserToRunsMap[alias];
+                const runIds               = testBrowserRuns && testBrowserRuns[alias] || null;
 
                 let videoUploadIds: string[] = [];
 
@@ -196,16 +200,16 @@ export default function reporterObjectFactory (
                     return result;
                 };
 
-                if (browserToRunsMap[alias] && browserToRunsMap[alias].length) {
-                    for (const attemptRunId of browserToRunsMap[alias])
+                if (runIds && runIds.length) {
+                    for (const attemptRunId of runIds)
                         runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
 
                     quarantineAttempt++;
+
+                    delete testBrowserRuns[alias];
                 }
                 else
                     runs[testRunId] = getBrowserRunInfo(testRunId, quarantineAttempt);
-
-                delete browserToRunsMap[alias];
 
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
@@ -220,6 +224,9 @@ export default function reporterObjectFactory (
                     createDashboardTestRunInfo(testRunInfo, browserRuns)
                 )
             };
+
+            if (browserToRunsMap && browserToRunsMap[testId])
+                delete browserToRunsMap[testId];
 
             await reportCommands.sendTestDoneCommand(testDonePayload);
         },

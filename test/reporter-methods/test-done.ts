@@ -4,7 +4,7 @@ import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 import { AggregateCommandType, DashboardSettings } from '../../src/types/internal/dashboard';
 import { CHROME } from './../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from './../data';
-import { testActionInfos, quarantineTestDoneInfo } from '../data/test-quarantine-mode-info';
+import { testActionInfos, quarantineTestDoneInfo, quarantiteTestStartInfo } from '../data/test-quarantine-mode-info';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
@@ -59,8 +59,6 @@ describe('reportTestDone', () => {
 
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
-        // console.log(testRunInfo.browserRuns);
-
         const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
 
         assert.ok(thirdPartyError);
@@ -108,6 +106,8 @@ describe('reportTestDone', () => {
                 readFile, fetchRunInfoMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
+
+        await reporter.reportTestStart('Test 1', {}, quarantiteTestStartInfo);
 
         for (const actionInfo of testActionInfos)
             await reporter.reportTestActionDone('click', actionInfo);

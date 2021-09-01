@@ -2,6 +2,7 @@ import { FIREFOX, CHROME, CHROME_HEADLESS } from './test-browser-info';
 
 import { TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
 import { CommandType, TestPhase, TestRunInfo } from '../../src/types/';
+import { TestStartInfo } from '../../src/types/internal';
 
 const testRunId1 = 'firefox_1';
 const testRunId2 = 'chrome_1';
@@ -28,7 +29,8 @@ const actionInfo = {
     },
     test: {
         name:  'Test 1',
-        phase: TestPhase.inTest
+        phase: TestPhase.inTest,
+        id:    testId
     }
 };
 
@@ -90,3 +92,7 @@ export const quarantineTestDoneInfo: TestRunInfo = {
     testId
 };
 
+export const quarantiteTestStartInfo: TestStartInfo = {
+    testId,
+    testRunId: [testRunId1]
+};
