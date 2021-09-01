@@ -1,5 +1,6 @@
 import { MAX_BUILD_ID_LENGTH } from './consts';
 import {
+    AUTHENTICATION_TOKEN_INVALID,
     AUTHENTICATION_TOKEN_NOT_DEFINED,
     createLongBuildIdError,
     createTestCafeVersionIncompatibledError,
@@ -8,6 +9,7 @@ import {
 } from './texts';
 import { DashboardSettings, Logger } from './types/internal/dashboard';
 import semver from 'semver';
+import { decode } from 'jsonwebtoken';
 
 // TODO: we should ask TC Dashboard
 export const TC_OLDEST_COMPATIBLE_VERSION = '1.14.2';
@@ -21,6 +23,12 @@ export function validateSettings (settings: DashboardSettings, tcVersion: string
         logger.error(AUTHENTICATION_TOKEN_NOT_DEFINED);
 
         areSettingsValid = false;
+    }
+    else {
+        const token = decode(authenticationToken);
+
+        if (!token || !token.projectId)
+            throw new Error(AUTHENTICATION_TOKEN_INVALID);
     }
 
     if (!dashboardUrl) {

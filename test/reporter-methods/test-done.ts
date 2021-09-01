@@ -11,7 +11,7 @@ import { mockReadFile } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
-const AUTHENTICATION_TOKEN        = 'authentication_token';
+const AUTHENTICATION_TOKEN        = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiI4MmUwMTNhNy01YzFlLTRkMzQtODdmZC0xYWRmNzg0ZGM2MDciLCJpYXQiOjE2Mjg4NTQxODF9.j-CKkD-T3IIVw9CMx5-cFu6516v0FXbMJYDT4lbH9rs';
 const SETTINGS: DashboardSettings = {
     authenticationToken: AUTHENTICATION_TOKEN,
     buildId:             void 0,
