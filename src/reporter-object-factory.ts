@@ -201,10 +201,11 @@ export default function reporterObjectFactory (
                 };
 
                 if (runIds && runIds.length) {
-                    for (const attemptRunId of runIds)
+                    for (const attemptRunId of runIds) {
                         runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
 
-                    quarantineAttempt++;
+                        quarantineAttempt++;
+                    }
 
                     delete testBrowserRuns[alias];
                 }
