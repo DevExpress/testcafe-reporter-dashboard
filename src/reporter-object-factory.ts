@@ -32,6 +32,13 @@ function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
+function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
+    if (!collection[key])
+        collection[key] = [value];
+    else if (!collection[key].includes(value))
+        collection[key].push(value);
+};
+
 export default function reporterObjectFactory (
     readFile: ReadFileMethod,
     fetch: FetchMethod,
@@ -114,10 +121,7 @@ export default function reporterObjectFactory (
             const { alias }       = browser;
             const testBrowserRuns = browserToRunsMap[testId];
 
-            if (!testBrowserRuns[alias])
-                testBrowserRuns[alias] = [testRunId];
-            else if (!testBrowserRuns[alias].includes(testRunId))
-                testBrowserRuns[alias].push(testRunId);
+            addArrayValueByKey(testBrowserRuns, alias, testRunId);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
@@ -135,10 +139,7 @@ export default function reporterObjectFactory (
 
                     if (!uploadId) continue;
 
-                    if (testRunToScreenshotsMap[testRunId])
-                        testRunToScreenshotsMap[testRunId].push(uploadId);
-                    else
-                        testRunToScreenshotsMap[testRunId] = [uploadId];
+                    addArrayValueByKey(testRunToScreenshotsMap, testRunId, uploadId);
                 }
             }
 
@@ -150,10 +151,7 @@ export default function reporterObjectFactory (
 
                     if (!uploadId) continue;
 
-                    if (testRunToVideosMap[testRunId])
-                        testRunToVideosMap[testRunId].push(uploadId);
-                    else
-                        testRunToVideosMap[testRunId] = [uploadId];
+                    addArrayValueByKey(testRunToVideosMap, testRunId, uploadId);
                 }
             }
 
@@ -200,7 +198,7 @@ export default function reporterObjectFactory (
                     return result;
                 };
 
-                if (runIds && runIds.length) {
+                if (runIds?.length) {
                     for (const attemptRunId of runIds) {
                         runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
 
