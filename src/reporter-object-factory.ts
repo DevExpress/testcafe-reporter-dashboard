@@ -198,7 +198,7 @@ export default function reporterObjectFactory (
                     return result;
                 };
 
-                if (runIds && runIds?.length) {
+                if (runIds && runIds.length) {
                     for (const attemptRunId of runIds) {
                         runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
 
