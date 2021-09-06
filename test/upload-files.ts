@@ -292,8 +292,8 @@ describe('Uploads', () => {
             assert.equal(uploadInfos.length, 1);
             assert.equal(uploadedUrls.length, 1);
             assert.equal(uploadedFiles.length, 1);
-            assert.equal(browserRuns['testRun_1'].videoUploadIds, void 0);
-            assert.equal(browserRuns['testRun_2'].videoUploadIds, void 0);
+            assert.deepEqual(browserRuns['testRun_1'].videoUploadIds, []);
+            assert.deepEqual(browserRuns['testRun_2'].videoUploadIds, []);
 
             assert.equal(aggregateCommands.length, 2);
             assert.equal(aggregateCommands[0].payload.uploadId, uploadInfos[0].uploadId);

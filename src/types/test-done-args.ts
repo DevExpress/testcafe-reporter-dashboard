@@ -10,6 +10,7 @@ export const TestDoneArgsSchema = t.readonly(
             skipped:    t.boolean,
             errorCount: t.number,
             duration:   t.number,
+            unstable:   t.union([t.boolean, t.undefined]),
             uploadId:   t.union([t.string, t.undefined])
         })
     )

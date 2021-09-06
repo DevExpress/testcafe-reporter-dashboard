@@ -87,6 +87,8 @@ export type BrowserRunInfo = {
     videoUploadIds?: string[];
     actions?: ActionInfo[];
     thirdPartyError?: TestError;
+    quarantineAttempt?: number;
+    isFinalAttempt?: boolean;
 }
 
 export type ActionInfo = {

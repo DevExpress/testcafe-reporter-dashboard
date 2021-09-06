@@ -32,6 +32,13 @@ function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
 }
 
+function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
+    if (!collection[key])
+        collection[key] = [value];
+    else if (!collection[key].includes(value))
+        collection[key].push(value);
+};
+
 export default function reporterObjectFactory (
     readFile: ReadFileMethod,
     fetch: FetchMethod,
@@ -61,7 +68,8 @@ export default function reporterObjectFactory (
     const uploader       = new Uploader(readFile, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 
-    const testRunToActionsMap: Record<string, ActionInfo[]> = {};
+    const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
+    const browserToRunsMap: Record<string, Record<string, any[]>> = {};
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
@@ -79,14 +87,15 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-
             const testId = testStartInfo.testId as ShortId;
+
+            browserToRunsMap[testId] = {};
 
             await reportCommands.sendTestStartCommand({ testId });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            const { test: { phase }, command, testRunId, err, duration } = actionInfo;
+            const { test: { phase, id: testId }, command, testRunId, err, duration, browser } = actionInfo;
 
             if (!testRunToActionsMap[testRunId])
                 testRunToActionsMap[testRunId] = [];
@@ -95,7 +104,7 @@ export default function reporterObjectFactory (
                 duration,
                 apiName:   apiActionName,
                 testPhase: phase,
-                command,
+                command
             };
 
             if (err) {
@@ -105,10 +114,18 @@ export default function reporterObjectFactory (
             }
 
             testRunToActionsMap[testRunId].push(action);
+
+            if (!browser)
+                return;
+
+            const { alias }       = browser;
+            const testBrowserRuns = browserToRunsMap[testId];
+
+            addArrayValueByKey(testBrowserRuns, alias, testRunId);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
-            const { screenshots, videos, errs, durationMs, testId, browsers, skipped } = testRunInfo;
+            const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable } = testRunInfo;
 
             const testRunToScreenshotsMap: Record<string, string[]> = {};
             const testRunToVideosMap: Record<string, string[]>      = {};
@@ -122,10 +139,7 @@ export default function reporterObjectFactory (
 
                     if (!uploadId) continue;
 
-                    if (testRunToScreenshotsMap[testRunId])
-                        testRunToScreenshotsMap[testRunId].push(uploadId);
-                    else
-                        testRunToScreenshotsMap[testRunId] = [uploadId];
+                    addArrayValueByKey(testRunToScreenshotsMap, testRunId, uploadId);
                 }
             }
 
@@ -137,10 +151,7 @@ export default function reporterObjectFactory (
 
                     if (!uploadId) continue;
 
-                    if (testRunToVideosMap[testRunId])
-                        testRunToVideosMap[testRunId].push(uploadId);
-                    else
-                        testRunToVideosMap[testRunId] = [uploadId];
+                    addArrayValueByKey(testRunToVideosMap, testRunId, uploadId);
                 }
             }
 
@@ -155,18 +166,49 @@ export default function reporterObjectFactory (
                 );
             }
 
-            const browserRuns = browsers.reduce((runs, browser) => {
-                const { testRunId } = browser;
+            const testBrowserRuns = browserToRunsMap[testId];
 
-                runs[testRunId] = {
-                    browser,
-                    screenshotUploadIds: testRunToScreenshotsMap[testRunId],
-                    videoUploadIds:      testRunToVideosMap[testRunId],
-                    actions:             testRunToActionsMap[testRunId],
-                    thirdPartyError:     testRunToErrorsMap[testRunId]
+            const browserRuns = browsers.reduce((runs, browser) => {
+                const { alias, testRunId } = browser;
+                const runIds               = testBrowserRuns && testBrowserRuns[alias] || null;
+
+                let videoUploadIds: string[] = [];
+
+                if (!noVideoUpload) {
+                    const videoTestRunId = runIds && runIds.find(videoRunId => testRunToVideosMap[videoRunId] && testRunToVideosMap[videoRunId].length) || testRunId;
+
+                    if (videoTestRunId)
+                        videoUploadIds = testRunToVideosMap[videoTestRunId];
+                }
+                let quarantineAttempt = 1;
+
+                const getBrowserRunInfo = (attemptRunId: string, attempt: number): BrowserRunInfo => {
+                    const result = {
+                        browser,
+                        screenshotUploadIds: testRunToScreenshotsMap[attemptRunId],
+                        videoUploadIds,
+                        actions:             testRunToActionsMap[attemptRunId],
+                        thirdPartyError:     testRunToErrorsMap[attemptRunId],
+                        quarantineAttempt:   attempt,
+                        isFinalAttempt:      attemptRunId === testRunId
+                    };
+
+                    delete testRunToActionsMap[attemptRunId];
+
+                    return result;
                 };
 
-                delete testRunToActionsMap[testRunId];
+                if (runIds && runIds.length) {
+                    for (const attemptRunId of runIds) {
+                        runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
+
+                        quarantineAttempt++;
+                    }
+
+                    delete testBrowserRuns[alias];
+                }
+                else
+                    runs[testRunId] = getBrowserRunInfo(testRunId, quarantineAttempt);
 
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
@@ -176,10 +218,14 @@ export default function reporterObjectFactory (
                 skipped,
                 errorCount: errs.length,
                 duration:   durationMs,
+                unstable,
                 uploadId:   await uploader.uploadTest(name,
                     createDashboardTestRunInfo(testRunInfo, browserRuns)
                 )
             };
+
+            if (browserToRunsMap && browserToRunsMap[testId])
+                delete browserToRunsMap[testId];
 
             await reportCommands.sendTestDoneCommand(testDonePayload);
         },
