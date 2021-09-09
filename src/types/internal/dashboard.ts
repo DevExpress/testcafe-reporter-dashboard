@@ -14,7 +14,6 @@ export enum AggregateCommandType {
     reportTestDone = 'reportTestDone',
     reportTaskDone = 'reportTaskDone',
     createUpload = 'createUpload',
-    reportWarnings = 'reportWarnings',
 };
 
 export enum AggregateNames {
