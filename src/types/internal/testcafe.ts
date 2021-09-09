@@ -40,7 +40,7 @@ export type ReporterMethods = {
     reportTestDone: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
     reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TaskResult) => Promise<void>;
 
-    reportWarnings: (testRunId: string, warnings: Warning[]) => Promise<void>;
+    reportWarnings: (warnings: Warning[], testRunId?: string) => Promise<void>;
 };
 
 export type ReporterPluginObject = ReporterMethods & {

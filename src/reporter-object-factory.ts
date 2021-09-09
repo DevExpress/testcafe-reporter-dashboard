@@ -71,21 +71,25 @@ export default function reporterObjectFactory (
     const reportCommands = reportCommandsFactory(id, transport);
 
     const testRunToWarningsMap: Record<string, Warning[]>         = {};
+    const runToWarnings: Warning[] = [];
     const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
-    async function getWarningsUploadId (): Promise<string | undefined> {
+    async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);
 
-        if (!warningsRunIds.length)
+        if (!warningsRunIds.length && !runToWarnings.length)
             return void 0;
 
         const warningsInfo: WarningsInfo[] = [];
 
         for (const testRunId of warningsRunIds)
             warningsInfo.push({ testRunId, warnings: testRunToWarningsMap[testRunId] });
+
+        if (runToWarnings.length)
+            warningsInfo.push({ warnings: runToWarnings });
 
         return await uploader.uploadRunWarning(id, warningsInfo);
     }
@@ -103,11 +107,15 @@ export default function reporterObjectFactory (
             return void 0;
         },
 
-        async reportWarnings (testRunId, warnings: Warning[]): Promise<void> {
-            if (!testRunToWarningsMap[testRunId])
-                testRunToWarningsMap[testRunId] = [];
+        async reportWarnings (warnings: Warning[], testRunId?: string): Promise<void> {
+            if (testRunId) {
+                if (!testRunToWarningsMap[testRunId])
+                    testRunToWarningsMap[testRunId] = [];
 
-            testRunToWarningsMap[testRunId].push(...warnings);
+                testRunToWarningsMap[testRunId].push(...warnings);
+                return;
+            }
+            runToWarnings.push(...warnings);
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
@@ -257,7 +265,7 @@ export default function reporterObjectFactory (
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
-            const warningsUploadId = await getWarningsUploadId();
+            const warningsUploadId = await uploadWarnings();
 
             await uploader.waitUploads();
 

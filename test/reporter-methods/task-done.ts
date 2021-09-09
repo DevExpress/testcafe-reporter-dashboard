@@ -35,13 +35,13 @@ describe('ReportTaskDone', () => {
 
         assert.deepStrictEqual(taskDonePayload, {});
 
-        await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+        await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 
         assert.strictEqual(taskDonePayload.warningsUploadId, void 0);
 
-        await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, [{ text: 'warning' }]);
+        await reporter.reportWarnings([{ text: 'warning' }], WARNINGS_TEST_RUN_ID_1);
 
-        await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+        await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 
         assert.ok(taskDonePayload.warningsUploadId);
     });

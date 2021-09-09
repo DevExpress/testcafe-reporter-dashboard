@@ -59,13 +59,14 @@ describe('Uploads', () => {
         it('Smoke test', async () => {
             const reporter = reporterObjectFactory(mockReadFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
 
-            const run1Warnings = [ { text: 'warning1ForTestRun1' }, { text: 'warning2ForTestRun1' } ];
-            const run1Warnings2 = [ { text: 'warning1ForTestRun1' }, { text: 'warning2ForTestRun1' } ];
-            const run2Warnings = [ { text: 'warning1ForTestRun2' }, { text: 'warning2ForTestRun2' } ];
+            const testRun1Warnings = [ { text: 'warning1ForTestRun1' }, { text: 'warning2ForTestRun1' } ];
+            const testRun1Warnings2 = [ { text: 'warning1ForTestRun1' }, { text: 'warning2ForTestRun1' } ];
+            const testRun2Warnings = [ { text: 'warning1ForTestRun2' }, { text: 'warning2ForTestRun2' } ];
+            const runWarnings = [ { text: 'runWarning1' }, { text: 'runWarning2' } ];
 
-            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, run1Warnings);
-            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, run1Warnings2);
-            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_2, run2Warnings);
+            await reporter.reportWarnings(testRun1Warnings, WARNINGS_TEST_RUN_ID_1);
+            await reporter.reportWarnings(testRun1Warnings2, WARNINGS_TEST_RUN_ID_1 );
+            await reporter.reportWarnings(testRun2Warnings, WARNINGS_TEST_RUN_ID_2 );
 
             assert.strictEqual(uploadedFiles.length, 0);
 
@@ -75,15 +76,17 @@ describe('Uploads', () => {
 
             const reportTestDoneUpload = JSON.parse(uploadedFiles[0].toString());
 
-            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_1].warnings, run1Warnings.concat(run1Warnings2) );
-            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_2].warnings, run2Warnings );
+            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_1].warnings, testRun1Warnings.concat(testRun1Warnings2) );
+            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_2].warnings, testRun2Warnings );
 
             await reporter.reportTaskDone( new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
             //No new uploads on reportTaskDone since no new warnings arrived
             assert.strictEqual(uploadedFiles.length, 1);
 
-            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, [ { text: 'warning5ForTest1' } ]);
-            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, [ { text: 'warning6ForTest1' } ]);
+            await reporter.reportWarnings([ { text: 'warning5ForTest1' } ], WARNINGS_TEST_RUN_ID_1);
+            await reporter.reportWarnings([ { text: 'warning6ForTest1' } ], WARNINGS_TEST_RUN_ID_1);
+            await reporter.reportWarnings(runWarnings);
+
             assert.strictEqual(uploadedFiles.length, 1);
 
             await reporter.reportTaskDone( new Date(), 1, [''], {
@@ -94,12 +97,16 @@ describe('Uploads', () => {
 
             assert.strictEqual(uploadedFiles.length, 2);
 
-            const reportTaskDoneUpload: WarningsInfo[]  = JSON.parse(uploadedFiles[1].toString());
+            console.log('reportTaskDoneUpload', uploadedFiles[1].toString());
+            const uploadedWarningInfo: WarningsInfo[]  = JSON.parse(uploadedFiles[1].toString());
 
-            assert.strictEqual(reportTaskDoneUpload.length, 1);
-            assert.strictEqual(reportTaskDoneUpload[0].testRunId, WARNINGS_TEST_RUN_ID_1);
-            assert.strictEqual(reportTaskDoneUpload[0].warnings.length, 2);
-            assert.deepStrictEqual(reportTaskDoneUpload[0].warnings, [ { text: 'warning5ForTest1' }, { text: 'warning6ForTest1' } ]);
+            assert.strictEqual(uploadedWarningInfo.length, 2);
+            assert.strictEqual(uploadedWarningInfo[0].testRunId, WARNINGS_TEST_RUN_ID_1);
+            assert.strictEqual(uploadedWarningInfo[0].warnings.length, 2);
+            assert.deepStrictEqual(uploadedWarningInfo[0].warnings, [ { text: 'warning5ForTest1' }, { text: 'warning6ForTest1' } ]);
+
+            assert.deepStrictEqual(uploadedWarningInfo[1].testRunId, void 0);
+            assert.deepStrictEqual(uploadedWarningInfo[1].warnings, runWarnings);
         });
     });
 
