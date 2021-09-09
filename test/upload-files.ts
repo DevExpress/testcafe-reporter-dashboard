@@ -105,7 +105,7 @@ describe('Uploads', () => {
             assert.strictEqual(uploadedWarningInfo[0].warnings.length, 2);
             assert.deepStrictEqual(uploadedWarningInfo[0].warnings, [ { text: 'warning5ForTest1' }, { text: 'warning6ForTest1' } ]);
 
-            assert.deepStrictEqual(uploadedWarningInfo[1].testRunId, void 0);
+            assert.strictEqual(uploadedWarningInfo[1].testRunId, void 0);
             assert.deepStrictEqual(uploadedWarningInfo[1].warnings, runWarnings);
         });
     });
