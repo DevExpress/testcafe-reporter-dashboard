@@ -270,7 +270,7 @@ export default function reporterObjectFactory (
             await uploader.waitUploads();
 
             await reportCommands.sendTaskDoneCommand({
-                endTime: endTime, passed, warningsUploadId, warnings, result, buildId: buildId as BuildId
+                endTime, passed, warningsUploadId, warnings, result, buildId: buildId as BuildId
             });
         }
     }, isLogEnabled);
