@@ -18,7 +18,9 @@ import {
     ReportedTestStructureItem,
     ShortId,
     TestDoneArgs,
-    TestError
+    TestError,
+    Warning,
+    WarningsInfo
 } from './types';
 import { Uploader } from './upload';
 import { errorDecorator, curly } from './error-decorator';
@@ -68,10 +70,25 @@ export default function reporterObjectFactory (
     const uploader       = new Uploader(readFile, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 
+    const testRunToWarningsMap: Record<string, Warning[]>         = {};
     const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
+
+    async function getWarningsUploadId (): Promise<string | undefined> {
+        const warningsRunIds = Object.keys(testRunToWarningsMap);
+
+        if (!warningsRunIds.length)
+            return void 0;
+
+        const warningsInfo: WarningsInfo[] = [];
+
+        for (const testRunId of warningsRunIds)
+            warningsInfo.push({ testRunId, warnings: testRunToWarningsMap[testRunId] });
+
+        return await uploader.uploadRunWarning(id, warningsInfo);
+    }
 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
@@ -84,6 +101,13 @@ export default function reporterObjectFactory (
 
         async reportFixtureStart (): Promise<void> {
             return void 0;
+        },
+
+        async reportWarnings (testRunId, warnings: Warning[]): Promise<void> {
+            if (!testRunToWarningsMap[testRunId])
+                testRunToWarningsMap[testRunId] = [];
+
+            testRunToWarningsMap[testRunId].push(...warnings);
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
@@ -190,10 +214,12 @@ export default function reporterObjectFactory (
                         actions:             testRunToActionsMap[attemptRunId],
                         thirdPartyError:     testRunToErrorsMap[attemptRunId],
                         quarantineAttempt:   attempt,
-                        isFinalAttempt:      attemptRunId === testRunId
+                        isFinalAttempt:      attemptRunId === testRunId,
+                        warnings:            testRunToWarningsMap[attemptRunId],
                     };
 
                     delete testRunToActionsMap[attemptRunId];
+                    delete testRunToWarningsMap[attemptRunId];
 
                     return result;
                 };
@@ -231,9 +257,12 @@ export default function reporterObjectFactory (
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
+            const warningsUploadId = await getWarningsUploadId();
+
             await uploader.waitUploads();
+
             await reportCommands.sendTaskDoneCommand({
-                endTime, passed, warnings, result, buildId: buildId as BuildId
+                endTime: endTime, passed, warningsUploadId, warnings, result, buildId: buildId as BuildId
             });
         }
     }, isLogEnabled);

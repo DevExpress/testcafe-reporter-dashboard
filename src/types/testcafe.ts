@@ -88,6 +88,7 @@ export type BrowserRunInfo = {
     actions?: ActionInfo[];
     thirdPartyError?: TestError;
     quarantineAttempt?: number;
+    warnings: Warning[];
     isFinalAttempt?: boolean;
 }
 
@@ -97,6 +98,15 @@ export type ActionInfo = {
     testPhase: TestPhase;
     command: Record<string, any> & { type: CommandType };
     error?: TestError;
+}
+
+export type Warning = {
+    text: string;
+}
+
+export type WarningsInfo = {
+    testRunId?: string;
+    warnings: Warning[];
 }
 
 export enum TestPhase {

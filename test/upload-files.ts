@@ -1,26 +1,14 @@
 import uuid from 'uuid';
 import assert from 'assert';
-import { Screenshot, DashboardTestRunInfo } from '../src/types/testcafe';
+import { Screenshot, DashboardTestRunInfo, WarningsInfo } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/internal/';
+import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal/';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
-import { mockReadFile } from './mocks';
+import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL, UPLOAD_URL_PREFIX } from './mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
-
-const UPLOAD_URL_PREFIX           = 'http://upload_url/';
-const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
-const SETTINGS: DashboardSettings = {
-    authenticationToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiI4MmUwMTNhNy01YzFlLTRkMzQtODdmZC0xYWRmNzg0ZGM2MDciLCJpYXQiOjE2Mjg4NTQxODF9.j-CKkD-T3IIVw9CMx5-cFu6516v0FXbMJYDT4lbH9rs',
-    buildId:             void 0,
-    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
-    isLogEnabled:        false,
-    noScreenshotUpload:  false,
-    noVideoUpload:       false,
-    responseTimeout:     1000,
-    requestRetryCount:   10
-};
+import { testWarningsInfo, WARNINGS_TEST_RUN_ID_1, WARNINGS_TEST_RUN_ID_2 } from './data/test-warnings-info';
 
 const testRunIdChrome = 'chrome_headless';
 const testRunId1 = 'testRun_1';
@@ -65,6 +53,54 @@ describe('Uploads', () => {
         uploadedFiles.splice(0);
         uploadedUrls.splice(0);
         uploadInfos.splice(0);
+    });
+
+    describe('Warnings', () => {
+        it('Smoke test', async () => {
+            const reporter = reporterObjectFactory(mockReadFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
+
+            const run1Warnings = [ { text: 'warning1ForTestRun1' }, { text: 'warning2ForTestRun1' } ];
+            const run1Warnings2 = [ { text: 'warning1ForTestRun1' }, { text: 'warning2ForTestRun1' } ];
+            const run2Warnings = [ { text: 'warning1ForTestRun2' }, { text: 'warning2ForTestRun2' } ];
+
+            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, run1Warnings);
+            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, run1Warnings2);
+            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_2, run2Warnings);
+
+            assert.strictEqual(uploadedFiles.length, 0);
+
+            await reporter.reportTestDone('testName', testWarningsInfo);
+
+            assert.strictEqual(uploadedFiles.length, 1);
+
+            const reportTestDoneUpload = JSON.parse(uploadedFiles[0].toString());
+
+            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_1].warnings, run1Warnings.concat(run1Warnings2) );
+            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_2].warnings, run2Warnings );
+
+            await reporter.reportTaskDone( new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+            //No new uploads on reportTaskDone since no new warnings arrived
+            assert.strictEqual(uploadedFiles.length, 1);
+
+            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, [ { text: 'warning5ForTest1' } ]);
+            await reporter.reportWarnings(WARNINGS_TEST_RUN_ID_1, [ { text: 'warning6ForTest1' } ]);
+            assert.strictEqual(uploadedFiles.length, 1);
+
+            await reporter.reportTaskDone( new Date(), 1, [''], {
+                failedCount:  2,
+                passedCount:  1,
+                skippedCount: 0
+            });
+
+            assert.strictEqual(uploadedFiles.length, 2);
+
+            const reportTaskDoneUpload: WarningsInfo[]  = JSON.parse(uploadedFiles[1].toString());
+
+            assert.strictEqual(reportTaskDoneUpload.length, 1);
+            assert.strictEqual(reportTaskDoneUpload[0].testRunId, WARNINGS_TEST_RUN_ID_1);
+            assert.strictEqual(reportTaskDoneUpload[0].warnings.length, 2);
+            assert.deepStrictEqual(reportTaskDoneUpload[0].warnings, [ { text: 'warning5ForTest1' }, { text: 'warning6ForTest1' } ]);
+        });
     });
 
     describe('Screenshots', () => {

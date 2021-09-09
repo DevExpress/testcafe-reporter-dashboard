@@ -1,4 +1,4 @@
-import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult } from '../';
+import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult, Warning } from '../';
 
 export type TestStartInfo = {
     testId: string;
@@ -39,6 +39,8 @@ export type ReporterMethods = {
     reportTestActionDone?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
     reportTestDone: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
     reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TaskResult) => Promise<void>;
+
+    reportWarnings: (testRunId: string, warnings: Warning[]) => Promise<void>;
 };
 
 export type ReporterPluginObject = ReporterMethods & {

@@ -18,6 +18,9 @@ export const createFileUploadError = (uploadId: string, filePath: string): strin
 export const createTestUploadError = (uploadId: string, testName: string): string =>
    `Failed to upload a test log. Upload ID: ${uploadId}, test name: ${testName}.`;
 
+export const createWarningUploadError = (uploadId: string, uploadEntityId: string): string =>
+   `Failed to upload warnings. Upload ID: ${uploadId}, upload entity id: ${uploadEntityId}.`;
+
 export const createGetUploadInfoError = (uploadEntityId: string, response: string): string =>
    `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
 
