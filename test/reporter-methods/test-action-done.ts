@@ -98,7 +98,7 @@ describe('reportTestActionDone', () => {
         checkBrowserRun(testRunInfo.browserRuns['chrome_headless'], CHROME_HEADLESS.prettyUserAgent);
 
         assert.deepEqual(testDonePayload, {
-            testId:     'test_1',
+            testId:     'Test_1',
             errorCount: 0,
             duration:   100,
             uploadId:   'upload_id',
