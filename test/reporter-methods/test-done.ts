@@ -117,28 +117,22 @@ describe('reportTestDone', () => {
         const { browserRuns } = testRunInfo;
 
         assert.equal(browserRuns.firefox_1.browser.alias, 'firefox');
-        assert.equal(browserRuns.firefox_1.quarantineAttempt, 1);
-        assert.equal(browserRuns.firefox_1.isFinalAttempt, true);
+        assert.equal(browserRuns.firefox_1.quarantineAttempt, void 0);
 
         assert.equal(browserRuns.chrome_1_1.browser.alias, 'chrome');
         assert.equal(browserRuns.chrome_1_1.quarantineAttempt, 2);
-        assert.equal(browserRuns.chrome_1_1.isFinalAttempt, false);
 
         assert.equal(browserRuns.chrome_1.browser.alias, 'chrome');
         assert.equal(browserRuns.chrome_1.quarantineAttempt, 1);
-        assert.equal(browserRuns.chrome_1.isFinalAttempt, true);
 
         assert.equal(browserRuns.chrome_headless_1.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless_1.quarantineAttempt, 2);
-        assert.equal(browserRuns.chrome_headless_1.isFinalAttempt, false);
 
         assert.equal(browserRuns.chrome_headless_2.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless_2.quarantineAttempt, 3);
-        assert.equal(browserRuns.chrome_headless_2.isFinalAttempt, false);
 
         assert.equal(browserRuns.chrome_headless.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless.quarantineAttempt, 1);
-        assert.equal(browserRuns.chrome_headless.isFinalAttempt, true);
 
         assert.equal(uploadPaths.length, 9);
 
