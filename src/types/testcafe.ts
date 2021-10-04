@@ -89,7 +89,6 @@ export type BrowserRunInfo = {
     thirdPartyError?: TestError;
     quarantineAttempt?: number;
     warnings: Warning[];
-    isFinalAttempt?: boolean;
 }
 
 export type ActionInfo = {

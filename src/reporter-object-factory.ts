@@ -212,17 +212,15 @@ export default function reporterObjectFactory (
                     if (videoTestRunId)
                         videoUploadIds = testRunToVideosMap[videoTestRunId];
                 }
-                let quarantineAttempt = 1;
 
-                const getBrowserRunInfo = (attemptRunId: string, attempt: number): BrowserRunInfo => {
+                const getBrowserRunInfo = (attemptRunId: string, attempt?: number): BrowserRunInfo => {
                     const result = {
                         browser,
                         screenshotUploadIds: testRunToScreenshotsMap[attemptRunId],
                         videoUploadIds,
                         actions:             testRunToActionsMap[attemptRunId],
                         thirdPartyError:     testRunToErrorsMap[attemptRunId],
-                        quarantineAttempt:   attempt,
-                        isFinalAttempt:      attemptRunId === testRunId,
+                        quarantineAttempt:   attempt
                         warnings:            testRunToWarningsMap[attemptRunId],
                     };
 
@@ -233,16 +231,19 @@ export default function reporterObjectFactory (
                 };
 
                 if (runIds && runIds.length) {
+                    let quarantineAttempt = runIds.length > 1 ? 1 : void 0;
+
                     for (const attemptRunId of runIds) {
                         runs[attemptRunId] = getBrowserRunInfo(attemptRunId, quarantineAttempt);
 
-                        quarantineAttempt++;
+                        if (quarantineAttempt)
+                            quarantineAttempt++;
                     }
 
                     delete testBrowserRuns[alias];
                 }
                 else
-                    runs[testRunId] = getBrowserRunInfo(testRunId, quarantineAttempt);
+                    runs[testRunId] = getBrowserRunInfo(testRunId);
 
                 return runs;
             }, {} as Record<string, BrowserRunInfo>);
