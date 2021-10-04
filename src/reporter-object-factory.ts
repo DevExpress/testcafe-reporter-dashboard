@@ -71,7 +71,7 @@ export default function reporterObjectFactory (
     const reportCommands = reportCommandsFactory(id, transport);
 
     const testRunToWarningsMap: Record<string, Warning[]>         = {};
-    const runToWarnings: Warning[] = [];
+    const runWarnings: Warning[] = [];
     const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
 
@@ -80,7 +80,7 @@ export default function reporterObjectFactory (
     async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);
 
-        if (!warningsRunIds.length && !runToWarnings.length)
+        if (!warningsRunIds.length && !runWarnings.length)
             return void 0;
 
         const warningsInfo: WarningsInfo[] = [];
@@ -88,8 +88,8 @@ export default function reporterObjectFactory (
         for (const testRunId of warningsRunIds)
             warningsInfo.push({ testRunId, warnings: testRunToWarningsMap[testRunId] });
 
-        if (runToWarnings.length)
-            warningsInfo.push({ warnings: runToWarnings });
+        if (runWarnings.length)
+            warningsInfo.push({ warnings: runWarnings });
 
         return await uploader.uploadRunWarning(id, warningsInfo);
     }
@@ -115,7 +115,7 @@ export default function reporterObjectFactory (
                 testRunToWarningsMap[testRunId].push(...warnings);
                 return;
             }
-            runToWarnings.push(...warnings);
+            runWarnings.push(...warnings);
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
