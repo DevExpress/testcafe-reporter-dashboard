@@ -220,7 +220,7 @@ export default function reporterObjectFactory (
                         videoUploadIds,
                         actions:             testRunToActionsMap[attemptRunId],
                         thirdPartyError:     testRunToErrorsMap[attemptRunId],
-                        quarantineAttempt:   attempt
+                        quarantineAttempt:   attempt,
                         warnings:            testRunToWarningsMap[attemptRunId],
                     };
 
