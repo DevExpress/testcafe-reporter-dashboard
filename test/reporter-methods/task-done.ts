@@ -39,7 +39,7 @@ describe('ReportTaskDone', () => {
 
         assert.strictEqual(taskDonePayload.warningsUploadId, void 0);
 
-        await reporter.reportWarnings([{ text: 'warning' }], WARNINGS_TEST_RUN_ID_1);
+        await reporter.reportWarnings({ message: 'warning', testRunId: WARNINGS_TEST_RUN_ID_1 });
 
         await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 

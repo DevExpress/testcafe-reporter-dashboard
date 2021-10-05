@@ -100,7 +100,8 @@ export type ActionInfo = {
 }
 
 export type Warning = {
-    text: string;
+    message: string;
+    testRunId?: string;
 }
 
 export type WarningsInfo = {

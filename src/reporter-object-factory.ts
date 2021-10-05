@@ -107,15 +107,15 @@ export default function reporterObjectFactory (
             return void 0;
         },
 
-        async reportWarnings (warnings: Warning[], testRunId?: string): Promise<void> {
-            if (testRunId) {
-                if (!testRunToWarningsMap[testRunId])
-                    testRunToWarningsMap[testRunId] = [];
+        async reportWarnings (warning: Warning): Promise<void> {
+            if (warning.testRunId) {
+                if (!testRunToWarningsMap[warning.testRunId])
+                    testRunToWarningsMap[warning.testRunId] = [];
 
-                testRunToWarningsMap[testRunId].push(...warnings);
-                return;
+                testRunToWarningsMap[warning.testRunId].push(warning);
+            } else {
+                runWarnings.push(warning);
             }
-            runWarnings.push(...warnings);
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
