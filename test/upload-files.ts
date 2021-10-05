@@ -59,13 +59,14 @@ describe('Uploads', () => {
         it('Smoke test', async () => {
             const reporter = reporterObjectFactory(mockReadFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
 
-            const testWarning1TestRun1 = { message : 'testWarning1TestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
-            const testWarning2TestRun1 = { message : 'testWarning2TestRun1', testRunId: WARNINGS_TEST_RUN_ID_1  };
-            const testWarning3TestRun1 = { message : 'warning3ForTestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
-            const testWarning4TestRun1 = { message : 'warning4ForTestRun1', testRunId: WARNINGS_TEST_RUN_ID_1  };
+            const testWarning1TestRun1 = { message: 'testWarning1TestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning2TestRun1 = { message: 'testWarning2TestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning3TestRun1 = { message: 'warning3ForTestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning4TestRun1 = { message: 'warning4ForTestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
 
-            const testWarning1TestRun2 = { message : 'testWarning1TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };;
-            const testWarning2TestRun2 = { message : 'testWarning2TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };;;
+            const testWarning1TestRun2 = { message: 'testWarning1TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };
+
+            const testWarning2TestRun2 = { message: 'testWarning2TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };
 
             await reporter.reportWarnings(testWarning1TestRun1);
             await reporter.reportWarnings(testWarning2TestRun1);
@@ -91,11 +92,11 @@ describe('Uploads', () => {
             //No new uploads on reportTaskDone since no new warnings arrived
             assert.strictEqual(uploadedFiles.length, 1);
 
-            const testWarning5TestRun1 = { message: 'warning5ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1  };
-            const testWarning6TestRun1 = { message: 'warning6ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1  };
+            const testWarning5TestRun1 = { message: 'warning5ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning6TestRun1 = { message: 'warning6ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 };
 
-            await reporter.reportWarnings({ message: 'warning5ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1  } );
-            await reporter.reportWarnings({ message: 'warning6ForTest1' , testRunId: WARNINGS_TEST_RUN_ID_1  } );
+            await reporter.reportWarnings({ message: 'warning5ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 } );
+            await reporter.reportWarnings({ message: 'warning6ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 } );
 
             const runWarning1 = { message: 'runWarning1' };
             const runWarning2 = { message: 'runWarning2' };

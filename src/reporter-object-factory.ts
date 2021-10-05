@@ -113,9 +113,10 @@ export default function reporterObjectFactory (
                     testRunToWarningsMap[warning.testRunId] = [];
 
                 testRunToWarningsMap[warning.testRunId].push(warning);
-            } else {
-                runWarnings.push(warning);
             }
+            else
+                runWarnings.push(warning);
+
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
