@@ -3,6 +3,7 @@ import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestP
 export type TestStartInfo = {
     testId: string;
     testRunId: string[];
+    testRunIds: string[];
 }
 
 export type TestCafeActionInfo = {

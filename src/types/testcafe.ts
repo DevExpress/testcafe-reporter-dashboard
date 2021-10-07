@@ -88,7 +88,7 @@ export type BrowserRunInfo = {
     actions?: ActionInfo[];
     thirdPartyError?: TestError;
     quarantineAttempt?: number;
-    warnings: Warning[];
+    warnings?: Warning[];
 }
 
 export type ActionInfo = {

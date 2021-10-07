@@ -74,6 +74,7 @@ export default function reporterObjectFactory (
     const runWarnings: Warning[] = [];
     const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
+    const testRunIdToTestIdMap: Record<string, string> = {};
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
@@ -113,6 +114,15 @@ export default function reporterObjectFactory (
                     testRunToWarningsMap[warning.testRunId] = [];
 
                 testRunToWarningsMap[warning.testRunId].push(warning);
+
+                const testId = testRunIdToTestIdMap[warning.testRunId];
+
+                if (testId) {
+                    console.log('sendTestHasWarningsCommand testId2', testId);
+                    await reportCommands.sendReportWarningsCommand({
+                        testId: testId as ShortId,
+                    });
+                }
             }
             else
                 runWarnings.push(warning);
@@ -121,6 +131,9 @@ export default function reporterObjectFactory (
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
             const testId = testStartInfo.testId as ShortId;
+
+            for (const testRunId of testStartInfo.testRunIds)
+                testRunIdToTestIdMap[testRunId] = testId;
 
             browserToRunsMap[testId] = {};
 
