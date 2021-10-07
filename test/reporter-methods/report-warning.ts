@@ -17,7 +17,7 @@ describe('ReportWarnings', () => {
 
             if (type === AggregateCommandType.reportWarnings)
                 reportWarningspayload = payload;
-            
+
             return Promise.resolve({ ok: true } as Response);
         }
 
@@ -28,19 +28,19 @@ describe('ReportWarnings', () => {
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
             mockReadFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
         ), process.stdout);
-    
+
         const warningTestId = 'warningsTestId';
 
-        const testRunInfo : TestStartInfo = {
-            testId: warningTestId,
-            testRunId: [''],
+        const testRunInfo: TestStartInfo = {
+            testId:     warningTestId,
+            testRunId:  [''],
             testRunIds: [WARNINGS_TEST_RUN_ID_1]
-        }
+        };
 
         await reporter.reportTestStart('', {}, testRunInfo);
 
         await reporter.reportWarnings({ message: 'warning', testRunId: 'notStartedTest' });
-        assert.deepStrictEqual(reportWarningspayload, {  });
+        assert.deepStrictEqual(reportWarningspayload, { });
 
         await reporter.reportWarnings({ message: 'warning', testRunId: WARNINGS_TEST_RUN_ID_1 });
         assert.deepStrictEqual(reportWarningspayload, { testId: warningTestId });
