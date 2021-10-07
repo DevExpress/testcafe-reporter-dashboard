@@ -118,7 +118,6 @@ export default function reporterObjectFactory (
                 const testId = testRunIdToTestIdMap[warning.testRunId];
 
                 if (testId) {
-                    console.log('sendTestHasWarningsCommand testId2', testId);
                     await reportCommands.sendReportWarningsCommand({
                         testId: testId as ShortId,
                     });

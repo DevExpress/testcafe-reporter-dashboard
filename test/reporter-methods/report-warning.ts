@@ -29,16 +29,15 @@ describe('ReportWarnings', () => {
             mockReadFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
         ), process.stdout);
     
-        assert.deepStrictEqual(reportWarningspayload, {});
-    
         const warningTestId = 'warningsTestId';
-        const tsi : TestStartInfo = {
+
+        const testRunInfo : TestStartInfo = {
             testId: warningTestId,
-            testRunId: ['testRunId1'],
+            testRunId: [''],
             testRunIds: [WARNINGS_TEST_RUN_ID_1]
         }
 
-        await reporter.reportTestStart('', {}, tsi);
+        await reporter.reportTestStart('', {}, testRunInfo);
 
         await reporter.reportWarnings({ message: 'warning', testRunId: 'notStartedTest' });
         assert.deepStrictEqual(reportWarningspayload, {  });
