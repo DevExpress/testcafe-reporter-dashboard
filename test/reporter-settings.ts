@@ -3,8 +3,26 @@ import getReporterSettings from '../src/get-reporter-settings';
 
 describe('getReporterSettings()', () => {
     it('should take options from reporter options', () => {
-        const options = { token: '123', noVideoUpload: true, buildId: '321' };
+        const options = {
+            token:              '123',
+            buildId:            '321',
+            noVideoUpload:      true,
+            noScreenshotUpload: true,
+            isLogEnabled:       true
+        };
 
-        assert.equal(getReporterSettings(options), { authenticationToken: '123', build: '321' });
+        const expectedSettings = {
+            authenticationToken: '123',
+            dashboardUrl:        'https://dashboard.testcafe.io',
+            buildId:             '321',
+            noVideoUpload:       true,
+            noScreenshotUpload:  true,
+            isLogEnabled:        true,
+            requestRetryCount:   20,
+            responseTimeout:     30000,
+            ciInfo:              void 0
+        };
+
+        assert.deepEqual(getReporterSettings(options), expectedSettings);
     });
 });
