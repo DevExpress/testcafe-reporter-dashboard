@@ -11,17 +11,26 @@ import {
 } from './env';
 
 export default function getReporterSettings (options) {
-    const { token, buildId, noScreenshotUpload, noVideoUpload, isLogEnabled } = options;
+    const {
+        dashboardUrl,
+        token,
+        buildId,
+        noScreenshotUpload,
+        noVideoUpload,
+        isLogEnabled,
+        requestRetryCount,
+        responseTimeout
+    } = options;
 
     return {
-        dashboardUrl:        TESTCAFE_DASHBOARD_URL,
+        dashboardUrl:        dashboardUrl || TESTCAFE_DASHBOARD_URL,
         authenticationToken: token || AUTHENTICATION_TOKEN as string, //is validated in factory
         buildId:             buildId || TESTCAFE_DASHBOARD_BUILD_ID,
         isLogEnabled:        isLogEnabled || ENABLE_LOG,
         noScreenshotUpload:  noScreenshotUpload || NO_SCREENSHOT_UPLOAD,
         noVideoUpload:       noVideoUpload || NO_VIDEO_UPLOAD,
-        responseTimeout:     RESPONSE_TIMEOUT,
-        requestRetryCount:   REQUEST_RETRY_COUNT,
+        responseTimeout:     responseTimeout || RESPONSE_TIMEOUT,
+        requestRetryCount:   requestRetryCount || REQUEST_RETRY_COUNT,
         ciInfo:              CI_INFO
     };
 }

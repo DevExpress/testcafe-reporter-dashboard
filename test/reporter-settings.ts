@@ -4,22 +4,25 @@ import getReporterSettings from '../src/get-reporter-settings';
 describe('getReporterSettings()', () => {
     it('should take options from reporter options', () => {
         const options = {
-            token:              '123',
-            buildId:            '321',
+            token:              'token_from_args',
+            dashboardUrl:       'https://ddev.testcafe.io',
+            buildId:            'buildId_from_args',
             noVideoUpload:      true,
             noScreenshotUpload: true,
-            isLogEnabled:       true
+            isLogEnabled:       true,
+            requestRetryCount:  1,
+            responseTimeout:    10000
         };
 
         const expectedSettings = {
-            authenticationToken: '123',
-            dashboardUrl:        'https://dashboard.testcafe.io',
-            buildId:             '321',
+            authenticationToken: 'token_from_args',
+            dashboardUrl:        'https://ddev.testcafe.io',
+            buildId:             'buildId_from_args',
             noVideoUpload:       true,
             noScreenshotUpload:  true,
             isLogEnabled:        true,
-            requestRetryCount:   20,
-            responseTimeout:     30000,
+            requestRetryCount:   1,
+            responseTimeout:     10000,
             ciInfo:              void 0
         };
 
