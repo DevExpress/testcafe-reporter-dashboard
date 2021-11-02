@@ -9,8 +9,9 @@ import {
     RESPONSE_TIMEOUT,
     REQUEST_RETRY_COUNT
 } from './env';
+import { ReporterPluginOptions } from './types';
 
-export default function getReporterSettings (options) {
+export default function getReporterSettings (options: ReporterPluginOptions) {
     const {
         dashboardUrl,
         token,
