@@ -25,11 +25,11 @@ const SETTINGS: DashboardSettings = {
 describe('initReporter', () => {
     const errorText = 'not good';
 
-    let requests: { url: string, method: string }[] = [];
+    let requests: { url: string; method: string }[] = [];
 
     let logs: string[]   = [];
     let errors: string[] = [];
-    
+
     const loggerMock = {
         log:   message => logs.push(message),
         warn:  () => void 0,
@@ -82,9 +82,9 @@ describe('initReporter', () => {
         await reporter.reportTestStart(test.name, {}, { testRunId: [testRunId], testId: test.id });
         await reporter.reportTestActionDone(apiActionName, reportTestActionDoneCalls[0].actionInfo);
         await reporter.reportTestDone(test.name, {
-            ...testDoneInfo, 
-            browsers:   [ { ...FIREFOX, testRunId: testRunId } ],
-            testId: test.id
+            ...testDoneInfo,
+            browsers: [ { ...FIREFOX, testRunId: testRunId } ],
+            testId:   test.id
         });
         await reporter.reportTaskDone(new Date(), 0, [], { failedCount: 1, passedCount: 0, skippedCount: 0 });
 
