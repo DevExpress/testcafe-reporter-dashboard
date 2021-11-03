@@ -22,10 +22,13 @@ describe('getReporterSettings()', () => {
             noScreenshotUpload:  true,
             isLogEnabled:        true,
             requestRetryCount:   1,
-            responseTimeout:     10000,
-            ciInfo:              void 0
+            responseTimeout:     10000
         };
 
-        assert.deepEqual(getReporterSettings(options), expectedSettings);
+        //Setting will contain a CI info. That's why we should omit it to check only required properties
+        const actualSettings = getReporterSettings(options);
+
+        for (const [key, value] of Object.entries(expectedSettings))
+            assert.deepEqual(actualSettings[key], value);
     });
 });
