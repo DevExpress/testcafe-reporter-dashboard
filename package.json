@@ -68,10 +68,10 @@
     "uuid": "3.3.3"
   },
   "resolutions": {
+    "ansi-regex": "5.0.1",
     "lodash": "4.17.21",
     "glob-parent": "5.1.2",
     "yargs-parser": "13.1.2",
-    "ansi-regex": "5.0.1",
     "set-value": "4.0.1"
   }
 }
