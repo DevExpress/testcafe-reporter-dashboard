@@ -1,9 +1,9 @@
 import assert from 'assert';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { AggregateCommandType } from '../../src/types/internal/';
-import { reportTestActionDoneCalls } from './../data/report-test-action-done-calls';
-import { CHROME, FIREFOX, CHROME_HEADLESS } from './../data/test-browser-info';
-import { testDoneInfo, twoErrorsTestActionDone, testId } from './../data';
+import { AggregateCommandType } from '../../src/types/internal';
+import { reportTestActionDoneCalls } from '../data/report-test-action-done-calls';
+import { CHROME, FIREFOX, CHROME_HEADLESS } from '../data/test-browser-info';
+import { testDoneInfo, twoErrorsTestActionDone, testId } from '../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo } from '../../src/types';

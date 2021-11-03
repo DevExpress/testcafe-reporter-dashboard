@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import assert from 'assert';
 import { Screenshot, DashboardTestRunInfo, WarningsInfo } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal/';
+import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';

@@ -308,6 +308,9 @@ export default function reporterObjectFactory (
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
+            if (!reporterInitialized)
+                return;
+
             const warningsUploadId = await uploadWarnings();
 
             await uploader.waitUploads();
