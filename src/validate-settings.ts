@@ -22,7 +22,7 @@ export function decodeAuthenticationToken (token: string): { projectId: string; 
     }
     catch (e) {}
 
-    if (tokenData?.projectId)
+    if (tokenData && tokenData.projectId)
         return tokenData;
 
     try {
@@ -30,7 +30,7 @@ export function decodeAuthenticationToken (token: string): { projectId: string; 
     }
     catch (e) {}
 
-    if (tokenData?.projectId && tokenData?.tokenId)
+    if (tokenData && tokenData.projectId && tokenData.tokenId)
         return tokenData;
 
     return void 0;
