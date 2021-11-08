@@ -45,7 +45,9 @@ async function initReporter (transport: Transport, logger: Logger, reportId: str
     const validationResponse = await transport.fetchFromDashboard(`api/validateReporter?reportId=${reportId}&tcVersion=${tcVersion}`, 'POST');
 
     if (!validationResponse.ok) {
-        logger.error(await validationResponse.text() ?? AUTHENTICATION_TOKEN_REJECTED);
+        const responseText = await validationResponse.text();
+
+        logger.error(responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED);
 
         return false;
     }
