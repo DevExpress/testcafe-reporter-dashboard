@@ -73,7 +73,7 @@ describe('initReporter', () => {
     });
 
     it('Should throw on error and run no further', async () => {
-        const reporter = getReporter(fetchFailMock);
+        const reporter = getReporter(fetchFailMock) as any;
 
         await reporter.reportTaskStart(new Date(), [], 1, []);
 
