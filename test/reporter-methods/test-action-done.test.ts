@@ -1,16 +1,35 @@
 import assert from 'assert';
+import { sign } from 'jsonwebtoken';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { AggregateCommandType } from '../../src/types/internal';
+import { AggregateCommandType, DashboardSettings } from '../../src/types/internal';
 import { reportTestActionDoneCalls } from '../data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from '../data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone, testId } from '../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
-import logger from '../../src/logger';
 import { DashboardTestRunInfo } from '../../src/types';
-import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL } from '../mocks';
+import { mockReadFile } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 
+const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
+const AUTHENTICATION_TOKEN        = sign({ projectId: 'project_1' }, 'jwt_secret');
+const SETTINGS: DashboardSettings = {
+    authenticationToken: AUTHENTICATION_TOKEN,
+    buildId:             void 0,
+    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
+    isLogEnabled:        false,
+    noScreenshotUpload:  false,
+    noVideoUpload:       false,
+    responseTimeout:     1000,
+    requestRetryCount:   10
+};
+
 describe('reportTestActionDone', () => {
+    const loggerMock = {
+        log:   () => void 0,
+        warn:  () => void 0,
+        error: () => void 0
+    };
+
     function checkBrowserRun (browserRun, prettyUserAgent): void {
         const { browser, actions } = browserRun;
 
@@ -65,8 +84,10 @@ describe('reportTestActionDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
+
+        await reporter.reportTaskStart(new Date(), [], 1, []);
 
         const testRunIds = new Set(reportTestActionDoneCalls.map(call => call.actionInfo.testRunId));
 
@@ -123,8 +144,10 @@ describe('reportTestActionDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
+
+        await reporter.reportTaskStart(new Date(), [], 1, []);
 
         const testRunIds = twoErrorsTestActionDone.map(actionInfo => actionInfo.testRunId);
 

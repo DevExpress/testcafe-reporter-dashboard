@@ -6,7 +6,6 @@ import { CHROME } from '../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from '../data';
 import { testActionInfos, quarantineTestDoneInfo, quarantiteTestStartInfo } from '../data/test-quarantine-mode-info';
 import reporterObjectFactory from '../../src/reporter-object-factory';
-import logger from '../../src/logger';
 import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
 import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
@@ -14,6 +13,12 @@ import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 describe('reportTestDone', () => {
     let testRunInfo           = {} as DashboardTestRunInfo;
     let uploadPaths: string[] = [];
+
+    const loggerMock = {
+        log:   () => void 0,
+        warn:  () => void 0,
+        error: () => void 0
+    };
 
     function fetchRunInfoMock (url: string, request) {
         const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
@@ -40,10 +45,11 @@ describe('reportTestDone', () => {
 
     it('Should process errors originated not from actions', async () => {
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchRunInfoMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
         const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
@@ -78,9 +84,10 @@ describe('reportTestDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestDone('Test 1', skippedTestDone);
 
         assert.ok(testDonePayload);
@@ -91,10 +98,11 @@ describe('reportTestDone', () => {
         const readFile = (path: string) => Promise.resolve(Buffer.from(path));
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                readFile, fetchRunInfoMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                readFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestStart('Test 1', {}, quarantiteTestStartInfo);
 
         for (const actionInfo of testActionInfos)
