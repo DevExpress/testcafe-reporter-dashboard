@@ -19,7 +19,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'firefox_1'
         }
@@ -36,7 +36,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'firefox_1'
         }
@@ -79,7 +79,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'firefox_1',
         }
@@ -99,7 +99,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'firefox_1',
         }
@@ -119,7 +119,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_1'
         }
@@ -136,7 +136,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_1'
         }
@@ -179,7 +179,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_1',
         }
@@ -199,7 +199,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_1',
         }
@@ -220,7 +220,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_headless'
         }
@@ -237,7 +237,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_headless'
         }
@@ -280,7 +280,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_headless',
         }
@@ -300,7 +300,7 @@ export const reportTestActionDoneCalls: { apiActionName: string; actionInfo: Tes
             test: {
                 name:  'Test 1',
                 phase: TestPhase.inTest,
-                id:    'Test_1'
+                id:    'test_1'
             },
             testRunId: 'chrome_headless',
         }

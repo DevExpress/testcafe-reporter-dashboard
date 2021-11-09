@@ -121,7 +121,8 @@ export default function reporterObjectFactory (
             const { alias }       = browser;
             const testBrowserRuns = browserToRunsMap[testId];
 
-            addArrayValueByKey(testBrowserRuns, alias, testRunId);
+            if (testBrowserRuns)
+                addArrayValueByKey(testBrowserRuns, alias, testRunId);
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
