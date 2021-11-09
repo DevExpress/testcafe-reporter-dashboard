@@ -26,6 +26,7 @@
                   "--timeout",
                   "999999",
                   "--colors",
+                  "--inspect-brk",
                   "'${workspaceFolder}/test/**/*.ts'",
               ],
               "console": "integratedTerminal",
