@@ -10,4 +10,4 @@ export const ReportWarningsSchema = t.readonly(
     )
 );
 
-export type ReportWarningsArgs = t.TypeOf<typeof ReportWarningsSchema>;
+export type ReportWarningArgs = t.TypeOf<typeof ReportWarningsSchema>;

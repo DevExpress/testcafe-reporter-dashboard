@@ -6,10 +6,10 @@ import logger from '../../src/logger';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL } from '../mocks';
 import { WARNINGS_TEST_RUN_ID_1 } from '../data/test-warnings-info';
-import { ReportWarningsArgs } from '../../src/types/report-warnings-args';
+import { ReportWarningArgs } from '../../src/types/report-warning-args';
 
 describe('ReportWarnings', () => {
-    let reportWarningspayload: ReportWarningsArgs = {} as ReportWarningsArgs;
+    let reportWarningspayload: ReportWarningArgs = {} as ReportWarningArgs;
 
     function fetch (url, request) {
         if (url === `${TESTCAFE_DASHBOARD_URL}/api/commands/`) {
