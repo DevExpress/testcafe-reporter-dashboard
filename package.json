@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.2.4-rc.1",
+  "version": "0.2.4",
   "description": "Dashboard TestCafe reporter plugin.",
   "repository": "https://github.com/DevExpress/testcafe-reporter-dashboard",
   "author": {
@@ -18,7 +18,7 @@
     "prepublish": "publish-please guard",
     "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
     "test": "npm run lint && gulp build && ts-node \"./node_modules/mocha/lib/cli/cli.js\" \"test/**/*.ts\"",
-    "test-debug": "gulp build && mocha -r ts-node/register \"test/**/*.ts\""
+    "test-debug": "gulp build && mocha -r ts-node/register --inspect-brk \"test/**/*.ts\""
   },
   "keywords": [
     "testcafe",
