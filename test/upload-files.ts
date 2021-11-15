@@ -1,26 +1,14 @@
 import uuid from 'uuid';
 import assert from 'assert';
-import { Screenshot, DashboardTestRunInfo } from '../src/types/testcafe';
+import { Screenshot, DashboardTestRunInfo, WarningsInfo } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { AggregateCommandType, UploadStatus, AggregateNames, DashboardSettings } from '../src/types/internal/';
+import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal/';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
-import { mockReadFile } from './mocks';
+import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL, UPLOAD_URL_PREFIX } from './mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
-
-const UPLOAD_URL_PREFIX           = 'http://upload_url/';
-const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
-const SETTINGS: DashboardSettings = {
-    authenticationToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiI4MmUwMTNhNy01YzFlLTRkMzQtODdmZC0xYWRmNzg0ZGM2MDciLCJpYXQiOjE2Mjg4NTQxODF9.j-CKkD-T3IIVw9CMx5-cFu6516v0FXbMJYDT4lbH9rs',
-    buildId:             void 0,
-    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
-    isLogEnabled:        false,
-    noScreenshotUpload:  false,
-    noVideoUpload:       false,
-    responseTimeout:     1000,
-    requestRetryCount:   10
-};
+import { testWarningsInfo, WARNINGS_TEST_RUN_ID_1, WARNINGS_TEST_RUN_ID_2 } from './data/test-warnings-info';
 
 const testRunIdChrome = 'chrome_headless';
 const testRunId1 = 'testRun_1';
@@ -65,6 +53,76 @@ describe('Uploads', () => {
         uploadedFiles.splice(0);
         uploadedUrls.splice(0);
         uploadInfos.splice(0);
+    });
+
+    describe('Warnings', () => {
+        it('Smoke test', async () => {
+            const reporter = reporterObjectFactory(mockReadFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
+
+            const testWarning1TestRun1 = { message: 'testWarning1TestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning2TestRun1 = { message: 'testWarning2TestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning3TestRun1 = { message: 'warning3ForTestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning4TestRun1 = { message: 'warning4ForTestRun1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+
+            const testWarning1TestRun2 = { message: 'testWarning1TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };
+
+            const testWarning2TestRun2 = { message: 'testWarning2TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };
+
+            await reporter.reportWarnings(testWarning1TestRun1);
+            await reporter.reportWarnings(testWarning2TestRun1);
+            await reporter.reportWarnings(testWarning3TestRun1);
+            await reporter.reportWarnings(testWarning4TestRun1);
+
+            await reporter.reportWarnings(testWarning1TestRun2);
+            await reporter.reportWarnings(testWarning2TestRun2);
+
+            assert.strictEqual(uploadedFiles.length, 0);
+
+            await reporter.reportTestDone('testName', testWarningsInfo);
+
+            assert.strictEqual(uploadedFiles.length, 1);
+
+            const reportTestDoneUpload = JSON.parse(uploadedFiles[0].toString());
+
+            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_1].warnings, [testWarning1TestRun1, testWarning2TestRun1, testWarning3TestRun1, testWarning4TestRun1] );
+
+            assert.deepStrictEqual(reportTestDoneUpload.browserRuns[WARNINGS_TEST_RUN_ID_2].warnings, [testWarning1TestRun2, testWarning2TestRun2] );
+
+            await reporter.reportTaskDone( new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+            //No new uploads on reportTaskDone since no new warnings arrived
+            assert.strictEqual(uploadedFiles.length, 1);
+
+            const testWarning5TestRun1 = { message: 'warning5ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+            const testWarning6TestRun1 = { message: 'warning6ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 };
+
+            await reporter.reportWarnings({ message: 'warning5ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 } );
+            await reporter.reportWarnings({ message: 'warning6ForTest1', testRunId: WARNINGS_TEST_RUN_ID_1 } );
+
+            const runWarning1 = { message: 'runWarning1' };
+            const runWarning2 = { message: 'runWarning2' };
+
+            await reporter.reportWarnings(runWarning1);
+            await reporter.reportWarnings(runWarning2);
+
+            assert.strictEqual(uploadedFiles.length, 1);
+
+            await reporter.reportTaskDone( new Date(), 1, [''], {
+                failedCount:  2,
+                passedCount:  1,
+                skippedCount: 0
+            });
+
+            assert.strictEqual(uploadedFiles.length, 2);
+
+            const uploadedWarningInfo: WarningsInfo[]  = JSON.parse(uploadedFiles[1].toString());
+
+            assert.strictEqual(uploadedWarningInfo.length, 2);
+            assert.strictEqual(uploadedWarningInfo[0].testRunId, WARNINGS_TEST_RUN_ID_1);
+            assert.strictEqual(uploadedWarningInfo[0].warnings.length, 2);
+            assert.deepStrictEqual(uploadedWarningInfo[0].warnings, [testWarning5TestRun1, testWarning6TestRun1]);
+            assert.strictEqual(uploadedWarningInfo[1].testRunId, void 0);
+            assert.deepStrictEqual(uploadedWarningInfo[1].warnings, [runWarning1, runWarning2]);
+        });
     });
 
     describe('Screenshots', () => {

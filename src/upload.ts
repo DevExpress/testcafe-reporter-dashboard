@@ -1,8 +1,8 @@
 import { AggregateCommandType, AggregateNames, Logger, ReadFileMethod, UploadStatus } from './types/internal';
 import { UploadInfo } from './types/internal/resolve';
-import { createGetUploadInfoError, createFileUploadError, createTestUploadError } from './texts';
+import { createGetUploadInfoError, createFileUploadError, createTestUploadError, createWarningUploadError } from './texts';
 import Transport from './transport';
-import { DashboardTestRunInfo } from './types/';
+import { WarningsInfo } from './types/';
 
 export class Uploader {
     private _transport: Transport;
@@ -67,15 +67,25 @@ export class Uploader {
         return uploadInfo.uploadId;
     }
 
-    async uploadTest (testName: string, testRunInfo: DashboardTestRunInfo): Promise<string | undefined> {
-        const uploadInfo = await this._getUploadInfo(testName);
+    requestUploadEntity ( uploadInfo: UploadInfo, uploadObject: object, error: string): void {
+        const buffer = Buffer.from(JSON.stringify(uploadObject, (key, value) => value instanceof RegExp ? value.toString() : value));
+
+        this._uploads.push(this._upload(uploadInfo, buffer, error));
+    }
+
+    async uploadTest (uploadEntityId: string, testRunInfo: object): Promise<string | undefined> {
+        const uploadInfo = await this._getUploadInfo(uploadEntityId);
 
         if (!uploadInfo) return void 0;
+        this.requestUploadEntity(uploadInfo, testRunInfo, createTestUploadError(uploadInfo.uploadId, uploadEntityId));
+        return uploadInfo.uploadId;
+    }
 
-        const buffer = Buffer.from(JSON.stringify(testRunInfo, (key, value) => value instanceof RegExp ? value.toString() : value));
+    async uploadRunWarning (uploadEntityId: string, warningInfo: WarningsInfo[]): Promise<string | undefined> {
+        const uploadInfo = await this._getUploadInfo(uploadEntityId);
 
-        this._uploads.push(this._upload(uploadInfo, buffer, createTestUploadError(uploadInfo.uploadId, testName)));
-
+        if (!uploadInfo) return void 0;
+        this.requestUploadEntity(uploadInfo, warningInfo, createWarningUploadError(uploadInfo.uploadId, uploadEntityId));
         return uploadInfo.uploadId;
     }
 

@@ -1,27 +1,14 @@
 import assert from 'assert';
 import { buildReporterPlugin, TestRunErrorFormattableAdapter } from 'testcafe/lib/embedding-utils';
-import { AggregateCommandType, DashboardSettings } from '../../src/types/internal/';
+import { AggregateCommandType } from '../../src/types/internal/';
 import { reportTestActionDoneCalls } from './../data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from './../data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone, testId } from './../data';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo } from '../../src/types';
-import { mockReadFile } from '../mocks';
+import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
-
-const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
-const AUTHENTICATION_TOKEN        = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiI4MmUwMTNhNy01YzFlLTRkMzQtODdmZC0xYWRmNzg0ZGM2MDciLCJpYXQiOjE2Mjg4NTQxODF9.j-CKkD-T3IIVw9CMx5-cFu6516v0FXbMJYDT4lbH9rs';
-const SETTINGS: DashboardSettings = {
-    authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             void 0,
-    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
-    isLogEnabled:        false,
-    noScreenshotUpload:  false,
-    noVideoUpload:       false,
-    responseTimeout:     1000,
-    requestRetryCount:   10
-};
 
 describe('reportTestActionDone', () => {
     function checkBrowserRun (browserRun, prettyUserAgent): void {
@@ -111,7 +98,7 @@ describe('reportTestActionDone', () => {
         checkBrowserRun(testRunInfo.browserRuns['chrome_headless'], CHROME_HEADLESS.prettyUserAgent);
 
         assert.deepEqual(testDonePayload, {
-            testId:     'test_1',
+            testId:     'Test_1',
             errorCount: 0,
             duration:   100,
             uploadId:   'upload_id',

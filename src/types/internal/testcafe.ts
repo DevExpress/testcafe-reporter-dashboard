@@ -1,8 +1,9 @@
-import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult } from '../';
+import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult, Warning } from '../';
 
 export type TestStartInfo = {
     testId: string;
     testRunId: string[];
+    testRunIds: string[];
 }
 
 export type TestCafeActionInfo = {
@@ -39,6 +40,8 @@ export type ReporterMethods = {
     reportTestActionDone?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;
     reportTestDone: (name: string, testRunInfo: TestRunInfo, meta?: Meta) => Promise<void>;
     reportTaskDone: (endTime: Date, passed: number, warnings: string[], result: TaskResult) => Promise<void>;
+
+    reportWarnings: (warnings: Warning) => Promise<void>;
 };
 
 export type ReporterPluginObject = ReporterMethods & {

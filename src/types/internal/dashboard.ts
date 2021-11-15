@@ -13,8 +13,8 @@ export enum AggregateCommandType {
     reportTestStart = 'reportTestStart',
     reportTestDone = 'reportTestDone',
     reportTaskDone = 'reportTaskDone',
-
-    createUpload = 'createUpload'
+    createUpload = 'createUpload',
+    reportWarnings = 'reportWarnings',
 };
 
 export enum AggregateNames {

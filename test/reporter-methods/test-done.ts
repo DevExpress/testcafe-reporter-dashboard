@@ -1,28 +1,15 @@
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 
-import { AggregateCommandType, DashboardSettings } from '../../src/types/internal/dashboard';
+import { AggregateCommandType } from '../../src/types/internal/dashboard';
 import { CHROME } from './../data/test-browser-info';
 import { thirdPartyTestDone, skippedTestDone } from './../data';
 import { testActionInfos, quarantineTestDoneInfo, quarantiteTestStartInfo } from '../data/test-quarantine-mode-info';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
-import { mockReadFile } from '../mocks';
+import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
-
-const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
-const AUTHENTICATION_TOKEN        = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiI4MmUwMTNhNy01YzFlLTRkMzQtODdmZC0xYWRmNzg0ZGM2MDciLCJpYXQiOjE2Mjg4NTQxODF9.j-CKkD-T3IIVw9CMx5-cFu6516v0FXbMJYDT4lbH9rs';
-const SETTINGS: DashboardSettings = {
-    authenticationToken: AUTHENTICATION_TOKEN,
-    buildId:             void 0,
-    dashboardUrl:        TESTCAFE_DASHBOARD_URL,
-    isLogEnabled:        false,
-    noScreenshotUpload:  false,
-    noVideoUpload:       false,
-    responseTimeout:     1000,
-    requestRetryCount:   10
-};
 
 describe('reportTestDone', () => {
     let testRunInfo           = {} as DashboardTestRunInfo;
@@ -62,6 +49,7 @@ describe('reportTestDone', () => {
         const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
 
         assert.ok(thirdPartyError);
+
         assert.deepEqual(actions, void 0);
         assert.ok(browser);
         assert.equal(browser.alias, CHROME.alias);

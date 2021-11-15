@@ -1,5 +1,5 @@
 import { AggregateCommandType, AggregateNames } from './types/internal/';
-import { TaskStartArgs, TestStartArgs, TestDoneArgs, TaskDoneArgs } from './types/';
+import { TaskStartArgs, TestStartArgs, TaskDoneArgs, TestDoneArgs, ReportWarningArgs } from './types/';
 import Transport from './transport';
 
 export default function reportCommandsFactory (reportId: string, transport: Transport) {
@@ -27,6 +27,9 @@ export default function reportCommandsFactory (reportId: string, transport: Tran
         },
         sendTaskDoneCommand (payload: TaskDoneArgs): Promise<void> {
             return sendReportCommand(AggregateCommandType.reportTaskDone, payload);
+        },
+        sendReportWarningsCommand (payload: ReportWarningArgs): Promise<void> {
+            return sendReportCommand(AggregateCommandType.reportWarnings, payload);
         }
     };
 };
