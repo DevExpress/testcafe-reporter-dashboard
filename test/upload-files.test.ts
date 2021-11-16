@@ -74,6 +74,8 @@ describe('Uploads', () => {
 
             const testWarning2TestRun2 = { message: 'testWarning2TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };
 
+            await reporter.reportTaskStart(new Date(), [], 1, []);
+
             await reporter.reportWarnings(testWarning1TestRun1);
             await reporter.reportWarnings(testWarning2TestRun1);
             await reporter.reportWarnings(testWarning3TestRun1);

@@ -17,11 +17,9 @@ describe('ReportWarnings', () => {
 
             if (type === AggregateCommandType.reportWarnings)
                 reportWarningspayload = payload;
-
-            return Promise.resolve({ ok: true } as Response);
         }
 
-        throw new Error('Unknown request');
+        return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
     }
 
     it('reportWarnings payload', async () => {
@@ -37,6 +35,7 @@ describe('ReportWarnings', () => {
             testRunIds: [WARNINGS_TEST_RUN_ID_1]
         };
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestStart('', {}, testRunInfo);
 
         await reporter.reportWarnings({ message: 'warning', testRunId: 'notStartedTest' });
