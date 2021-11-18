@@ -4,10 +4,7 @@ import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import { DashboardSettings } from '../src/types/internal';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
-import { reportTestActionDoneCalls } from './data/report-test-action-done-calls';
-import { testDoneInfo } from './data';
 import { mockReadFile } from './mocks';
-import { FIREFOX } from './data/test-browser-info';
 import { AUTHENTICATION_TOKEN_REJECTED } from '../src/texts';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
@@ -66,9 +63,24 @@ describe('initReporter', () => {
         ), process.stdout);
     }
 
+    async function assertInitError (reporter, expectedError) {
+        let errorMessage;
+
+        try {
+            await reporter.init();
+        }
+        catch (e) {
+            errorMessage = e.message;
+        }
+        finally {
+            assert.strictEqual(errorMessage, expectedError);
+        }
+    }
+
     it('Should send a request and report success', async () => {
         const reporter = getReporter(fetchOkMock);
 
+        await reporter.init();
         await reporter.reportTaskStart(new Date(), [], 1, []);
 
         assert.strictEqual(errors.length, 0);
@@ -78,22 +90,10 @@ describe('initReporter', () => {
         assert.strictEqual(logs[0], 'Task execution report: http://localhost/runs/project_1/buildId');
     });
 
-    it('Should throw on error and run no further', async () => {
+    it('Should throw on error', async () => {
         const reporter = getReporter(fetchFailMock) as any;
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
-
-        const { actionInfo: { test, testRunId }, apiActionName } = reportTestActionDoneCalls[0];
-
-        await reporter.reportTestStart(test.name, {}, { testRunId: [testRunId], testId: test.id });
-        await reporter.reportTestActionDone(apiActionName, reportTestActionDoneCalls[0].actionInfo);
-        await reporter.reportTestDone(test.name, {
-            ...testDoneInfo,
-            browsers: [ { ...FIREFOX, testRunId: testRunId } ],
-            testId:   test.id
-        });
-        await reporter.reportTaskDone(new Date(), 0, [], { failedCount: 1, passedCount: 0, skippedCount: 0 });
-
+        await assertInitError(reporter, errorText);
         assert.strictEqual(errors.length, 1);
         assert.strictEqual(errors[0], errorText);
         assert.strictEqual(requests.length, 1);
@@ -102,8 +102,7 @@ describe('initReporter', () => {
     it('Should use default error text', async () => {
         const reporter = getReporter(fetchFailSilentMock);
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
-
+        await assertInitError(reporter, AUTHENTICATION_TOKEN_REJECTED);
         assert.strictEqual(errors.length, 1);
         assert.strictEqual(errors[0], AUTHENTICATION_TOKEN_REJECTED);
     });

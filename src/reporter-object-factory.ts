@@ -29,6 +29,7 @@ import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
 import BLANK_REPORTER from './blank-reporter';
+import InitializationError from './initialization-error';
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
@@ -40,20 +41,6 @@ function addArrayValueByKey (collection: Record<string, any[]>, key: string, val
     else if (!collection[key].includes(value))
         collection[key].push(value);
 };
-
-async function initReporter (transport: Transport, logger: Logger, reportId: string, tcVersion: string) {
-    const validationResponse = await transport.fetchFromDashboard(`api/validateReporter?reportId=${reportId}&tcVersion=${tcVersion}`, 'POST');
-
-    if (!validationResponse.ok) {
-        const responseText = await validationResponse.text();
-
-        logger.error(responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED);
-
-        return false;
-    }
-
-    return true;
-}
 
 export default function reporterObjectFactory (
     readFile: ReadFileMethod,
@@ -92,8 +79,6 @@ export default function reporterObjectFactory (
 
     const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
 
-    let reporterInitialized;
-
     async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);
 
@@ -112,12 +97,19 @@ export default function reporterObjectFactory (
     }
 
     assignReporterMethods(reporterPluginObject, {
+        async init (): Promise<void> {
+            const validationResponse = await transport.fetchFromDashboard(`api/validateReporter?reportId=${id}&tcVersion=${tcVersion}`, 'POST');
+
+            if (!validationResponse.ok) {
+                const responseText = await validationResponse.text();
+                const errorMessage = responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED;
+
+                logger.error(errorMessage);
+
+                throw new InitializationError(errorMessage);
+            }
+        },
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
-            reporterInitialized = await initReporter(transport, logger, id, tcVersion);
-
-            if (!reporterInitialized)
-                return;
-
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
 
             await reportCommands.sendTaskStartCommand({
@@ -150,9 +142,6 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            if (!reporterInitialized)
-                return;
-
             const testId = testStartInfo.testId as ShortId;
 
             for (const testRunId of testStartInfo.testRunIds)
@@ -164,9 +153,6 @@ export default function reporterObjectFactory (
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
-            if (!reporterInitialized)
-                return;
-
             const { test: { phase, id: testId }, command, testRunId, err, duration, browser } = actionInfo;
 
             if (!testRunToActionsMap[testRunId])
@@ -203,9 +189,6 @@ export default function reporterObjectFactory (
             const testRunToScreenshotsMap: Record<string, string[]> = {};
             const testRunToVideosMap: Record<string, string[]>      = {};
             const testRunToErrorsMap: Record<string, TestError>     = {};
-
-            if (!reporterInitialized)
-                return;
 
             if (!noScreenshotUpload) {
                 for (const screenshotInfo of screenshots) {
@@ -310,9 +293,6 @@ export default function reporterObjectFactory (
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
-            if (!reporterInitialized)
-                return;
-
             const warningsUploadId = await uploadWarnings();
 
             await uploader.waitUploads();

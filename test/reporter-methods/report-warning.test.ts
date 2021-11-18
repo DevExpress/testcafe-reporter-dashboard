@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
-import { AggregateCommandType, TestStartInfo } from '../../src/types/internal/';
+import { AggregateCommandType, TestStartInfo } from '../../src/types/internal';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
@@ -35,7 +35,6 @@ describe('ReportWarnings', () => {
             testRunIds: [WARNINGS_TEST_RUN_ID_1]
         };
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestStart('', {}, testRunInfo);
 
         await reporter.reportWarnings({ message: 'warning', testRunId: 'notStartedTest' });
