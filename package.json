@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.2.5-rc.1",
+  "version": "0.2.5",
   "description": "Dashboard TestCafe reporter plugin.",
   "author": {
     "name": "Developer Express Inc.",
