@@ -1,11 +1,10 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.2.5-rc.1",
+  "version": "0.2.5",
   "description": "Dashboard TestCafe reporter plugin.",
-  "repository": "https://github.com/DevExpress/testcafe-reporter-dashboard",
   "author": {
-    "name": "aleks-pro",
-    "email": "prokhor.aleks@gmail.com"
+    "name": "Developer Express Inc.",
+    "url": "https://www.devexpress.com/"
   },
   "main": "lib/index",
   "types": "./lib/types/index.d.ts",

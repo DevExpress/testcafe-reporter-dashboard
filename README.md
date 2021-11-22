@@ -1,11 +1,5 @@
 # testcafe-reporter-dashboard
-[![Build Status](https://travis-ci.org/aleks-pro/testcafe-reporter-dashboard.svg)](https://travis-ci.org/aleks-pro/testcafe-reporter-dashboard)
-
 This is the **dashboard** reporter plugin for [TestCafe](http://devexpress.github.io/testcafe).
-
-<p align="center">
-    <img src="https://raw.github.com/aleks-pro/testcafe-reporter-dashboard/master/media/preview.png" alt="preview" />
-</p>
 
 ## Install
 
