@@ -14,7 +14,6 @@ import {
     ActionInfo,
     BrowserRunInfo,
     BuildId,
-    Error,
     ReportedTestStructureItem,
     ShortId,
     TestDoneArgs,
@@ -29,10 +28,6 @@ import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
 import BLANK_REPORTER from './blank-reporter';
-
-function isThirdPartyError (error: Error): boolean {
-    return error.code === 'E2';
-}
 
 function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
     if (!collection[key])
@@ -74,7 +69,8 @@ export default function reporterObjectFactory (
     const runWarnings: Warning[] = [];
     const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
-    const testRunIdToTestIdMap: Record<string, string> = {};
+    const testRunIdToTestIdMap: Record<string, string>            = {};
+    const storedActionErrors: string[]                            = [];
 
     const reporterPluginObject: ReporterPluginObject = {
         ...BLANK_REPORTER,
@@ -179,6 +175,9 @@ export default function reporterObjectFactory (
             };
 
             if (err) {
+                if (err.id)
+                    storedActionErrors.push(err.id);
+
                 action.error = createTestError(err,
                     curly(this.useWordWrap(false).setIndent(0).formatError(err))
                 );
@@ -228,7 +227,7 @@ export default function reporterObjectFactory (
             }
 
             for (const err of errs) {
-                if (!isThirdPartyError(err))
+                if (err.id && storedActionErrors.includes(err.id))
                     continue;
 
                 const { testRunId } = err;
@@ -237,6 +236,8 @@ export default function reporterObjectFactory (
                     curly(this.useWordWrap(false).setIndent(0).formatError(err))
                 );
             }
+
+            storedActionErrors.length = 0;
 
             const testBrowserRuns = browserToRunsMap[testId];
 

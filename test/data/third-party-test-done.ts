@@ -11,6 +11,7 @@ export const thirdPartyTestDone: TestRunInfo = {
 
     errs: [
         new TestRunErrorFormattableAdapter({
+            id:              'third_party_error',
             userAgent:       CHROME.prettyUserAgent,
             screenshotPath:  '',
             testRunId:       TEST_RUN_ID,

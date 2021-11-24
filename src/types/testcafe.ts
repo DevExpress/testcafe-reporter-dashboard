@@ -34,6 +34,7 @@ export type Error = {
     testRunId: string;
     testRunPhase: string;
     userAgent: string;
+    id?: string;
 };
 
 export type TestRunInfo = {
