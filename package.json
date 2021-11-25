@@ -46,7 +46,6 @@
     "eslint-plugin-standard": "^4.0.1",
     "gulp": "^4.0.2",
     "gulp-typescript": "^5.0.1",
-    "is-primitive": "^3.0.1",
     "mocha": "^7.0.1",
     "mock-require": "^3.0.3",
     "normalize-newline": "^1.0.2",
