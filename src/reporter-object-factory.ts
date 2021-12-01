@@ -70,7 +70,7 @@ export default function reporterObjectFactory (
     const testRunToActionsMap: Record<string, ActionInfo[]>       = {};
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
     const testRunIdToTestIdMap: Record<string, string>            = {};
-    const storedActionErrors: string[]                            = [];
+    const errorsToTestIdMap: Record<string, string[]>             = {};
 
     const reporterPluginObject: ReporterPluginObject = {
         ...BLANK_REPORTER,
@@ -176,7 +176,7 @@ export default function reporterObjectFactory (
 
             if (err) {
                 if (err.id)
-                    storedActionErrors.push(err.id);
+                    addArrayValueByKey(errorsToTestIdMap, testId, err.id);
 
                 action.error = createTestError(err,
                     curly(this.useWordWrap(false).setIndent(0).formatError(err))
@@ -227,7 +227,7 @@ export default function reporterObjectFactory (
             }
 
             for (const err of errs) {
-                if (err.id && storedActionErrors.includes(err.id))
+                if (err.id && errorsToTestIdMap[testId] && errorsToTestIdMap[testId].includes(err.id))
                     continue;
 
                 const { testRunId } = err;
@@ -237,7 +237,7 @@ export default function reporterObjectFactory (
                 );
             }
 
-            storedActionErrors.length = 0;
+            delete errorsToTestIdMap[testId];
 
             const testBrowserRuns = browserToRunsMap[testId];
 
