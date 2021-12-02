@@ -27,3 +27,14 @@ export type Name = t.TypeOf<typeof NameSchema>;
 export const BuildIdSchema = t.union([MaxLengthString(MAX_BUILD_ID_LENGTH), t.undefined]);
 
 export type BuildId = t.TypeOf<typeof BuildIdSchema>;
+
+export type ReporterPluginOptions = {
+    dashboardUrl?: string;
+    token?: string;
+    buildId?: string;
+    noScreenshotUpload?: boolean;
+    noVideoUpload?: boolean;
+    isLogEnabled?: boolean;
+    requestRetryCount?: number;
+    responseTimeout?: number;
+};
