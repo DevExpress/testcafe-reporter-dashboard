@@ -1,11 +1,11 @@
 import { sign } from 'jsonwebtoken';
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
-import reporterObjectFactory from '../src/reporter-object-factory';
-import { DashboardSettings } from '../src/types/internal';
-import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
-import { mockReadFile } from './mocks';
-import { AUTHENTICATION_TOKEN_REJECTED } from '../src/texts';
+import reporterObjectFactory from '../../src/reporter-object-factory';
+import { DashboardSettings } from '../../src/types/internal';
+import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
+import { mockReadFile } from '../mocks';
+import { AUTHENTICATION_TOKEN_REJECTED } from '../../src/texts';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = sign({ projectId: 'project_1' }, 'jwt_secret');
@@ -24,7 +24,7 @@ const SETTINGS: DashboardSettings = {
 describe('initReporter', () => {
     const errorText = 'not good';
 
-    let requests: { url: string; method: string }[] = [];
+    let requests: { url: string; method: string; body: string }[] = [];
 
     let logs: string[]   = [];
     let errors: string[] = [];
@@ -41,14 +41,14 @@ describe('initReporter', () => {
         errors   = [];
     });
 
-    function fetchOkMock (url, { method }) {
-        requests.push({ url, method });
+    function fetchOkMock (url, { method, body }) {
+        requests.push({ url, method, body });
 
         return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
     };
 
-    function fetchFailMock (url, { method }) {
-        requests.push({ url, method });
+    function fetchFailMock (url, { method, body }) {
+        requests.push({ url, method, body });
 
         return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', text: () => Promise.resolve(errorText) } as Response);
     }
@@ -84,8 +84,9 @@ describe('initReporter', () => {
         await reporter.reportTaskStart(new Date(), [], 1, []);
 
         assert.strictEqual(errors.length, 0);
-        assert.strictEqual(requests[0].url, `http://localhost/api/validateReporter?reportId=runId&tcVersion=${TC_OLDEST_COMPATIBLE_VERSION}`);
+        assert.strictEqual(requests[0].url, 'http://localhost/api/validateReporter');
         assert.strictEqual(requests[0].method, 'POST');
+        assert.deepStrictEqual(JSON.parse(requests[0].body), { reportId: 'runId', tcVersion: TC_OLDEST_COMPATIBLE_VERSION, reporterVersion: '0.2.5-rc.1' });
         assert.strictEqual(logs.length, 1);
         assert.strictEqual(logs[0], 'Task execution report: http://localhost/runs/project_1/buildId');
     });

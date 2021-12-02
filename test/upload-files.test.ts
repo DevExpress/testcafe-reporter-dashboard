@@ -51,7 +51,10 @@ describe('Uploads', () => {
             return Promise.resolve({ ok: true } as Response);
         }
 
-        return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
+        if (url === `${TESTCAFE_DASHBOARD_URL}/api/validateReporter`)
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
+
+        throw new Error('Unknown request');
     }
 
     beforeEach(() => {

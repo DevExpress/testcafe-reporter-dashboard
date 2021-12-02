@@ -44,20 +44,30 @@ describe('Reporter factory', () => {
         assert.equal(reporter, BLANK_REPORTER);
     });
 
-    it('Show authentication token (legacy) invalid error', async () => {
-        const reporter = createReporter({ authenticationToken: sign({ user: 'user_1' }, 'jwt_secret') });
+    it('Throw authentication token (legacy) invalid error', async () => {
+        let error = null;
 
-        assert.equal(errors.length, 1);
-        assert.equal(errors[0], AUTHENTICATION_TOKEN_INVALID);
-        assert.equal(reporter, BLANK_REPORTER);
+        try {
+            createReporter({ authenticationToken: sign({ user: 'user_1' }, 'jwt_secret') });
+        }
+        catch (e) {
+            error = e;
+        }
+
+        assert(error, new Error(AUTHENTICATION_TOKEN_INVALID));
     });
 
-    it('Show authentication token (new) invalid error', async () => {
-        const reporter = createReporter({ authenticationToken: Buffer.from('abcdefghijklm').toString('base64') });
+    it('Throw authentication token (new) invalid error', async () => {
+        let error = null;
 
-        assert.equal(errors.length, 1);
-        assert.equal(errors[0], AUTHENTICATION_TOKEN_INVALID);
-        assert.equal(reporter, BLANK_REPORTER);
+        try {
+            createReporter({ authenticationToken: Buffer.from('abcdefghijklm').toString('base64') });
+        }
+        catch (e) {
+            error = e;
+        }
+
+        assert(error, new Error(AUTHENTICATION_TOKEN_INVALID));
     });
 
     it('Show dashboard URL validation error', async () => {

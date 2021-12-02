@@ -50,11 +50,8 @@ export function validateSettings (settings: DashboardSettings, tcVersion: string
 
         areSettingsValid = false;
     }
-    else if (!validateAuthenticationToken(authenticationToken)) {
-        logger.error(AUTHENTICATION_TOKEN_INVALID);
-
-        areSettingsValid = false;
-    }
+    else if (!validateAuthenticationToken(authenticationToken))
+        throw new Error(AUTHENTICATION_TOKEN_INVALID);
 
     if (!dashboardUrl) {
         logger.error(DASHBOARD_LOCATION_NOT_DEFINED);

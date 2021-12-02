@@ -29,7 +29,6 @@ import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
 import BLANK_REPORTER from './blank-reporter';
-import InitializationError from './initialization-error';
 
 function isThirdPartyError (error: Error): boolean {
     return error.code === 'E2';
@@ -77,7 +76,33 @@ export default function reporterObjectFactory (
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
     const testRunIdToTestIdMap: Record<string, string> = {};
 
-    const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
+    const reporterPluginObject: ReporterPluginObject = {
+        ...BLANK_REPORTER,
+        createErrorDecorator: errorDecorator,
+
+        async init (): Promise<void> {
+            const validationResponse = await transport.fetchFromDashboard(
+                'api/validateReporter',
+                {
+                    method: 'POST',
+                    body:   JSON.stringify({
+                        reportId:        id,
+                        reporterVersion: require('../package.json').version,
+                        tcVersion
+                    })
+                }
+            );
+
+            if (!validationResponse.ok) {
+                const responseText = await validationResponse.text();
+                const errorMessage = responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED;
+
+                logger.error(errorMessage);
+
+                throw new Error(errorMessage);
+            }
+        }
+    };
 
     async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);
@@ -97,18 +122,6 @@ export default function reporterObjectFactory (
     }
 
     assignReporterMethods(reporterPluginObject, {
-        async init (): Promise<void> {
-            const validationResponse = await transport.fetchFromDashboard(`api/validateReporter?reportId=${id}&tcVersion=${tcVersion}`, 'POST');
-
-            if (!validationResponse.ok) {
-                const responseText = await validationResponse.text();
-                const errorMessage = responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED;
-
-                logger.error(errorMessage);
-
-                throw new InitializationError(errorMessage);
-            }
-        },
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
 

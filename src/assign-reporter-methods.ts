@@ -1,7 +1,6 @@
 import { ReporterMethods, ReporterPluginObject } from './types/internal';
 import logger from './logger';
 import { createReporterMethodName } from './texts';
-import InitializationError from './initialization-error';
 
 export default function assignReporterMethods (
     reporterObject: ReporterPluginObject,
@@ -17,10 +16,7 @@ export default function assignReporterMethods (
                 await reporterMethods[methodName].apply(this, args);
             }
             catch (e) {
-                if (e instanceof InitializationError)
-                    throw e;
-                else
-                    logger.error(createReporterMethodName(methodName, e && e.toString()));
+                logger.error(createReporterMethodName(methodName, e && e.toString()));
             }
         };
     }
