@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { sign } from 'jsonwebtoken';
 import { DashboardSettings } from '../src/types/internal/dashboard';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
@@ -35,12 +36,38 @@ describe('Reporter factory', () => {
         assert.equal(reporter, BLANK_REPORTER);
     });
 
-    it('Show authentication token validation error', async () => {
+    it('Show authentication token not defined error', async () => {
         const reporter = createReporter({ authenticationToken: '' });
 
         assert.equal(errors.length, 1);
         assert.equal(errors[0], AUTHENTICATION_TOKEN_NOT_DEFINED);
         assert.equal(reporter, BLANK_REPORTER);
+    });
+
+    it('Throw authentication token (legacy) invalid error', async () => {
+        let error = null;
+
+        try {
+            createReporter({ authenticationToken: sign({ user: 'user_1' }, 'jwt_secret') });
+        }
+        catch (e) {
+            error = e;
+        }
+
+        assert(error, new Error(AUTHENTICATION_TOKEN_INVALID));
+    });
+
+    it('Throw authentication token (new) invalid error', async () => {
+        let error = null;
+
+        try {
+            createReporter({ authenticationToken: Buffer.from('abcdefghijklm').toString('base64') });
+        }
+        catch (e) {
+            error = e;
+        }
+
+        assert(error, new Error(AUTHENTICATION_TOKEN_INVALID));
     });
 
     it('Show dashboard URL validation error', async () => {
@@ -75,18 +102,5 @@ describe('Reporter factory', () => {
         }
 
         assert(error, new Error(createTestCafeVersionIncompatibledError('1.14.1')));
-    });
-
-    it('Throw AuthentificationToken invalid error', async () => {
-        let error = null;
-
-        try {
-            createReporter({ authenticationToken: 'abcdefgh' });
-        }
-        catch (e) {
-            error = e;
-        }
-
-        assert(error, new Error(AUTHENTICATION_TOKEN_INVALID));
     });
 });

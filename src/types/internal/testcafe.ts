@@ -33,6 +33,7 @@ export type DashboardBrowserRunInfo = {
 export type decoratorFn = (str: string) => string;
 
 export type ReporterMethods = {
+    init?: () => Promise<void>;
     reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
     reportFixtureStart: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;

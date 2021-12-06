@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 
-import { createReportUrlMessage } from './texts';
+import { AUTHENTICATION_TOKEN_REJECTED, createReportUrlMessage } from './texts';
 import {
     createDashboardTestRunInfo,
     createTestError,
@@ -76,7 +76,33 @@ export default function reporterObjectFactory (
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
     const testRunIdToTestIdMap: Record<string, string> = {};
 
-    const reporterPluginObject: ReporterPluginObject = { ...BLANK_REPORTER, createErrorDecorator: errorDecorator };
+    const reporterPluginObject: ReporterPluginObject = {
+        ...BLANK_REPORTER,
+        createErrorDecorator: errorDecorator,
+
+        async init (): Promise<void> {
+            const validationResponse = await transport.fetchFromDashboard(
+                'api/validateReporter',
+                {
+                    method: 'POST',
+                    body:   JSON.stringify({
+                        reportId:        id,
+                        reporterVersion: require('../package.json').version,
+                        tcVersion
+                    })
+                }
+            );
+
+            if (!validationResponse.ok) {
+                const responseText = await validationResponse.text();
+                const errorMessage = responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED;
+
+                logger.error(errorMessage);
+
+                throw new Error(errorMessage);
+            }
+        }
+    };
 
     async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);
@@ -105,7 +131,7 @@ export default function reporterObjectFactory (
         },
 
         async reportFixtureStart (): Promise<void> {
-            return void 0;
+            return;
         },
 
         async reportWarnings (warning: Warning): Promise<void> {

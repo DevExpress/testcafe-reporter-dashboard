@@ -1,19 +1,26 @@
 import assert from 'assert';
+import { v4 as uuid } from 'uuid';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 
 import { AggregateCommandType } from '../../src/types/internal/dashboard';
-import { CHROME } from './../data/test-browser-info';
-import { thirdPartyTestDone, skippedTestDone } from './../data';
+import { CHROME } from '../data/test-browser-info';
+import { thirdPartyTestDone, skippedTestDone } from '../data';
 import { testActionInfos, quarantineTestDoneInfo, quarantiteTestStartInfo } from '../data/test-quarantine-mode-info';
 import reporterObjectFactory from '../../src/reporter-object-factory';
-import logger from '../../src/logger';
-import { DashboardTestRunInfo, TestDoneArgs } from '../../src/types';
-import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL } from '../mocks';
+import { DashboardTestRunInfo, TaskDoneArgs, TestDoneArgs } from '../../src/types';
+import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL, UPLOAD_URL_PREFIX } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
+import { WARNINGS_TEST_RUN_ID_1 } from '../data/test-warnings-info';
 
 describe('reportTestDone', () => {
     let testRunInfo           = {} as DashboardTestRunInfo;
     let uploadPaths: string[] = [];
+
+    const loggerMock = {
+        log:   () => void 0,
+        warn:  () => void 0,
+        error: () => void 0
+    };
 
     function fetchRunInfoMock (url: string, request) {
         const response  = { ok: true, status: 200, statusText: 'OK' } as Response;
@@ -40,10 +47,11 @@ describe('reportTestDone', () => {
 
     it('Should process errors originated not from actions', async () => {
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchRunInfoMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
         const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
@@ -78,9 +86,10 @@ describe('reportTestDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestDone('Test 1', skippedTestDone);
 
         assert.ok(testDonePayload);
@@ -91,10 +100,11 @@ describe('reportTestDone', () => {
         const readFile = (path: string) => Promise.resolve(Buffer.from(path));
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                readFile, fetchRunInfoMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                readFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
+        await reporter.reportTaskStart(new Date(), [], 1, []);
         await reporter.reportTestStart('Test 1', {}, quarantiteTestStartInfo);
 
         for (const actionInfo of testActionInfos)
@@ -128,5 +138,43 @@ describe('reportTestDone', () => {
             assert.deepEqual(runInfo.screenshotUploadIds, ['upload_id']);
             assert.deepEqual(runInfo.videoUploadIds, ['upload_id']);
         }
+    });
+
+    it('warningsUploadId payload', async () => {
+        let taskDonePayload: TaskDoneArgs = {} as TaskDoneArgs;
+
+        function fetch (url, request) {
+            if (url === `${TESTCAFE_DASHBOARD_URL}/api/getUploadUrl`) {
+                const uploadInfo = { uploadId: uuid(), uploadUrl: `${UPLOAD_URL_PREFIX}${uuid()}` };
+
+                return Promise.resolve({ ok: true, json: () => uploadInfo } as unknown as Response);
+            }
+
+            if (url === `${TESTCAFE_DASHBOARD_URL}/api/commands/`) {
+                const { type, payload } = JSON.parse(request.body);
+
+                if (type === AggregateCommandType.reportTaskDone)
+                    taskDonePayload = payload;
+
+                return Promise.resolve({ ok: true } as Response);
+            }
+
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
+        }
+
+        const reporter = reporterObjectFactory(mockReadFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+        assert.deepStrictEqual(taskDonePayload, {});
+
+        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+
+        assert.strictEqual(taskDonePayload.warningsUploadId, void 0);
+
+        await reporter.reportWarnings({ message: 'warning', testRunId: WARNINGS_TEST_RUN_ID_1 });
+
+        await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+
+        assert.ok(taskDonePayload.warningsUploadId);
     });
 });

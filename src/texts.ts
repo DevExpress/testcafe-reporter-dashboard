@@ -1,15 +1,16 @@
-import { decode } from 'jsonwebtoken';
 import { MAX_BUILD_ID_LENGTH } from './consts';
+import { decodeAuthenticationToken } from './validate-settings';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
 export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable is not defined.';
 export const AUTHENTICATION_TOKEN_INVALID = 'The \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable does not contain a valid token. Check the value for typos.';
+export const AUTHENTICATION_TOKEN_REJECTED = 'Token in the \'TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN\' environment variable was rejected by TestCafe Dashboard. Ensure that the token is correct and was not revoked.';
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
 export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
-    const token = decode(authenticationToken);
+    const tokenData = decodeAuthenticationToken(authenticationToken) as { projectId: string; tokenId?: string };
 
-    return `Task execution report: ${dashboardUrl}/runs/${token.projectId}/${encodeURIComponent(reportId)}`;
+    return `Task execution report: ${dashboardUrl}/runs/${tokenData.projectId}/${encodeURIComponent(reportId)}`;
 };
 
 export const createFileUploadError = (uploadId: string, filePath: string): string =>

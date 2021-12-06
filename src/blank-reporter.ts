@@ -3,6 +3,7 @@ import { ReporterPluginObject } from './types/internal';
 const noop = () => Promise.resolve();
 
 const BLANK_REPORTER: ReporterPluginObject = {
+    init:                 noop,
     reportTaskStart:      noop,
     reportFixtureStart:   noop,
     reportTestDone:       noop,

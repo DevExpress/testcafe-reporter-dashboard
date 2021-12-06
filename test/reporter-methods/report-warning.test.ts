@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
-import { AggregateCommandType, TestStartInfo } from '../../src/types/internal/';
+import { AggregateCommandType, TestStartInfo } from '../../src/types/internal';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import logger from '../../src/logger';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
@@ -17,9 +17,10 @@ describe('ReportWarnings', () => {
 
             if (type === AggregateCommandType.reportWarnings)
                 reportWarningspayload = payload;
-
-            return Promise.resolve({ ok: true } as Response);
         }
+
+        if (url === `${TESTCAFE_DASHBOARD_URL}/api/validateReporter`)
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
 
         throw new Error('Unknown request');
     }

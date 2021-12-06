@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import assert from 'assert';
 import { Screenshot, DashboardTestRunInfo, WarningsInfo } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal/';
+import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import reporterObjectFactory from '../src/reporter-object-factory';
 import logger from '../src/logger';
@@ -19,6 +19,12 @@ describe('Uploads', () => {
     const uploadedFiles: any[]     = [];
     const uploadedUrls: any[]      = [];
     const uploadInfos: any[]       = [];
+
+    const loggerMock = {
+        log:   () => void 0,
+        warn:  () => void 0,
+        error: () => void 0
+    };
 
     function fetch (url, request) {
         if (url === `${TESTCAFE_DASHBOARD_URL}/api/getUploadUrl`) {
@@ -44,6 +50,9 @@ describe('Uploads', () => {
 
             return Promise.resolve({ ok: true } as Response);
         }
+
+        if (url === `${TESTCAFE_DASHBOARD_URL}/api/validateReporter`)
+            return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
 
         throw new Error('Unknown request');
     }
@@ -163,7 +172,9 @@ describe('Uploads', () => {
                 return Promise.resolve(Buffer.from(fileContent));
             }
 
-            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTaskStart(new Date(), [], 1, []);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -174,12 +185,13 @@ describe('Uploads', () => {
             const { browserRuns } = JSON.parse(uploadedFiles[2].toString());
             const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
 
-            assert.equal(runCommands.length, 1);
-            assert.equal(runCommands[0].type, AggregateCommandType.reportTestDone);
+            assert.equal(runCommands.length, 2);
+            assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
+            assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
 
             assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[0], uploadInfos[0].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[1], uploadInfos[1].uploadId);
-            assert.equal(runCommands[0].payload.uploadId, uploadInfos[2].uploadId);
+            assert.equal(runCommands[1].payload.uploadId, uploadInfos[2].uploadId);
 
             assert.equal(uploadInfos.length, 3);
             assert.equal(uploadedUrls.length, 3);
@@ -230,7 +242,9 @@ describe('Uploads', () => {
                 }
             ];
 
-            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noScreenshotUpload: true }, logger, TC_OLDEST_COMPATIBLE_VERSION);
+            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noScreenshotUpload: true }, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTaskStart(new Date(), [], 1, []);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -247,13 +261,15 @@ describe('Uploads', () => {
 
             assert.equal(browserRuns['chrome_headless'].screenshotUploadIds, void 0);
 
-            assert.equal(aggregateCommands.length, 2);
-            assert.equal(aggregateCommands[0].payload.uploadId, uploadInfos[0].uploadId);
-            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTestDone);
+            assert.equal(aggregateCommands.length, 3);
+            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTaskStart);
 
-            assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
-            assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed });
+            assert.equal(aggregateCommands[1].payload.uploadId, uploadInfos[0].uploadId);
+            assert.equal(aggregateCommands[1].type, AggregateCommandType.reportTestDone);
+
+            assert.equal(aggregateCommands[2].type, AggregateCommandType.createUpload);
+            assert.deepEqual(aggregateCommands[2].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(aggregateCommands[2].payload, { status: UploadStatus.Completed });
         });
     });
 
@@ -267,7 +283,9 @@ describe('Uploads', () => {
                 return Promise.resolve(Buffer.from(`fileContent_${path}`));
             };
 
-            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION);
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTaskStart(new Date(), [], 1, []);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -289,8 +307,9 @@ describe('Uploads', () => {
             const { browserRuns } = JSON.parse(uploadedFiles[2].toString());
             const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
 
-            assert.equal(runCommands.length, 1);
-            assert.equal(runCommands[0].type, AggregateCommandType.reportTestDone);
+            assert.equal(runCommands.length, 2);
+            assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
+            assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
 
             assert.equal(videoPaths.length, 2, 'videoPaths');
             assert.equal(uploadInfos.length, 3, 'uploadInfos');
@@ -298,7 +317,7 @@ describe('Uploads', () => {
 
             assert.equal(browserRuns['testRun_1'].videoUploadIds[0], uploadInfos[0].uploadId);
             assert.equal(browserRuns['testRun_2'].videoUploadIds[0], uploadInfos[1].uploadId);
-            assert.equal(runCommands[0].payload.uploadId, uploadInfos[2].uploadId);
+            assert.equal(runCommands[1].payload.uploadId, uploadInfos[2].uploadId);
 
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
@@ -326,7 +345,9 @@ describe('Uploads', () => {
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
-            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noVideoUpload: true }, logger, TC_OLDEST_COMPATIBLE_VERSION);
+            const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noVideoUpload: true }, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTaskStart(new Date(), [], 1, []);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -353,13 +374,15 @@ describe('Uploads', () => {
             assert.deepEqual(browserRuns['testRun_1'].videoUploadIds, []);
             assert.deepEqual(browserRuns['testRun_2'].videoUploadIds, []);
 
-            assert.equal(aggregateCommands.length, 2);
-            assert.equal(aggregateCommands[0].payload.uploadId, uploadInfos[0].uploadId);
-            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTestDone);
+            assert.equal(aggregateCommands.length, 3);
+            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTaskStart);
 
-            assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
-            assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed });
+            assert.equal(aggregateCommands[1].payload.uploadId, uploadInfos[0].uploadId);
+            assert.equal(aggregateCommands[1].type, AggregateCommandType.reportTestDone);
+
+            assert.equal(aggregateCommands[2].type, AggregateCommandType.createUpload);
+            assert.deepEqual(aggregateCommands[2].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(aggregateCommands[2].payload, { status: UploadStatus.Completed });
         });
     });
 });

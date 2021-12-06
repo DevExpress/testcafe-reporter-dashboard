@@ -37,4 +37,11 @@ export default class FetchResponse {
 
         return null;
     }
+
+    async text (): Promise<string | undefined> {
+        if (this._response)
+            return await this._response.text();
+
+        return void 0;
+    }
 }

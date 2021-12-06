@@ -101,9 +101,9 @@ export default class Transport {
         } while (true);
     }
 
-    async fetchFromDashboard (relativeUrl: string) {
+    async fetchFromDashboard (relativeUrl: string, requestOptions: any = { method: 'GET' }) {
         return await this.fetch(`${this._dashboardUrl}/${relativeUrl}`, {
-            method:  'GET',
+            ...requestOptions,
             headers: {
                 authorization: `Bearer ${this._authenticationToken}`
             }

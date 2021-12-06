@@ -14,6 +14,32 @@ import { decode } from 'jsonwebtoken';
 // TODO: we should ask TC Dashboard
 export const TC_OLDEST_COMPATIBLE_VERSION = '1.14.2';
 
+export function decodeAuthenticationToken (token: string): { projectId: string; tokenId?: string } | undefined {
+    let tokenData;
+
+    try {
+        tokenData = decode(token);
+    }
+    catch (e) {}
+
+    if (tokenData && tokenData.projectId)
+        return tokenData;
+
+    try {
+        tokenData = JSON.parse(Buffer.from(token, 'base64').toString());
+    }
+    catch (e) {}
+
+    if (tokenData && tokenData.projectId && tokenData.tokenId)
+        return tokenData;
+
+    return void 0;
+}
+
+function validateAuthenticationToken (token: string): boolean {
+    return !!decodeAuthenticationToken(token);
+}
+
 export function validateSettings (settings: DashboardSettings, tcVersion: string, logger: Logger): boolean {
     const { authenticationToken, buildId, dashboardUrl } = settings;
 
@@ -24,12 +50,8 @@ export function validateSettings (settings: DashboardSettings, tcVersion: string
 
         areSettingsValid = false;
     }
-    else {
-        const token = decode(authenticationToken);
-
-        if (!token || !token.projectId)
-            throw new Error(AUTHENTICATION_TOKEN_INVALID);
-    }
+    else if (!validateAuthenticationToken(authenticationToken))
+        throw new Error(AUTHENTICATION_TOKEN_INVALID);
 
     if (!dashboardUrl) {
         logger.error(DASHBOARD_LOCATION_NOT_DEFINED);
