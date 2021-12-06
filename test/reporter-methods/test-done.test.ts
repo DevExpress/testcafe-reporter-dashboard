@@ -186,7 +186,7 @@ describe('reportTestDone', () => {
 
     it('should not duplicate errors from action and test done (including case of concurrency)', async () => {
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchRunInfoMock, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
