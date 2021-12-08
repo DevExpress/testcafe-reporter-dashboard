@@ -3,8 +3,14 @@ import { v4 as uuid } from 'uuid';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
 
 import { AggregateCommandType } from '../../src/types/internal/dashboard';
-import { CHROME } from '../data/test-browser-info';
-import { thirdPartyTestDone, skippedTestDone } from '../data';
+import { CHROME } from './../data/test-browser-info';
+import {
+    thirdPartyTestDone,
+    thirdPartyTestDone2,
+    skippedTestDone,
+    TEST_RUN_ID,
+    TEST_RUN_ID_2
+} from './../data';
 import { testActionInfos, quarantineTestDoneInfo, quarantiteTestStartInfo } from '../data/test-quarantine-mode-info';
 import reporterObjectFactory from '../../src/reporter-object-factory';
 import { DashboardTestRunInfo, TaskDoneArgs, TestDoneArgs } from '../../src/types';
@@ -176,5 +182,36 @@ describe('reportTestDone', () => {
         await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 
         assert.ok(taskDonePayload.warningsUploadId);
+    });
+
+    it('should not duplicate errors from action and test done (including case of concurrency)', async () => {
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(
+                mockReadFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+            ), process.stdout
+        );
+
+        const mockActionInfo = {
+            test:      { phase: 'inTest', id: 'Test' },
+            command:   {},
+            testRunId: TEST_RUN_ID,
+            duration:  1,
+            browser:   {},
+            err:       { id: 'action_error', formatMessage: () => '' }
+        };
+
+        const mockActionInfo2 = { ...mockActionInfo };
+
+        mockActionInfo2.test.id   = 'Test2';
+        mockActionInfo2.testRunId = TEST_RUN_ID_2;
+
+        await reporter.reportTestActionDone('click', mockActionInfo);
+        await reporter.reportTestActionDone('click', mockActionInfo2);
+        await reporter.reportTestDone('Test 1', thirdPartyTestDone2);
+        await reporter.reportTestDone('Test 1', thirdPartyTestDone);
+
+        const { thirdPartyError } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
+
+        assert.ok(thirdPartyError);
+        assert.match(thirdPartyError.errorModel, /Error: In Before - third party error 1/);
     });
 });
