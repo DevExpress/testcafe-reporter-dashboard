@@ -13,7 +13,7 @@ import { ReporterPluginOptions } from './types';
 
 export default function getReporterSettings (options: ReporterPluginOptions) {
     const {
-        dashboardUrl,
+        url,
         token,
         buildId,
         noScreenshotUpload,
@@ -24,7 +24,7 @@ export default function getReporterSettings (options: ReporterPluginOptions) {
     } = options;
 
     return {
-        dashboardUrl:        dashboardUrl || TESTCAFE_DASHBOARD_URL,
+        dashboardUrl:        url || TESTCAFE_DASHBOARD_URL,
         authenticationToken: token || AUTHENTICATION_TOKEN as string, //is validated in factory
         buildId:             buildId || TESTCAFE_DASHBOARD_BUILD_ID,
         isLogEnabled:        isLogEnabled || ENABLE_LOG,
