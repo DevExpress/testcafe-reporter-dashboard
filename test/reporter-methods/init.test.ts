@@ -86,7 +86,12 @@ describe('initReporter', () => {
         assert.strictEqual(errors.length, 0);
         assert.strictEqual(requests[0].url, 'http://localhost/api/validateReporter');
         assert.strictEqual(requests[0].method, 'POST');
-        assert.deepStrictEqual(JSON.parse(requests[0].body), { reportId: 'runId', tcVersion: TC_OLDEST_COMPATIBLE_VERSION, reporterVersion: '0.2.5' });
+
+        const { reportId, tcVersion, reporterVersion } = JSON.parse(requests[0].body);
+
+        assert.strictEqual(reportId, 'runId');
+        assert.strictEqual(tcVersion, TC_OLDEST_COMPATIBLE_VERSION);
+        assert.match(reporterVersion, /[0-1]\.[0-9]*\.[0-9]/);
         assert.strictEqual(logs.length, 1);
         assert.strictEqual(logs[0], 'Task execution report: http://localhost/runs/project_1/buildId');
     });

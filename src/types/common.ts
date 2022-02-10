@@ -29,7 +29,7 @@ export const BuildIdSchema = t.union([MaxLengthString(MAX_BUILD_ID_LENGTH), t.un
 export type BuildId = t.TypeOf<typeof BuildIdSchema>;
 
 export type ReporterPluginOptions = {
-    dashboardUrl?: string;
+    url?: string;
     token?: string;
     buildId?: string;
     noScreenshotUpload?: boolean;

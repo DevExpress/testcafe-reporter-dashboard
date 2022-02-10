@@ -5,7 +5,7 @@ describe('getReporterSettings()', () => {
     it('should take options from reporter options', () => {
         const options = {
             token:              'token_from_args',
-            dashboardUrl:       'https://ddev.testcafe.io',
+            url:                'https://ddev.testcafe.io',
             buildId:            'buildId_from_args',
             noVideoUpload:      true,
             noScreenshotUpload: true,

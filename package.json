@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Dashboard TestCafe reporter plugin.",
   "author": {
     "name": "Developer Express Inc.",
@@ -51,7 +51,7 @@
     "normalize-newline": "^1.0.2",
     "publish-please": "^5.5.2",
     "read-file-relative": "^1.2.0",
-    "testcafe": "1.17.2-alpha.2",
+    "testcafe": "^1.18.3",
     "ts-node": "^8.7.0",
     "typescript": "^3.8.3"
   },
