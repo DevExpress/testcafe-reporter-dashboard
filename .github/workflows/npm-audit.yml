@@ -1,6 +1,7 @@
 name: Npm audit
 
 on:
+  workflow_dispatch:
   pull_request_target:
     branches: [ master ]
 
@@ -12,10 +13,14 @@ jobs:
     steps:
       - name: Show ip
         run: ip addr show
-      - name: Checkout
+      - name: Checkout PR Head
+        if: ${{ github.event.pull_request != null }}
         uses: actions/checkout@v2
         with:
           ref: refs/pull/${{ github.event.pull_request.number }}/head
+      - name: Checkout Base Branch
+        if: ${{ github.event.pull_request == null }}
+        uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:
