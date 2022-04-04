@@ -11,5 +11,5 @@ import { ReporterPluginOptions } from './types';
 module.exports = function pluginFactory (options: ReporterPluginOptions = {}): ReporterPluginObject {
     const settings = getReporterSettings(options);
 
-    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, require('testcafe/package').version);
+    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, require('testcafe/package.json').version);
 };
