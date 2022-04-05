@@ -7,9 +7,14 @@ import reporterObjectFactory from './reporter-object-factory';
 import logger from './logger';
 import getReporterSettings from './get-reporter-settings';
 import { ReporterPluginOptions } from './types';
+import path from 'path';
 
 module.exports = function pluginFactory (options: ReporterPluginOptions = {}): ReporterPluginObject {
-    const settings = getReporterSettings(options);
+    const settings        = getReporterSettings(options);
+    const rootPackageName = require(path.resolve('package')).name;
+    const tcVersion       = require(rootPackageName === 'testcafe'
+                                    ? path.resolve('package')
+                                    : 'testcafe/package').version;
 
-    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, require('testcafe/package.json').version);
+    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, tcVersion);
 };
