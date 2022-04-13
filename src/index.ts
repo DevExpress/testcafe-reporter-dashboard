@@ -9,12 +9,20 @@ import getReporterSettings from './get-reporter-settings';
 import { ReporterPluginOptions } from './types';
 import path from 'path';
 
+function getTestcafeVersion (): string {
+    try {
+        const rootPackagePath = path.resolve('package');
+
+        return require(require(rootPackagePath).name === 'testcafe' ? rootPackagePath : 'testcafe/package').version;
+    }
+    catch (_) {
+        return require('testcafe/package').version;
+    }
+}
+
 module.exports = function pluginFactory (options: ReporterPluginOptions = {}): ReporterPluginObject {
-    const settings        = getReporterSettings(options);
-    const rootPackageName = require(path.resolve('package')).name;
-    const tcVersion       = require(rootPackageName === 'testcafe'
-                                    ? path.resolve('package')
-                                    : 'testcafe/package').version;
+    const settings  = getReporterSettings(options);
+    const tcVersion = getTestcafeVersion();
 
     return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, tcVersion);
 };
