@@ -13,7 +13,7 @@ const TESTCAFE_PACKAGE_PATH = 'testcafe/package';
 
 function getTestCafeVersion () {
     let packageName = '';
-    
+
     try {
         packageName = require(path.resolve('package')).name;
 
