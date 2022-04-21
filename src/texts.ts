@@ -8,7 +8,7 @@ export const AUTHENTICATION_TOKEN_REJECTED = 'Token in the \'TESTCAFE_DASHBOARD_
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
 export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
-    const tokenData = decodeAuthenticationToken(authenticationToken) as { projectId: string; tokenId?: string };
+    const tokenData = decodeAuthenticationToken(authenticationToken) as { projectId: string; tokenSecret?: string };
 
     return `Task execution report: ${dashboardUrl}/runs/${tokenData.projectId}/${encodeURIComponent(reportId)}`;
 };
