@@ -14,7 +14,7 @@ import { decode } from 'jsonwebtoken';
 // TODO: we should ask TC Dashboard
 export const TC_OLDEST_COMPATIBLE_VERSION = '1.14.2';
 
-export function decodeAuthenticationToken (token: string): { projectId: string; tokenId?: string } | undefined {
+export function decodeAuthenticationToken (token: string): { projectId: string; tokenSecret?: string } | undefined {
     let tokenData;
 
     try {
@@ -30,7 +30,7 @@ export function decodeAuthenticationToken (token: string): { projectId: string; 
     }
     catch (e) {}
 
-    if (tokenData && tokenData.projectId && tokenData.tokenId)
+    if (tokenData && tokenData.projectId && tokenData.tokenSecret)
         return tokenData;
 
     return void 0;
