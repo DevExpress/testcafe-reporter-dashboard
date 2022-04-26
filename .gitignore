@@ -1,4 +1,5 @@
 lib
+.idea
 node_modules
 screenshots
 video_artifacts
