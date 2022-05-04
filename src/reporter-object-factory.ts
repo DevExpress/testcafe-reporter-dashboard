@@ -72,6 +72,8 @@ export default function reporterObjectFactory (
     const testRunIdToTestIdMap: Record<string, string>            = {};
     const errorsToTestIdMap: Record<string, string[]>             = {};
 
+    let reportRejected = false;
+
     const reporterPluginObject: ReporterPluginObject = {
         ...BLANK_REPORTER,
         createErrorDecorator: errorDecorator,
@@ -97,6 +99,19 @@ export default function reporterObjectFactory (
 
                 throw new Error(errorMessage);
             }
+
+            let response;
+
+            try {
+                response = await validationResponse.json();
+            }
+            catch (err) {}
+
+            if (response?.error && response.error.type === 'error') {
+                logger.error(response.error.message);
+
+                reportRejected = true;
+            }            
         }
     };
 
@@ -119,6 +134,8 @@ export default function reporterObjectFactory (
 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
+            if (reportRejected) return;
+
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
 
             await reportCommands.sendTaskStartCommand({
@@ -131,6 +148,8 @@ export default function reporterObjectFactory (
         },
 
         async reportWarnings (warning: Warning): Promise<void> {
+            if (reportRejected) return;
+
             if (warning.testRunId) {
                 if (!testRunToWarningsMap[warning.testRunId])
                     testRunToWarningsMap[warning.testRunId] = [];
@@ -151,6 +170,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
+            if (reportRejected) return;
+
             const testId = testStartInfo.testId as ShortId;
 
             for (const testRunId of testStartInfo.testRunIds)
@@ -162,6 +183,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
+            if (reportRejected) return;
+
             const { test: { phase, id: testId }, command, testRunId, err, duration, browser } = actionInfo;
 
             if (!testRunToActionsMap[testRunId])
@@ -196,6 +219,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
+            if (reportRejected) return;
+
             const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable } = testRunInfo;
 
             const testRunToScreenshotsMap: Record<string, string[]> = {};
@@ -307,6 +332,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
+            if (reportRejected) return;
+
             const warningsUploadId = await uploadWarnings();
 
             await uploader.waitUploads();
