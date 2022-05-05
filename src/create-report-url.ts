@@ -9,11 +9,11 @@ type ReportPathParts = {
 const REPORT_PATH = ({ projectId, reportId }: ReportPathParts) => `runs/${projectId}/${reportId}`;
 const HTTP_URL    = (url: string) => `http://${url}`;
 
-function createURL (...args: ConstructorParameters<typeof URL>) {
+function createURL (...args: ConstructorParameters<typeof URL>): string {
     return String(new URL(...args));
 }
 
-function ensureHTTPProtocol (url: string) {
+function ensureHTTPProtocol (url: string): string {
     try {
         return createURL(url);
     }
@@ -22,7 +22,7 @@ function ensureHTTPProtocol (url: string) {
     }
 }
 
-export default function (reportId: string, dashboardUrl: string, authenticationToken: string) {
+export default function (reportId: string, dashboardUrl: string, authenticationToken: string): string {
     const { projectId } = decodeAuthenticationToken(authenticationToken);
 
     const reportPath = REPORT_PATH({ projectId, reportId: encodeURIComponent(reportId) });
