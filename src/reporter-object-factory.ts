@@ -27,7 +27,9 @@ import reportCommandsFactory from './report-commands-factory';
 import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
+import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
+
 
 function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
     if (!collection[key])
@@ -97,6 +99,10 @@ export default function reporterObjectFactory (
 
                 throw new Error(errorMessage);
             }
+        },
+
+        getReportUrl (): string {
+            return createReportUrl(buildId || id, dashboardUrl, authenticationToken);
         }
     };
 

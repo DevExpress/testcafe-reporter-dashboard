@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "es6-promise": "^4.2.8",
-    "fp-ts": "^2.9.5",
     "io-ts": "^2.2.14",
     "io-ts-types": "^0.5.15",
     "isomorphic-fetch": "^3.0.0",

@@ -46,5 +46,6 @@ export type ReporterMethods = {
 };
 
 export type ReporterPluginObject = ReporterMethods & {
-    createErrorDecorator: () => Record<string, decoratorFn>;
+    createErrorDecorator(): Record<string, decoratorFn>;
+    getReportUrl(): string;
 };

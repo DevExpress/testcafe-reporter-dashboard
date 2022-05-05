@@ -1,5 +1,5 @@
 import { MAX_BUILD_ID_LENGTH } from './consts';
-import { decodeAuthenticationToken } from './validate-settings';
+import createReportUrl from './create-report-url';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
 export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_TOKEN\' environment variable is not defined.';
@@ -8,9 +8,7 @@ export const AUTHENTICATION_TOKEN_REJECTED = 'Token in the \'TESTCAFE_DASHBOARD_
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
 export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
-    const tokenData = decodeAuthenticationToken(authenticationToken) as { projectId: string; tokenSecret?: string };
-
-    return `Task execution report: ${dashboardUrl}/runs/${tokenData.projectId}/${encodeURIComponent(reportId)}`;
+    return `Task execution report: ${createReportUrl(reportId, dashboardUrl, authenticationToken)}`;
 };
 
 export const createFileUploadError = (uploadId: string, filePath: string): string =>

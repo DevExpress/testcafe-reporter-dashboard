@@ -9,7 +9,8 @@ const BLANK_REPORTER: ReporterPluginObject = {
     reportTestDone:       noop,
     reportTaskDone:       noop,
     reportWarnings:       noop,
-    createErrorDecorator: () => ({})
+    createErrorDecorator: () => ({}),
+    getReportUrl:         () => ''
 };
 
 export default BLANK_REPORTER;
