@@ -13,3 +13,5 @@ jobs:
       - uses: DevExpress/testcafe-build-system/actions/publish-with-publish-please@main
         with:
           token: ${{ secrets.NPM_TOKEN }}
+      - if: ${ failure() }
+        run: git status && git diff
