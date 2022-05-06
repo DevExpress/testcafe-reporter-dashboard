@@ -76,6 +76,13 @@ export default function reporterObjectFactory (
 
     let reportRejected = false;
 
+    function processLimits (dashboardInfo: DashboardInfo) {
+        if (dashboardInfo && dashboardInfo.type === DASHBOARD_INFO_TYPES.warning) {
+            logger.warn(dashboardInfo.message);
+            reportRejected = true;
+        }
+    }
+
     const reporterPluginObject: ReporterPluginObject = {
         ...BLANK_REPORTER,
         createErrorDecorator: errorDecorator,
@@ -95,7 +102,7 @@ export default function reporterObjectFactory (
 
             const responseJson = await validationResponse.json();
 
-            if(!responseJson)
+            if (!responseJson)
                 throw new Error('Expected json response');
 
             if (!validationResponse.ok) {
@@ -106,16 +113,9 @@ export default function reporterObjectFactory (
                 throw new Error(errorMessage);
             }
 
-            processLimits(responseJson as DashboardInfo);     
+            processLimits(responseJson as DashboardInfo);
         }
     };
-
-    function processLimits(dashboardInfo: DashboardInfo) {
-        if (dashboardInfo && dashboardInfo.type === DASHBOARD_INFO_TYPES.warning) {
-            logger.warn(dashboardInfo.message);
-            reportRejected = true;
-        }
-    }
 
     async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);

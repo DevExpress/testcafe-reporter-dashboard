@@ -25,6 +25,17 @@ const SETTINGS: DashboardSettings = {
     requestRetryCount:   10
 };
 
+async function runReporterLifecycleMethods (reporter: any, requests: { url: string; method: string; body: string }[]) {
+    await reporter.init();
+
+    assert.strictEqual(requests.length, 1);
+
+    await reporter.reportTaskStart(new Date(), [], 1, []);
+    await reporter.reportTestStart('', {}, { testId: 'warningTestId', testRunId: [''], testRunIds: ['testRunId'] });
+    await reporter.reportTestDone('Test 1', { ...testDoneInfo, testId: 'testId' }, {});
+    await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+}
+
 describe('initReporter', () => {
     const errorText = 'not good';
 
@@ -48,25 +59,27 @@ describe('initReporter', () => {
     function fetchOkMock (url, { method, body }) {
         requests.push({ url, method, body });
 
-        return Promise.resolve({ ok: true, status: 200, statusText: 'OK', 
-            json: () => Promise.resolve('okMock') } as Response);
+        return Promise.resolve({ ok:         true, status:     200, statusText: 'OK',
+            json:       () => Promise.resolve('okMock') } as Response);
     };
 
     function fetchFailMock (url, { method, body }) {
         requests.push({ url, method, body });
 
-        const error =  { type: DASHBOARD_INFO_TYPES.error, message: errorText } as DashboardInfo ;
+        const error =  { type: DASHBOARD_INFO_TYPES.error, message: errorText } as DashboardInfo;
 
-        return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', 
-            json: () => Promise.resolve(error)
+        return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
+            json:       () => Promise.resolve(error)
         });
     }
 
     function fetchFailSilentMock () {
-        const silentError =  { type: DASHBOARD_INFO_TYPES.error, message: '' } as DashboardInfo ;;
+        const silentError =  { type: DASHBOARD_INFO_TYPES.error, message: '' } as DashboardInfo;
 
-        return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', 
-            json: () => Promise.resolve(silentError)
+        ;
+
+        return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
+            json:       () => Promise.resolve(silentError)
         });
     }
 
@@ -91,19 +104,21 @@ describe('initReporter', () => {
     }
 
     function fetchOutOfLimits (url, { method, body }) {
-        const outOfLimitResponseJson = 
-            { type: DASHBOARD_INFO_TYPES.warning, message: RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } as DashboardInfo ;
+        const outOfLimitResponseJson =
+            { type: DASHBOARD_INFO_TYPES.warning, message: RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } as DashboardInfo;
+
         ;
 
         requests.push({ url, method, body });
 
-        return Promise.resolve({ ok: true, status: 200, statusText: 'OK', 
-            json: () => Promise.resolve(outOfLimitResponseJson)
+        return Promise.resolve({ ok:         true, status:     200, statusText: 'OK',
+            json:       () => Promise.resolve(outOfLimitResponseJson)
         });
     };
 
     it('requests are blocked when reports are out of limits', async () => {
         const reporter = getReporter(fetchOutOfLimits);
+
         assert.strictEqual(requests.length, 0);
 
         await runReporterLifecycleMethods(reporter, requests);
@@ -113,6 +128,7 @@ describe('initReporter', () => {
 
     it('requests are not blocked when reports are within limits', async () => {
         const reporter = getReporter(fetchOkMock);
+
         assert.strictEqual(requests.length, 0);
 
         await runReporterLifecycleMethods(reporter, requests);
@@ -156,14 +172,3 @@ describe('initReporter', () => {
         assert.strictEqual(errors[0], AUTHENTICATION_TOKEN_REJECTED);
     });
 });
-
-async function runReporterLifecycleMethods(reporter: any, requests: { url: string; method: string; body: string; }[]) {
-    await reporter.init();
-
-    assert.strictEqual(requests.length, 1);
-
-    await reporter.reportTaskStart(new Date(), [], 1, []);
-    await reporter.reportTestStart('', {}, { testId: 'warningTestId', testRunId: [''], testRunIds: ['testRunId'] });
-    await reporter.reportTestDone('Test 1', { ...testDoneInfo, testId: 'testId' }, {});
-    await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
-}
