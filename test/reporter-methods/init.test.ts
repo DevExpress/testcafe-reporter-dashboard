@@ -6,6 +6,10 @@ import { DashboardSettings } from '../../src/types/internal';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 import { mockReadFile } from '../mocks';
 import { AUTHENTICATION_TOKEN_REJECTED } from '../../src/texts';
+import { testDoneInfo } from '../data';
+import { DASHBOARD_INFO_TYPES, RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } from '../../src/types/common';
+import { DashboardInfo } from '../../src/types';
+
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = sign({ projectId: 'project_1' }, 'jwt_secret');
@@ -44,17 +48,26 @@ describe('initReporter', () => {
     function fetchOkMock (url, { method, body }) {
         requests.push({ url, method, body });
 
-        return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
+        return Promise.resolve({ ok: true, status: 200, statusText: 'OK', 
+            json: () => Promise.resolve('okMock') } as Response);
     };
 
     function fetchFailMock (url, { method, body }) {
         requests.push({ url, method, body });
 
-        return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', text: () => Promise.resolve(errorText) } as Response);
+        const error =  { type: DASHBOARD_INFO_TYPES.error, message: errorText } as DashboardInfo ;
+
+        return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', 
+            json: () => Promise.resolve(error)
+        });
     }
 
     function fetchFailSilentMock () {
-        return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', text: () => Promise.resolve('') } as Response);
+        const silentError =  { type: DASHBOARD_INFO_TYPES.error, message: '' } as DashboardInfo ;;
+
+        return Promise.resolve({ ok: false, status: 401, statusText: 'Unauthorized', 
+            json: () => Promise.resolve(silentError)
+        });
     }
 
     function getReporter (fetchMock) {
@@ -76,6 +89,36 @@ describe('initReporter', () => {
             assert.strictEqual(errorMessage, expectedError);
         }
     }
+
+    function fetchOutOfLimits (url, { method, body }) {
+        const outOfLimitResponseJson = 
+            { type: DASHBOARD_INFO_TYPES.warning, message: RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } as DashboardInfo ;
+        ;
+
+        requests.push({ url, method, body });
+
+        return Promise.resolve({ ok: true, status: 200, statusText: 'OK', 
+            json: () => Promise.resolve(outOfLimitResponseJson)
+        });
+    };
+
+    it('requests are blocked when reports are out of limits', async () => {
+        const reporter = getReporter(fetchOutOfLimits);
+        assert.strictEqual(requests.length, 0);
+
+        await runReporterLifecycleMethods(reporter, requests);
+
+        assert.strictEqual(requests.length, 1);
+    });
+
+    it('requests are not blocked when reports are within limits', async () => {
+        const reporter = getReporter(fetchOkMock);
+        assert.strictEqual(requests.length, 0);
+
+        await runReporterLifecycleMethods(reporter, requests);
+
+        assert.ok(requests.length >= 5);
+    });
 
     it('Should send a request and report success', async () => {
         const reporter = getReporter(fetchOkMock);
@@ -113,3 +156,14 @@ describe('initReporter', () => {
         assert.strictEqual(errors[0], AUTHENTICATION_TOKEN_REJECTED);
     });
 });
+
+async function runReporterLifecycleMethods(reporter: any, requests: { url: string; method: string; body: string; }[]) {
+    await reporter.init();
+
+    assert.strictEqual(requests.length, 1);
+
+    await reporter.reportTaskStart(new Date(), [], 1, []);
+    await reporter.reportTestStart('', {}, { testId: 'warningTestId', testRunId: [''], testRunIds: ['testRunId'] });
+    await reporter.reportTestDone('Test 1', { ...testDoneInfo, testId: 'testId' }, {});
+    await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
+}

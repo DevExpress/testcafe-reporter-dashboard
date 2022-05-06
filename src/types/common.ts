@@ -38,3 +38,10 @@ export type ReporterPluginOptions = {
     requestRetryCount?: number;
     responseTimeout?: number;
 };
+
+export enum DASHBOARD_INFO_TYPES {
+  warning = 'warning',
+  error = 'error'
+}
+
+export const RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE = 'RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE';

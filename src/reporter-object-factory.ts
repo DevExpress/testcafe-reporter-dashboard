@@ -14,6 +14,8 @@ import {
     ActionInfo,
     BrowserRunInfo,
     BuildId,
+    DashboardInfo,
+    DASHBOARD_INFO_TYPES,
     ReportedTestStructureItem,
     ShortId,
     TestDoneArgs,
@@ -91,29 +93,29 @@ export default function reporterObjectFactory (
                 }
             );
 
+            const responseJson = await validationResponse.json();
+
+            if(!responseJson)
+                throw new Error('Expected json response');
+
             if (!validationResponse.ok) {
-                const responseText = await validationResponse.text();
-                const errorMessage = responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED;
+                const errorMessage = responseJson.message ? responseJson.message : AUTHENTICATION_TOKEN_REJECTED;
 
                 logger.error(errorMessage);
 
                 throw new Error(errorMessage);
             }
 
-            let response;
-
-            try {
-                response = await validationResponse.json();
-            }
-            catch (err) {}
-
-            if (response?.error && response.error.type === 'error') {
-                logger.error(response.error.message);
-
-                reportRejected = true;
-            }            
+            processLimits(responseJson as DashboardInfo);     
         }
     };
+
+    function processLimits(dashboardInfo: DashboardInfo) {
+        if (dashboardInfo && dashboardInfo.type === DASHBOARD_INFO_TYPES.warning) {
+            logger.warn(dashboardInfo.message);
+            reportRejected = true;
+        }
+    }
 
     async function uploadWarnings (): Promise<string | undefined> {
         const warningsRunIds = Object.keys(testRunToWarningsMap);
