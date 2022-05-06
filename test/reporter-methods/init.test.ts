@@ -76,8 +76,6 @@ describe('initReporter', () => {
     function fetchFailSilentMock () {
         const silentError =  { type: DASHBOARD_INFO_TYPES.error, message: '' } as DashboardInfo;
 
-        ;
-
         return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
             json:       () => Promise.resolve(silentError)
         });

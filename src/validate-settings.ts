@@ -11,33 +11,57 @@ import { DashboardSettings, Logger } from './types/internal/dashboard';
 import semver from 'semver';
 import { decode } from 'jsonwebtoken';
 
+
 // TODO: we should ask TC Dashboard
 export const TC_OLDEST_COMPATIBLE_VERSION = '1.14.2';
 
-export function decodeAuthenticationToken (token: string): { projectId: string; tokenSecret?: string } | undefined {
-    let tokenData;
+type Token = {
+    projectId: string;
+    tokenSecret?: string;
+};
 
-    try {
-        tokenData = decode(token);
-    }
-    catch (e) {}
+type TokenValidator = (input: object) => input is Record<string, any>;
 
-    if (tokenData && tokenData.projectId)
-        return tokenData;
-
-    try {
-        tokenData = JSON.parse(Buffer.from(token, 'base64').toString());
-    }
-    catch (e) {}
-
-    if (tokenData && tokenData.projectId && tokenData.tokenSecret)
-        return tokenData;
-
-    return void 0;
+function isJWTToken (input: object): input is Token {
+    return input && input['projectId'];
 }
 
-function validateAuthenticationToken (token: string): boolean {
-    return !!decodeAuthenticationToken(token);
+function isBase64Token (input: object): input is Token {
+    return isJWTToken(input) && !!input['tokenSecret'];
+}
+
+export function assertTokenObject (input: object, validator: TokenValidator): asserts input is Token {
+    if (!validator(input))
+        throw new Error(AUTHENTICATION_TOKEN_INVALID);
+}
+
+export function decodeJWTAuthenticationToken (input: string): Token {
+    const parsed: object = decode(input);
+
+    assertTokenObject(parsed, isJWTToken);
+
+    return parsed;
+}
+
+export function decodeBase64AuthenticationToken (input: string): Token {
+    const parsed: object = JSON.parse(Buffer.from(input, 'base64').toString());
+
+    assertTokenObject(parsed, isBase64Token);
+
+    return parsed;
+}
+
+export function decodeAuthenticationToken (input: string): Token {
+    try {
+        return decodeJWTAuthenticationToken(input);
+    }
+    catch (error) {
+        return decodeBase64AuthenticationToken(input);
+    }
+}
+
+function assertTokenString (input: string): void {
+    decodeAuthenticationToken(input);
 }
 
 export function validateSettings (settings: DashboardSettings, tcVersion: string, logger: Logger): boolean {
@@ -50,8 +74,8 @@ export function validateSettings (settings: DashboardSettings, tcVersion: string
 
         areSettingsValid = false;
     }
-    else if (!validateAuthenticationToken(authenticationToken))
-        throw new Error(AUTHENTICATION_TOKEN_INVALID);
+    else
+        assertTokenString(authenticationToken);
 
     if (!dashboardUrl) {
         logger.error(DASHBOARD_LOCATION_NOT_DEFINED);

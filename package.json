@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.2.6-rc.3",
+  "version": "0.2.6-rc.4",
   "description": "Dashboard TestCafe reporter plugin.",
   "author": {
     "name": "Developer Express Inc.",
@@ -13,6 +13,7 @@
   ],
   "scripts": {
     "lint": "eslint --ext .ts src test",
+    "build": "gulp build",
     "publish-please": "publish-please",
     "prepublish": "publish-please guard",
     "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
@@ -57,7 +58,6 @@
   },
   "dependencies": {
     "es6-promise": "^4.2.8",
-    "fp-ts": "^2.9.5",
     "io-ts": "^2.2.14",
     "io-ts-types": "^0.5.15",
     "isomorphic-fetch": "^3.0.0",

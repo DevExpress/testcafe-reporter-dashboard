@@ -29,6 +29,7 @@ import reportCommandsFactory from './report-commands-factory';
 import Transport from './transport';
 import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
+import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
 
 function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
@@ -114,6 +115,10 @@ export default function reporterObjectFactory (
             }
 
             processLimits(responseJson as DashboardInfo);
+        },
+
+        getReportUrl (): string {
+            return createReportUrl(buildId || id, dashboardUrl, authenticationToken);
         }
     };
 
