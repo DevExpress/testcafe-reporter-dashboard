@@ -30,6 +30,15 @@ function isBase64Token (input: object): input is Token {
     return isJWTToken(input) && !!input['tokenSecret'];
 }
 
+function parseBase64Token (input: string): object {
+    try {
+        return JSON.parse(Buffer.from(input, 'base64').toString());
+    }
+    catch (error) {
+        throw new Error(AUTHENTICATION_TOKEN_INVALID);
+    }
+}
+
 export function assertTokenObject (input: object, validator: TokenValidator): asserts input is Token {
     if (!validator(input))
         throw new Error(AUTHENTICATION_TOKEN_INVALID);
@@ -44,7 +53,7 @@ export function decodeJWTAuthenticationToken (input: string): Token {
 }
 
 export function decodeBase64AuthenticationToken (input: string): Token {
-    const parsed: object = JSON.parse(Buffer.from(input, 'base64').toString());
+    const parsed: object = parseBase64Token(input);
 
     assertTokenObject(parsed, isBase64Token);
 
