@@ -39,9 +39,8 @@ export type ReporterPluginOptions = {
     responseTimeout?: number;
 };
 
-export enum DASHBOARD_INFO_TYPES {
-  warning = 'warning',
-  error = 'error'
+export enum DashboardValidationResult {
+  warning = 'warning'
 }
 
 export const RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE = 'RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE';

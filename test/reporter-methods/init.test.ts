@@ -7,7 +7,7 @@ import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 import { mockReadFile } from '../mocks';
 import { AUTHENTICATION_TOKEN_REJECTED } from '../../src/texts';
 import { testDoneInfo } from '../data';
-import { DASHBOARD_INFO_TYPES, RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } from '../../src/types/common';
+import { DashboardValidationResult, RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } from '../../src/types/common';
 import { DashboardInfo } from '../../src/types';
 
 
@@ -66,7 +66,7 @@ describe('initReporter', () => {
     function fetchFailMock (url, { method, body }) {
         requests.push({ url, method, body });
 
-        const error =  { type: DASHBOARD_INFO_TYPES.error, message: errorText } as DashboardInfo;
+        const error =  { message: errorText } as DashboardInfo;
 
         return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
             json:       () => Promise.resolve(error)
@@ -74,7 +74,7 @@ describe('initReporter', () => {
     }
 
     function fetchFailSilentMock () {
-        const silentError =  { type: DASHBOARD_INFO_TYPES.error, message: '' } as DashboardInfo;
+        const silentError =  { message: '' } as DashboardInfo;
 
         return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
             json:       () => Promise.resolve(silentError)
@@ -103,7 +103,7 @@ describe('initReporter', () => {
 
     function fetchOutOfLimits (url, { method, body }) {
         const outOfLimitResponseJson =
-            { type: DASHBOARD_INFO_TYPES.warning, message: RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } as DashboardInfo;
+            { type: DashboardValidationResult.warning, message: RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } as DashboardInfo;
 
         ;
 
