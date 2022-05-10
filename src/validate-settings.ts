@@ -9,7 +9,7 @@ import {
 } from './texts';
 import { DashboardSettings, Logger } from './types/internal/dashboard';
 import semver from 'semver';
-import { decode } from 'jsonwebtoken';
+import { decode as decodeJWTAuthenticationToken } from 'jsonwebtoken';
 
 
 // TODO: we should ask TC Dashboard
@@ -20,44 +20,26 @@ type Token = {
     tokenSecret?: string;
 };
 
-type TokenValidator = (input: object) => input is Record<string, any>;
-
-function isJWTToken (input: object): input is Token {
+function isValidAuthenticationToken (input: object): input is Token {
     return input && input['projectId'];
 }
 
-function isBase64Token (input: object): input is Token {
-    return isJWTToken(input) && !!input['tokenSecret'];
-}
-
-export function assertTokenObject (input: object, validator: TokenValidator): asserts input is Token {
-    if (!validator(input))
-        throw new Error(AUTHENTICATION_TOKEN_INVALID);
-}
-
-export function decodeJWTAuthenticationToken (input: string): Token {
-    const parsed: object = decode(input);
-
-    assertTokenObject(parsed, isJWTToken);
-
-    return parsed;
-}
-
-export function decodeBase64AuthenticationToken (input: string): Token {
-    const parsed: object = JSON.parse(Buffer.from(input, 'base64').toString());
-
-    assertTokenObject(parsed, isBase64Token);
-
-    return parsed;
+function decodeBase64AuthenticationToken (input: string): object | null {
+    try {
+        return JSON.parse(Buffer.from(input, 'base64').toString());
+    }
+    catch (error) {
+        return null;
+    }
 }
 
 export function decodeAuthenticationToken (input: string): Token {
-    try {
-        return decodeJWTAuthenticationToken(input);
-    }
-    catch (error) {
-        return decodeBase64AuthenticationToken(input);
-    }
+    const token = decodeJWTAuthenticationToken(input) || decodeBase64AuthenticationToken(input);
+
+    if (isValidAuthenticationToken(token))
+        return token;
+
+    throw new Error(AUTHENTICATION_TOKEN_INVALID);
 }
 
 function assertTokenString (input: string): void {
