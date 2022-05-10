@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { decodeBase64AuthenticationToken } from '../../src/validate-settings';
+import { decodeAuthenticationToken } from '../../src/validate-settings';
 import { AUTHENTICATION_TOKEN_INVALID } from '../../src/texts';
 
 const validTokenString   = 'eyJwcm9qZWN0SWQiOiJhZWUzMDc3ZC1hNjJiLTQ2Y2YtYWZhYS04MDYzYzE5NmQ2YzIiLCJ0b2tlblNlY3JldCI6InJTcFJpQmxuRzhnNDg1UmNod3BQMXVUVVUrRUtldGxqdGN5enp3ZjBVT3ROQTQzVjhCWUZ2Qk1Gc05Hajh1T2N2STRvckRGYlFUUFpLUU9PbDM0aWNacnI0RzhzbXZhRjZ3cW80M09TTjEwS3NpbTFGTEdpVzI5VW93ajAwOGZpUGthRFZaZW1aVzlFaDhobTZVc1VLbjhPOEZrZkpqZlN4VkJ6S1lhTUNKWlI4L3c2bXdEWlJCa2R5OVROSUUzVjRGaFBvV3dYVTNaczlKR2RxNGNzTUxEM2dhbURlRytITnpsQ0hEekI1VWZ4UEdORUx6SHpGWXNrYkNQa2ZBM1cxbEJFbzliUzdERUFtSWJrOVhIdWp2OEJXaTQ4MlBZM1RzYzFncjkyU0w4TjF5d3VQNkZuSmErNklRTDZwakRTT044VGlvaXJscUEzdGtKZStNM1hkdz09In0=';
@@ -10,15 +10,15 @@ const expectedValidToken = {
 };
 
 describe('Validate settings', () => {
-    describe('decodeBase64AuthenticationToken', () => {
+    describe('decodeAuthenticationToken', () => {
         it('should return valid decoded token', () => {
-            const token = decodeBase64AuthenticationToken(validTokenString);
+            const token = decodeAuthenticationToken(validTokenString);
 
             assert.deepStrictEqual(token, expectedValidToken);
         });
 
         it('should throw AUTHENTICATION_TOKEN_INVALID for invalid token', () => {
-            assert.throws(() => decodeBase64AuthenticationToken('invalid-token'), new Error(AUTHENTICATION_TOKEN_INVALID));
+            assert.throws(() => decodeAuthenticationToken('invalid-token'), new Error(AUTHENTICATION_TOKEN_INVALID));
         });
     });
 });
