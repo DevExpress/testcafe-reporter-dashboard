@@ -38,3 +38,9 @@ export type ReporterPluginOptions = {
     requestRetryCount?: number;
     responseTimeout?: number;
 };
+
+export enum DashboardValidationResult {
+  warning = 'warning'
+}
+
+export const RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE = 'Report error: run limit exceeded. The subscription is either insufficient or inactive. Upgrade or activate the subscription to raise the run limit.';

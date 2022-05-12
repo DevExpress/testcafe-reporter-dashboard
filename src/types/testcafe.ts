@@ -168,3 +168,8 @@ export enum CommandType {
     unlockPage = 'unlock-page',
     recorder = 'recorder'
 };
+
+export type DashboardInfo = {
+    type: string;
+    message: string;
+};

@@ -14,6 +14,8 @@ import {
     ActionInfo,
     BrowserRunInfo,
     BuildId,
+    DashboardInfo,
+    DashboardValidationResult,
     ReportedTestStructureItem,
     ShortId,
     TestDoneArgs,
@@ -29,7 +31,6 @@ import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
 import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
-
 
 function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
     if (!collection[key])
@@ -74,6 +75,15 @@ export default function reporterObjectFactory (
     const testRunIdToTestIdMap: Record<string, string>            = {};
     const errorsToTestIdMap: Record<string, string[]>             = {};
 
+    let rejectReport = false;
+
+    function processDashboardWarnings (dashboardInfo: DashboardInfo) {
+        if (dashboardInfo.type === DashboardValidationResult.warning) {
+            logger.warn(dashboardInfo.message);
+            rejectReport = true;
+        }
+    }
+
     const reporterPluginObject: ReporterPluginObject = {
         ...BLANK_REPORTER,
         createErrorDecorator: errorDecorator,
@@ -91,14 +101,19 @@ export default function reporterObjectFactory (
                 }
             );
 
+            const responseJson = await validationResponse.json() as DashboardInfo;
+
+            if (!responseJson)
+                throw new Error('Expected json DashboardInfo response');
+
             if (!validationResponse.ok) {
-                const responseText = await validationResponse.text();
-                const errorMessage = responseText ? responseText : AUTHENTICATION_TOKEN_REJECTED;
+                const errorMessage = responseJson.message ? responseJson.message : AUTHENTICATION_TOKEN_REJECTED;
 
                 logger.error(errorMessage);
-
                 throw new Error(errorMessage);
             }
+
+            processDashboardWarnings(responseJson);
         },
 
         getReportUrl (): string {
@@ -125,6 +140,8 @@ export default function reporterObjectFactory (
 
     assignReporterMethods(reporterPluginObject, {
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
+            if (rejectReport) return;
+
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
 
             await reportCommands.sendTaskStartCommand({
@@ -137,6 +154,8 @@ export default function reporterObjectFactory (
         },
 
         async reportWarnings (warning: Warning): Promise<void> {
+            if (rejectReport) return;
+
             if (warning.testRunId) {
                 if (!testRunToWarningsMap[warning.testRunId])
                     testRunToWarningsMap[warning.testRunId] = [];
@@ -157,6 +176,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
+            if (rejectReport) return;
+
             const testId = testStartInfo.testId as ShortId;
 
             for (const testRunId of testStartInfo.testRunIds)
@@ -168,6 +189,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {
+            if (rejectReport) return;
+
             const { test: { phase, id: testId }, command, testRunId, err, duration, browser } = actionInfo;
 
             if (!testRunToActionsMap[testRunId])
@@ -202,6 +225,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTestDone (name, testRunInfo): Promise<void> {
+            if (rejectReport) return;
+
             const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable } = testRunInfo;
 
             const testRunToScreenshotsMap: Record<string, string[]> = {};
@@ -313,6 +338,8 @@ export default function reporterObjectFactory (
         },
 
         async reportTaskDone (endTime, passed, warnings, result): Promise<void> {
+            if (rejectReport) return;
+
             const warningsUploadId = await uploadWarnings();
 
             await uploader.waitUploads();
