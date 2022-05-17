@@ -74,6 +74,7 @@ export type Screenshot = Readonly<{
     userAgent: string;
     quarantineAttempt: number;
     takenOnFail: boolean;
+    screenshotData?: Buffer;
 }>;
 
 export type Video = Readonly<{
