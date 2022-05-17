@@ -135,9 +135,28 @@ describe('Uploads', () => {
     });
 
     describe('Screenshots', () => {
-        it('Smoke test', async () => {
-            const screenshotPaths: string[] = [];
+        let screenshotPaths: string[] = [];
 
+        function readFile (path: string): Promise<Buffer> {
+            screenshotPaths.push(path);
+
+            let fileContent = '';
+
+            if (path === 'C:\\screenshots\\1.png')
+                fileContent = 'take_screenshot_action';
+            else if (path === 'C:\\screenshots\\errors\\1.png')
+                fileContent = 'screenshot_on_fail';
+            else
+                throw new Error('Unknown file path');
+
+            return Promise.resolve(Buffer.from(fileContent));
+        }
+
+        beforeEach(() => {
+            screenshotPaths = [];
+        });
+
+        it('Smoke test', async () => {
             const screenshots: Screenshot[] = [
                 {
                     testRunId:         testRunIdChrome,
@@ -156,21 +175,6 @@ describe('Uploads', () => {
                     quarantineAttempt: 0
                 }
             ];
-
-            function readFile (path: string): Promise<Buffer> {
-                screenshotPaths.push(path);
-
-                let fileContent = '';
-
-                if (path === 'C:\\screenshots\\1.png')
-                    fileContent = 'take_screenshot_action';
-                else if (path === 'C:\\screenshots\\errors\\1.png')
-                    fileContent = 'screenshot_on_fail';
-                else
-                    throw new Error('Unknown file path');
-
-                return Promise.resolve(Buffer.from(fileContent));
-            }
 
             const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
@@ -206,6 +210,76 @@ describe('Uploads', () => {
             assert.equal(screenshotPaths.length, 2);
             assert.equal(screenshotPaths[0], 'C:\\screenshots\\1.png');
             assert.equal(screenshotPaths[1], 'C:\\screenshots\\errors\\1.png');
+
+            const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
+
+            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
+            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
+            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
+        });
+
+        it('Should upload screenshots from screenshotData', async () => {
+
+
+            const screenshots: Screenshot[] = [
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    'C:\\screenshots\\1.png',
+                    screenshotData:    Buffer.from('take_screenshot_action_from_buffer'),
+                    thumbnailPath:     'C:\\screenshots\\thumbnails\\1.png',
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
+                },
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    'C:\\screenshots\\errors\\1.png',
+                    screenshotData:    Buffer.from('screenshot_on_fail_from_buffer'),
+                    thumbnailPath:     'C:\\screenshots\\errors\\thumbnails\\1.png',
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       true,
+                    quarantineAttempt: 0
+                }
+            ];
+
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTaskStart(new Date(), [], 1, []);
+
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                screenshots,
+                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ]
+            });
+
+            const { browserRuns } = JSON.parse(uploadedFiles[2].toString());
+            const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
+
+            assert.equal(runCommands.length, 2);
+            assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
+            assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
+
+            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[0], uploadInfos[0].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[1], uploadInfos[1].uploadId);
+            assert.equal(runCommands[1].payload.uploadId, uploadInfos[2].uploadId);
+
+            assert.equal(uploadInfos.length, 3);
+            assert.equal(uploadedUrls.length, 3);
+            assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
+            assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
+            assert.equal(uploadedUrls[2], uploadInfos[2].uploadUrl);
+
+            assert.equal(uploadedFiles.length, 3);
+            assert.equal(uploadedFiles[0], 'take_screenshot_action_from_buffer');
+            assert.equal(uploadedFiles[1], 'screenshot_on_fail_from_buffer');
 
             const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
 
