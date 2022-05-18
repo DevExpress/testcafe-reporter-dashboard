@@ -74,8 +74,9 @@ export default function reporterObjectFactory (
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
     const testRunIdToTestIdMap: Record<string, string>            = {};
     const errorsToTestIdMap: Record<string, string[]>             = {};
+    const skippedTests: Record<string, boolean>                   = {};
 
-    let rejectReport = false;
+    let rejectReport  = false;
 
     function processDashboardWarnings (dashboardInfo: DashboardInfo) {
         if (dashboardInfo.type === DashboardValidationResult.warning) {
@@ -142,6 +143,16 @@ export default function reporterObjectFactory (
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
             if (rejectReport) return;
 
+            for (const fixtureItem of taskStructure) {
+                if (!fixtureItem.fixture?.tests)
+                    break;
+
+                for (const test of fixtureItem.fixture.tests) {
+                    if (test.skip)
+                        skippedTests[test.id] = true;
+                }
+            }
+
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
 
             await reportCommands.sendTaskStartCommand({
@@ -176,9 +187,9 @@ export default function reporterObjectFactory (
         },
 
         async reportTestStart (name, meta, testStartInfo): Promise<void> {
-            if (rejectReport) return;
-
             const testId = testStartInfo.testId as ShortId;
+
+            if (rejectReport || skippedTests[testId]) return;
 
             for (const testRunId of testStartInfo.testRunIds)
                 testRunIdToTestIdMap[testRunId] = testId;
