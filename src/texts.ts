@@ -2,9 +2,9 @@ import { MAX_BUILD_ID_LENGTH } from './consts';
 import createReportUrl from './create-report-url';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
-export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'The \'TESTCAFE_DASHBOARD_TOKEN\' environment variable is not defined.';
-export const AUTHENTICATION_TOKEN_INVALID = 'The \'TESTCAFE_DASHBOARD_TOKEN\' environment variable does not contain a valid token. Check the value for typos.';
-export const AUTHENTICATION_TOKEN_REJECTED = 'Token in the \'TESTCAFE_DASHBOARD_TOKEN\' environment variable was rejected by TestCafe Dashboard. Ensure that the token is correct and was not revoked.';
+export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'Your TestCafe setup does not contain a TestCafe Dashboard token.';
+export const AUTHENTICATION_TOKEN_INVALID = 'The TestCafe Dashboard token is not valid. Check the value for typos.';
+export const AUTHENTICATION_TOKEN_REJECTED = 'TestCafe Dashboard rejected the authentication token. Confirm that the token has not been revoked.';
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
 
 export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
@@ -21,19 +21,19 @@ export const createWarningUploadError = (uploadId: string, uploadEntityId: strin
    `Failed to upload warning data. Upload ID: ${uploadId}, upload entity id: ${uploadEntityId}.`;
 
 export const createGetUploadInfoError = (uploadEntityId: string, response: string): string =>
-   `Cannot get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
+   `Failed to get an upload URL. Upload entity ID: ${uploadEntityId}. Response: ${response}`;
 
 export const createLongBuildIdError = (buildId: string): string =>
-   `Build ID cannot be longer than ${MAX_BUILD_ID_LENGTH} symbols. Build ID: ${buildId}.`;
+   `Error: The Build ID exceeds the maximum length of ${MAX_BUILD_ID_LENGTH} characters. Build ID: ${buildId}.`;
 
 export const createReporterMethodName = (reporterMethodName: string, errorDetails: string): string =>
-   `Error occurred in the "dashboard" reporter's "${reporterMethodName}" method. Error details: ${errorDetails}`;
+   `Error: The "dashboard" reporter could not successfully execute the "${reporterMethodName}" method. Error details: ${errorDetails}`;
 
 export const createGithubInfoError = (error: string): string =>
-   `Could not retrieve information from the Github Actions environment due to an error: ${error}`;
+   `Cannot retrieve information from the Github Actions environment due to an error: ${error}`;
 
 export const createTestCafeVersionInvalidError = (tcVersion: string): string =>
    `Unrecognized version of TestCafe: ${tcVersion}`;
 
 export const createTestCafeVersionIncompatibledError = (tcVersion: string): string =>
-   `TestCafe Dashboard does not support TestCafe ${tcVersion}. Please update the TestCafe package.`;
+   `TestCafe ${tcVersion} is not compatible with TestCafe Dashboard. Please update the "testcafe" package.`;
