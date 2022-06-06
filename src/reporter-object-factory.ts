@@ -235,9 +235,9 @@ export default function reporterObjectFactory (
 
             if (!noScreenshotUpload) {
                 for (const screenshotInfo of screenshots) {
-                    const { screenshotPath, testRunId } = screenshotInfo;
+                    const { screenshotPath, screenshotData, testRunId } = screenshotInfo;
 
-                    const uploadId = await uploader.uploadFile(screenshotPath);
+                    const uploadId = await uploader.uploadFile(screenshotPath, screenshotData);
 
                     if (!uploadId) continue;
 

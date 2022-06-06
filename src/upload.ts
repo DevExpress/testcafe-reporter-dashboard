@@ -55,12 +55,12 @@ export class Uploader {
             this._logger.error(`${uploadError}. Response: ${response}`);
     }
 
-    async uploadFile (filePath: string): Promise<string | undefined> {
+    async uploadFile (filePath: string, fileData?: Buffer): Promise<string | undefined> {
         const uploadInfo = await this._getUploadInfo(filePath);
 
         if (!uploadInfo) return void 0;
 
-        const file = await this._readFile(filePath);
+        const file = fileData || await this._readFile(filePath);
 
         this._uploads.push(this._upload(uploadInfo, file, createFileUploadError(uploadInfo.uploadId, filePath)));
 
