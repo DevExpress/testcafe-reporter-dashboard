@@ -5,7 +5,7 @@ import { promisify } from 'util';
 import { ReporterPluginObject } from './types/internal';
 import reporterObjectFactory from './reporter-object-factory';
 import logger from './logger';
-import getReporterSettings from './get-reporter-settings';
+import { getReporterSettings } from './get-reporter-settings';
 import { ReporterPluginOptions } from './types';
 import path from 'path';
 

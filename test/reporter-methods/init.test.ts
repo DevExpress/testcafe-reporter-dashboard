@@ -30,8 +30,8 @@ async function runReporterLifecycleMethods (reporter: any, requests: { url: stri
 
     assert.strictEqual(requests.length, 1);
 
-    await reporter.reportTaskStart(new Date(), [], 1, []);
-    await reporter.reportTestStart('', {}, { testId: 'warningTestId', testRunId: [''], testRunIds: ['testRunId'] });
+    await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
+    await reporter.reportTestStart('', {}, { testId: 'testId', testRunId: [''], testRunIds: ['testRunId'] });
     await reporter.reportTestDone('Test 1', { ...testDoneInfo, testId: 'testId' }, {});
     await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 }
@@ -138,7 +138,7 @@ describe('initReporter', () => {
         const reporter = getReporter(fetchOkMock);
 
         await reporter.init();
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
         assert.strictEqual(errors.length, 0);
         assert.strictEqual(requests[0].url, 'http://localhost/api/validateReporter');

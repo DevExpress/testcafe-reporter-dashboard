@@ -36,7 +36,7 @@ describe('reportTaskStart', () => {
 
         const reporter = reporterObjectFactory(mockReadFile, fetchMock, settings, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
         assert.equal(logs.length, 1);
         assert.equal(logs[0], expected);

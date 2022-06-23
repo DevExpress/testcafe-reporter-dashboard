@@ -57,7 +57,7 @@ describe('reportTestDone', () => {
             ), process.stdout
         );
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
         const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
@@ -95,7 +95,7 @@ describe('reportTestDone', () => {
                 mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestDone('Test 1', skippedTestDone);
 
         assert.ok(testDonePayload);
@@ -110,7 +110,7 @@ describe('reportTestDone', () => {
             ), process.stdout
         );
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestStart('Test 1', {}, quarantiteTestStartInfo);
 
         for (const actionInfo of testActionInfos)
@@ -122,28 +122,74 @@ describe('reportTestDone', () => {
 
         assert.equal(browserRuns.firefox_1.browser.alias, 'firefox');
         assert.equal(browserRuns.firefox_1.quarantineAttempt, void 0);
+        assert.deepEqual(browserRuns.firefox_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%firefox_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_1_1.browser.alias, 'chrome');
         assert.equal(browserRuns.chrome_1_1.quarantineAttempt, 2);
+        assert.deepEqual(browserRuns.chrome_1_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_1_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_1.browser.alias, 'chrome');
         assert.equal(browserRuns.chrome_1.quarantineAttempt, 1);
+        assert.deepEqual(browserRuns.chrome_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_headless_1.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless_1.quarantineAttempt, 2);
+        assert.deepEqual(browserRuns.chrome_headless_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_headless_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_headless_2.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless_2.quarantineAttempt, 3);
+        assert.deepEqual(browserRuns.chrome_headless_2.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_headless_2.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_headless.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless.quarantineAttempt, 1);
+        assert.deepEqual(browserRuns.chrome_headless.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_headless.png'
+            }
+        ]);
 
         assert.equal(uploadPaths.length, 9);
 
-        for (const runInfo of Object.values(browserRuns)) {
-            assert.deepEqual(runInfo.screenshotUploadIds, ['upload_id']);
+        for (const runInfo of Object.values(browserRuns))
             assert.deepEqual(runInfo.videoUploadIds, ['upload_id']);
-        }
     });
 
     it('warningsUploadId payload', async () => {
@@ -172,7 +218,7 @@ describe('reportTestDone', () => {
 
         assert.deepStrictEqual(taskDonePayload, {});
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 
         assert.strictEqual(taskDonePayload.warningsUploadId, void 0);
@@ -204,6 +250,7 @@ describe('reportTestDone', () => {
         mockActionInfo2.test.id   = 'Test2';
         mockActionInfo2.testRunId = TEST_RUN_ID_2;
 
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestActionDone('click', mockActionInfo);
         await reporter.reportTestActionDone('click', mockActionInfo2);
         await reporter.reportTestDone('Test 1', thirdPartyTestDone2);

@@ -16,5 +16,11 @@ export const skippedTestDone: TestRunInfo = {
     testId,
     unstable:       false,
     videos:         [],
-    warnings:       []
+    warnings:       [],
+    fixture:        {
+        id:   '',
+        path: '',
+        name: '',
+        meta: {}
+    }
 };

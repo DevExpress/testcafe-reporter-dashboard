@@ -77,6 +77,7 @@ describe('Uploads', () => {
 
             const testWarning2TestRun2 = { message: 'testWarning2TestRun2', testRunId: WARNINGS_TEST_RUN_ID_2 };
 
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
             await reporter.reportWarnings(testWarning1TestRun1);
             await reporter.reportWarnings(testWarning2TestRun1);
             await reporter.reportWarnings(testWarning3TestRun1);
@@ -178,7 +179,7 @@ describe('Uploads', () => {
 
             const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
-            await reporter.reportTaskStart(new Date(), [], 1, []);
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -193,8 +194,8 @@ describe('Uploads', () => {
             assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
             assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
 
-            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[0], uploadInfos[0].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[1], uploadInfos[1].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.current, uploadInfos[0].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.current, uploadInfos[1].uploadId);
             assert.equal(runCommands[1].payload.uploadId, uploadInfos[2].uploadId);
 
             assert.equal(uploadInfos.length, 3);
@@ -252,7 +253,7 @@ describe('Uploads', () => {
 
             const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
-            await reporter.reportTaskStart(new Date(), [], 1, []);
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -267,8 +268,8 @@ describe('Uploads', () => {
             assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
             assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
 
-            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[0], uploadInfos[0].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds[1], uploadInfos[1].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.current, uploadInfos[0].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.current, uploadInfos[1].uploadId);
             assert.equal(runCommands[1].payload.uploadId, uploadInfos[2].uploadId);
 
             assert.equal(uploadInfos.length, 3);
@@ -318,7 +319,7 @@ describe('Uploads', () => {
 
             const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noScreenshotUpload: true }, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
-            await reporter.reportTaskStart(new Date(), [], 1, []);
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -333,7 +334,7 @@ describe('Uploads', () => {
 
             const { browserRuns } = JSON.parse(uploadedFiles[0].toString()) as DashboardTestRunInfo;
 
-            assert.equal(browserRuns['chrome_headless'].screenshotUploadIds, void 0);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap, void 0);
 
             assert.equal(aggregateCommands.length, 3);
             assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTaskStart);
@@ -359,7 +360,7 @@ describe('Uploads', () => {
 
             const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
-            await reporter.reportTaskStart(new Date(), [], 1, []);
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
@@ -421,7 +422,7 @@ describe('Uploads', () => {
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
             const reporter = reporterObjectFactory(mockReadFile, fetch, { ...SETTINGS, noVideoUpload: true }, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
-            await reporter.reportTaskStart(new Date(), [], 1, []);
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,

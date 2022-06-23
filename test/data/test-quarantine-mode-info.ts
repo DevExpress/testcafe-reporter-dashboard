@@ -89,7 +89,13 @@ export const quarantineTestDoneInfo: TestRunInfo = {
     })),
     unstable: false,
     warnings: [],
-    testId
+    testId,
+    fixture:  {
+        id:   '',
+        path: '',
+        name: '',
+        meta: {}
+    }
 };
 
 export const quarantiteTestStartInfo: TestStartInfo = {
