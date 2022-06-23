@@ -1,4 +1,4 @@
-import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult, Warning } from '../';
+import { BrowserInfo, Meta, ReportedTestStructureItem, TestRunInfo, Error, TestPhase, CommandType, TaskResult, Warning, TaskProperties } from '../';
 
 export type TestStartInfo = {
     testId: string;
@@ -34,7 +34,7 @@ export type decoratorFn = (str: string) => string;
 
 export type ReporterMethods = {
     init?: () => Promise<void>;
-    reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[]) => Promise<void>;
+    reportTaskStart: (startTime: Date, userAgents: string[], testCount: number, taskStructure: ReportedTestStructureItem[], taskProperties: TaskProperties) => Promise<void>;
     reportFixtureStart: (name: string, path: string, meta: Meta) => Promise<void>;
     reportTestStart?: (name: string, meta: Meta, testStartInfo: TestStartInfo) => Promise<void>;
     reportTestActionStart?: (apiActionName: string, actionInfo: TestCafeActionInfo) => Promise<void>;

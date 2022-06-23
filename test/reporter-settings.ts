@@ -1,5 +1,5 @@
 import assert from 'assert';
-import getReporterSettings from '../src/get-reporter-settings';
+import { getReporterSettings } from '../src/get-reporter-settings';
 
 describe('getReporterSettings()', () => {
     it('should take options from reporter options', () => {

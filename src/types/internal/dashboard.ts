@@ -62,6 +62,13 @@ export type DashboardSettings = {
     ciInfo?: CIInfo;
 };
 
+export type LayoutTestingSettings = {
+    screenshotsRelativePath: string;
+    destinationRelativePath: string;
+    layoutTestingEnabled: boolean;
+    comparerBasePath: string;
+};
+
 export type Logger = {
     log (...params): void;
     warn (...params): void;

@@ -8,16 +8,20 @@ import {
     ReadFileMethod,
     DashboardSettings,
     Logger,
-    ReporterPluginObject
+    ReporterPluginObject,
+    LayoutTestingSettings
 } from './types/internal/';
 import {
     ActionInfo,
+    BrowserInfo,
     BrowserRunInfo,
     BuildId,
     DashboardInfo,
     DashboardValidationResult,
     ReportedTestStructureItem,
+    ScreenshotMapItem,
     ShortId,
+    TaskProperties,
     TestDoneArgs,
     TestError,
     Warning,
@@ -31,12 +35,33 @@ import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
 import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
+import { existsSync } from 'fs';
+import path from 'path';
+import { getLayoutTestingSettings } from './get-reporter-settings';
 
-function addArrayValueByKey (collection: Record<string, any[]>, key: string, value: any) {
+function addArrayValueByKey<T> (collection: Record<string, T[]>, key: string, value: T) {
     if (!collection[key])
         collection[key] = [value];
     else if (!collection[key].includes(value))
         collection[key].push(value);
+};
+
+function getShouldUploadLayoutTestingData (layoutTestingEnabled: boolean | undefined, browsers: (BrowserInfo & { testRunId: string })[], testBrowserRuns: Record<string, any[]>): boolean {
+    if (!layoutTestingEnabled || browsers.length > 1)
+        return false;
+
+    const alias = browsers[0].alias;
+
+    return testBrowserRuns && (!testBrowserRuns[alias] || testBrowserRuns[alias].length === 1);
+};
+
+async function uploadScreenshot (uploader: Uploader, basePath: string, postfix: string): Promise<string | undefined> {
+    const filePath = basePath.replace(/.png$/, `${postfix}.png`);
+
+    if (!existsSync(filePath))
+        return void 0;
+
+    return await uploader.uploadFile(filePath);
 };
 
 export default function reporterObjectFactory (
@@ -74,8 +99,11 @@ export default function reporterObjectFactory (
     const browserToRunsMap: Record<string, Record<string, any[]>> = {};
     const testRunIdToTestIdMap: Record<string, string>            = {};
     const errorsToTestIdMap: Record<string, string[]>             = {};
+    const testIdToFixtureNameMap: Record<string, string>          = {};
+    const fixtureNameToPathMap: Record<string, string>            = {};
 
     let rejectReport = false;
+    let layoutTestingSettings: LayoutTestingSettings;
 
     function processDashboardWarnings (dashboardInfo: DashboardInfo) {
         if (dashboardInfo.type === DashboardValidationResult.warning) {
@@ -139,18 +167,28 @@ export default function reporterObjectFactory (
     }
 
     assignReporterMethods(reporterPluginObject, {
-        async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[]): Promise<void> {
+        async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[], taskProperties: TaskProperties): Promise<void> {
             if (rejectReport) return;
 
+            layoutTestingSettings = getLayoutTestingSettings(taskProperties);
+
             logger.log(createReportUrlMessage(buildId || id, authenticationToken, dashboardUrl));
+
+            await Promise.all(taskStructure.map(({ fixture }) => {
+                return Promise.all(fixture.tests.map(({ id: testId }) => {
+                    testIdToFixtureNameMap[testId] = fixture.name;
+                    return Promise.resolve();
+                }));
+            }));
 
             await reportCommands.sendTaskStartCommand({
                 startTime, userAgents, testCount, buildId: buildId as BuildId, taskStructure, ciInfo
             });
         },
 
-        async reportFixtureStart (): Promise<void> {
-            return;
+        async reportFixtureStart (fixtureName, fixturePath): Promise<void> {
+            if (!fixtureNameToPathMap[fixtureName])
+                fixtureNameToPathMap[fixtureName] = fixturePath;
         },
 
         async reportWarnings (warning: Warning): Promise<void> {
@@ -227,21 +265,53 @@ export default function reporterObjectFactory (
         async reportTestDone (name, testRunInfo): Promise<void> {
             if (rejectReport) return;
 
-            const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable } = testRunInfo;
+            const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable }               = testRunInfo;
+            const { layoutTestingEnabled, screenshotsRelativePath, destinationRelativePath, comparerBasePath } = layoutTestingSettings;
 
-            const testRunToScreenshotsMap: Record<string, string[]> = {};
-            const testRunToVideosMap: Record<string, string[]>      = {};
-            const testRunToErrorsMap: Record<string, TestError>     = {};
+            const testRunToScreenshotsMap: Record<string, ScreenshotMapItem[]> = {};
+
+            const testRunToVideosMap: Record<string, string[]>  = {};
+            const testRunToErrorsMap: Record<string, TestError> = {};
+
+            const testBrowserRuns               = browserToRunsMap[testId];
+            const shouldUploadLayoutTestingData = getShouldUploadLayoutTestingData(layoutTestingEnabled, browsers, testBrowserRuns);
 
             if (!noScreenshotUpload) {
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath, screenshotData, testRunId } = screenshotInfo;
 
-                    const uploadId = await uploader.uploadFile(screenshotPath, screenshotData);
+                    const currentUploadId = await uploader.uploadFile(screenshotPath, screenshotData);
 
-                    if (!uploadId) continue;
+                    if (!currentUploadId) continue;
 
-                    addArrayValueByKey(testRunToScreenshotsMap, testRunId, uploadId);
+                    const screenshotMapItem: ScreenshotMapItem = {
+                        path: screenshotPath,
+                        ids:  {
+                            current: currentUploadId
+                        }
+                    };
+
+                    if (shouldUploadLayoutTestingData) {
+                        const comparisonArtifactsPath   = screenshotPath.replace(new RegExp(`(${screenshotsRelativePath})(?!.*\\1)`), destinationRelativePath);
+                        const testPath                  = fixtureNameToPathMap[testIdToFixtureNameMap[testId]];
+                        const baselinePath              = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
+                        const relativeBaselinePathMatch = baselinePath.match(new RegExp(`\\/(${comparerBasePath.replace(/^\.\//, '')}.*)`)) ?? void 0;
+                        const baselineSourcePath        = relativeBaselinePathMatch && relativeBaselinePathMatch[1];
+
+                        screenshotMapItem.baselineSourcePath = baselineSourcePath;
+                        screenshotMapItem.maskSourcePath = baselineSourcePath?.replace(/.png$/, '_mask.png');
+                        screenshotMapItem.ids = {
+                            ...screenshotMapItem.ids,
+
+                            baseline: await uploadScreenshot(uploader, comparisonArtifactsPath, '_etalon'),
+                            diff:     await uploadScreenshot(uploader, comparisonArtifactsPath, '_diff'),
+                            mask:     await uploadScreenshot(uploader, comparisonArtifactsPath, '_mask'),
+                            text:     await uploadScreenshot(uploader, comparisonArtifactsPath, '_text'),
+                            textMask: await uploadScreenshot(uploader, comparisonArtifactsPath, '_text_mask')
+                        };
+                    }
+
+                    addArrayValueByKey(testRunToScreenshotsMap, testRunId, screenshotMapItem);
                 }
             }
 
@@ -270,8 +340,6 @@ export default function reporterObjectFactory (
 
             delete errorsToTestIdMap[testId];
 
-            const testBrowserRuns = browserToRunsMap[testId];
-
             const browserRuns = browsers.reduce((runs, browser) => {
                 const { alias, testRunId } = browser;
                 const runIds               = testBrowserRuns && testBrowserRuns[alias] || null;
@@ -286,14 +354,32 @@ export default function reporterObjectFactory (
                 }
 
                 const getBrowserRunInfo = (attemptRunId: string, attempt?: number): BrowserRunInfo => {
+                    let actions = testRunToActionsMap[attemptRunId];
+                    let screenshotIndex = 0;
+
+                    const screenshotMap = testRunToScreenshotsMap[attemptRunId];
+
+                    actions = actions?.map(action => {
+                        if (action.apiName !== 'takeScreenshot' && action.apiName !== 'takeElementScreenshot')
+                            return action;
+
+                        if (screenshotIndex < screenshotMap.length) {
+                            action.screenshotPath = screenshotMap[screenshotIndex].path;
+                            screenshotMap[screenshotIndex].actionId = action.command.actionId;
+                            screenshotIndex++;
+                        }
+
+                        return action;
+                    });
+
                     const result = {
                         browser,
-                        screenshotUploadIds: testRunToScreenshotsMap[attemptRunId],
+                        actions,
                         videoUploadIds,
-                        actions:             testRunToActionsMap[attemptRunId],
-                        thirdPartyError:     testRunToErrorsMap[attemptRunId],
-                        quarantineAttempt:   attempt,
-                        warnings:            testRunToWarningsMap[attemptRunId],
+                        screenshotMap,
+                        thirdPartyError:   testRunToErrorsMap[attemptRunId],
+                        quarantineAttempt: attempt,
+                        warnings:          testRunToWarningsMap[attemptRunId],
                     };
 
                     delete testRunToActionsMap[attemptRunId];

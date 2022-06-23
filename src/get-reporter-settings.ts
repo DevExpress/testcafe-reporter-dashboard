@@ -6,12 +6,17 @@ import {
     TESTCAFE_DASHBOARD_BUILD_ID,
     TESTCAFE_DASHBOARD_URL,
     CI_INFO,
+    LAYOUT_TESTING_ENABLED,
     RESPONSE_TIMEOUT,
-    REQUEST_RETRY_COUNT
+    REQUEST_RETRY_COUNT,
+    LT_SCREENSHOTS_RELATIVE_PATH,
+    LT_DESTINATION_RELATIVE_PATH,
+    LT_COMPARER_BASE_PATH
 } from './env';
-import { ReporterPluginOptions } from './types';
+import { ReporterPluginOptions, TaskProperties } from './types';
+import { LayoutTestingSettings } from './types/internal';
 
-export default function getReporterSettings (options: ReporterPluginOptions) {
+export function getReporterSettings (options: ReporterPluginOptions) {
     const {
         url,
         token,
@@ -33,5 +38,16 @@ export default function getReporterSettings (options: ReporterPluginOptions) {
         responseTimeout:     responseTimeout || RESPONSE_TIMEOUT,
         requestRetryCount:   requestRetryCount || REQUEST_RETRY_COUNT,
         ciInfo:              CI_INFO
+    };
+}
+
+export function getLayoutTestingSettings (taskProperties: TaskProperties): LayoutTestingSettings {
+    const comparerProperties = taskProperties.configuration['screenshots-comparer'] ?? {};
+
+    return {
+        layoutTestingEnabled:    LAYOUT_TESTING_ENABLED,
+        screenshotsRelativePath: LT_SCREENSHOTS_RELATIVE_PATH || comparerProperties['screenshotsRelativePath'] || '/screenshots',
+        destinationRelativePath: LT_DESTINATION_RELATIVE_PATH || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots',
+        comparerBasePath:        LT_COMPARER_BASE_PATH || comparerProperties['path'] || './testing'
     };
 }

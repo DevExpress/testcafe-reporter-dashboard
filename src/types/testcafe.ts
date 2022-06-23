@@ -1,3 +1,20 @@
+export type ScreenshotUploadIdSet = {
+    current: string;
+    baseline?: string;
+    diff?: string;
+    mask?: string;
+    text?: string;
+    textMask?: string;
+};
+
+export type ScreenshotMapItem = {
+    path: string;
+    ids: ScreenshotUploadIdSet;
+    baselineSourcePath?: string;
+    maskSourcePath?: string;
+    actionId?: string;
+};
+
 export type BrowserInfo = {
     alias: string;
     engine: { name: string; version: string };
@@ -85,6 +102,7 @@ export type Video = Readonly<{
 
 export type BrowserRunInfo = {
     browser: BrowserInfo;
+    screenshotMap?: ScreenshotMapItem[];
     screenshotUploadIds?: string[];
     videoUploadIds?: string[];
     actions?: ActionInfo[];
@@ -99,6 +117,7 @@ export type ActionInfo = {
     testPhase: TestPhase;
     command: Record<string, any> & { type: CommandType };
     error?: TestError;
+    screenshotPath?: string;
 }
 
 export type Warning = {
