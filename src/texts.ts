@@ -6,6 +6,7 @@ export const AUTHENTICATION_TOKEN_NOT_DEFINED = 'Your TestCafe setup does not co
 export const AUTHENTICATION_TOKEN_INVALID = 'The TestCafe Dashboard token is not valid. Check the value for typos.';
 export const AUTHENTICATION_TOKEN_REJECTED = 'TestCafe Dashboard rejected the authentication token. Confirm that the token has not been revoked.';
 export const FETCH_NETWORK_CONNECTION_ERROR  = 'Connection failed';
+export const BUILD_ID_IS_NOT_A_STRING_ERROR = 'Invalid parameter value: the Build ID is not a String';
 
 export const createReportUrlMessage = (reportId: string, authenticationToken: string, dashboardUrl: string): string => {
     return `Task execution report: ${createReportUrl(reportId, dashboardUrl, authenticationToken)}`;

@@ -2,6 +2,7 @@ import { MAX_BUILD_ID_LENGTH } from './consts';
 import {
     AUTHENTICATION_TOKEN_INVALID,
     AUTHENTICATION_TOKEN_NOT_DEFINED,
+    BUILD_ID_IS_NOT_A_STRING_ERROR,
     createLongBuildIdError,
     createTestCafeVersionIncompatibledError,
     createTestCafeVersionInvalidError,
@@ -65,10 +66,18 @@ export function validateSettings (settings: DashboardSettings, tcVersion: string
         areSettingsValid = false;
     }
 
-    if (buildId && buildId.length > MAX_BUILD_ID_LENGTH) {
-        logger.error(createLongBuildIdError(buildId));
+    if (buildId) {
+        if (typeof buildId !== 'string') {
+            logger.error(BUILD_ID_IS_NOT_A_STRING_ERROR);
 
-        areSettingsValid = false;
+            areSettingsValid = false;
+        }
+
+        if (buildId.length > MAX_BUILD_ID_LENGTH) {
+            logger.error(createLongBuildIdError(buildId));
+
+            areSettingsValid = false;
+        }
     }
 
     if (!semver.valid(tcVersion))
