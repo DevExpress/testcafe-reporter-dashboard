@@ -95,5 +95,6 @@ export const quarantineTestDoneInfo: TestRunInfo = {
 export const quarantiteTestStartInfo: TestStartInfo = {
     testId,
     testRunId:  [testRunId1],
-    testRunIds: []
+    testRunIds: [],
+    skipped:    false
 };

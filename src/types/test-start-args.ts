@@ -5,7 +5,8 @@ import { ShortIdSchema } from './common';
 export const TestStartArgsSchema = t.readonly(
     t.exact(
         t.type({
-            testId: ShortIdSchema,
+            testId:  ShortIdSchema,
+            skipped: t.boolean
         })
     )
 );

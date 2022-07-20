@@ -35,7 +35,8 @@ describe('ReportWarnings', () => {
         const testRunInfo: TestStartInfo = {
             testId:     warningTestId,
             testRunId:  [''],
-            testRunIds: [WARNINGS_TEST_RUN_ID_1]
+            testRunIds: [WARNINGS_TEST_RUN_ID_1],
+            skipped:    false
         };
 
         await reporter.reportTestStart('', {}, testRunInfo);
