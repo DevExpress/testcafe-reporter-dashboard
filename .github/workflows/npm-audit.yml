@@ -7,8 +7,12 @@ on:
 
 jobs:
   run:
-    runs-on: shr-ubuntu-m5a-instance-cpu2ram8
-    timeout-minutes: 30
+    runs-on: farm
+    strategy:
+      matrix:
+        oses: [UBUNTU]
+    env:
+      VM_IMAGE: ${{ matrix.oses }}
 
     steps:
       - name: Show ip
