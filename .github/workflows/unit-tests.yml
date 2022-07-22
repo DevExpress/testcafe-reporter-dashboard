@@ -25,7 +25,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-      - name: npm install
-        run: npm install
+      - name: Install Yarn
+        run: npm install -g yarn
+      - name: yarn install
+        run: yarn install --frozen-lockfile
       - name: Run Tests
-        run: npm run test
+        run: yarn run test
