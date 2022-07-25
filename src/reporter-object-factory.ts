@@ -185,7 +185,7 @@ export default function reporterObjectFactory (
 
             browserToRunsMap[testId] = {};
 
-            await reportCommands.sendTestStartCommand({ testId });
+            await reportCommands.sendTestStartCommand({ testId, skipped: testStartInfo.skipped });
         },
 
         async reportTestActionDone (apiActionName, actionInfo): Promise<void> {

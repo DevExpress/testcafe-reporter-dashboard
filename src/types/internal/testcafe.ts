@@ -4,6 +4,7 @@ export type TestStartInfo = {
     testId: string;
     testRunId: string[];
     testRunIds: string[];
+    skipped: boolean;
 }
 
 export type TestCafeActionInfo = {
