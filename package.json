@@ -16,7 +16,7 @@
     "build": "gulp build",
     "publish-please": "publish-please",
     "prepublish": "publish-please guard",
-    "sandbox": "gulp build && node --inspect-brk \"./sandbox/index.js\"",
+    "sandbox": "gulp build && node \"./sandbox/index.js\"",
     "test": "yarn run lint && gulp build && ts-node \"./node_modules/mocha/lib/cli/cli.js\" \"test/**/*.ts\"",
     "test-debug": "gulp build && mocha -r ts-node/register --inspect-brk \"test/**/*.ts\""
   },
@@ -35,7 +35,6 @@
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "babel-eslint": "^10.0.1",
-    "callsite-record": "^3.2.0",
     "del": "^6.0.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
@@ -49,15 +48,12 @@
     "gulp-typescript": "^5.0.1",
     "mocha": "^7.0.1",
     "mock-require": "^3.0.3",
-    "normalize-newline": "^1.0.2",
     "publish-please": "^5.5.2",
-    "read-file-relative": "^1.2.0",
     "testcafe": "^1.20.0",
     "ts-node": "^8.7.0",
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "es6-promise": "^4.2.8",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.14",
     "io-ts-types": "^0.5.15",
@@ -69,11 +65,7 @@
     "uuid": "3.3.3"
   },
   "resolutions": {
-    "ansi-regex": "5.0.1",
     "lodash": "4.17.21",
-    "glob-parent": "5.1.2",
-    "yargs-parser": "13.1.2",
-    "set-value": "4.0.1",
-    "moment": "2.29.4"
-  }
+    "glob-parent": "5.1.2"
+  }  
 }
