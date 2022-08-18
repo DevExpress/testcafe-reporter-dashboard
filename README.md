@@ -15,7 +15,6 @@ When you run tests from the command line, specify the reporter name by using the
 testcafe chrome 'path/to/test/file.js' --reporter dashboard
 ```
 
-
 When you use API, pass the reporter name to the `reporter()` method:
 
 ```js
@@ -27,5 +26,10 @@ testCafe
     .run();
 ```
 
-## Author
-aleks-pro 
+## License
+
+Code released under the [MIT license](LICENSE).
+
+## Creators
+
+Developer Express Inc. ([https://devexpress.com](https://devexpress.com))
