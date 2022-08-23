@@ -31,7 +31,7 @@ describe('Reporter factory', () => {
         const longBuildId      = 'test_build_id/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
         const reporter         = createReporter({ buildId: longBuildId as BuildId });
 
-        assert.equal(errors.length, 2);
+        assert.equal(errors.length, 1);
         assert.equal(errors[0], createLongBuildIdError(longBuildId));
         assert.equal(reporter, BLANK_REPORTER);
     });
