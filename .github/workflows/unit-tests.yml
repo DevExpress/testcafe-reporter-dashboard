@@ -7,15 +7,17 @@ on:
 
 jobs:
   run:
+    name: Unit Tests (${{ matrix.oses }})
     runs-on: farm
     strategy:
       matrix:
-        oses: [UBUNTU]
+        oses: [UBUNTU, WIN]
     env:
       VM_IMAGE: ${{ matrix.oses }}
 
     steps:
       - name: Show ip
+        if: ${{ matrix.oses == 'UBUNTU' }}
         run: ip addr show
       - name: Checkout
         uses: actions/checkout@v2
