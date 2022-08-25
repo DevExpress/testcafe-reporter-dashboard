@@ -49,6 +49,10 @@ export interface ReadFileMethod {
     (path: string): Promise<Buffer>;
 };
 
+export interface FileExistsMethod {
+    (path: string): Promise<boolean>;
+};
+
 export type DashboardSettings = {
     authenticationToken: string;
     buildId?: string;
@@ -63,10 +67,10 @@ export type DashboardSettings = {
 };
 
 export type LayoutTestingSettings = {
-    screenshotsRelativePath: string;
-    destinationRelativePath: string;
+    screenshotsDir: string;
+    destinationDir: string;
     layoutTestingEnabled: boolean;
-    comparerBasePath: string;
+    comparerBaseDir: string;
 };
 
 export type Logger = {

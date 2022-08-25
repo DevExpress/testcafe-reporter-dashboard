@@ -1,8 +1,9 @@
-import { AggregateCommandType, AggregateNames, Logger, ReadFileMethod, UploadStatus } from './types/internal';
+import { AggregateCommandType, AggregateNames, FileExistsMethod, Logger, ReadFileMethod, UploadStatus } from './types/internal';
 import { UploadInfo } from './types/internal/resolve';
 import { createGetUploadInfoError, createFileUploadError, createTestUploadError, createWarningUploadError } from './texts';
 import Transport from './transport';
 import { WarningsInfo } from './types/';
+import { getPostfixedPath } from './utils';
 
 export class Uploader {
     private _transport: Transport;
@@ -10,13 +11,15 @@ export class Uploader {
     private _logger: Logger;
 
     private _readFile: ReadFileMethod;
+    private _fileExists: FileExistsMethod;
 
-    constructor (readFile: ReadFileMethod, transport: Transport, logger: Logger) {
+    constructor (readFile: ReadFileMethod, fileExists: FileExistsMethod, transport: Transport, logger: Logger) {
         this._transport = transport;
         this._uploads   = [];
         this._logger    = logger;
 
         this._readFile = readFile;
+        this._fileExists = fileExists;
     }
 
     private async _getUploadInfo (uploadEntityId: string): Promise<UploadInfo | null> {
@@ -92,4 +95,13 @@ export class Uploader {
     async waitUploads (): Promise<void> {
         await Promise.all(this._uploads);
     }
+
+    async uploadScreenshot (basePath: string, postfix: string): Promise<string | undefined> {
+        const filePath = getPostfixedPath(basePath, postfix);
+
+        if (await this._fileExists(filePath) === false)
+            return void 0;
+
+        return await this.uploadFile(filePath);
+    };
 }

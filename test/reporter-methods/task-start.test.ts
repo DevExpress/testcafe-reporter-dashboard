@@ -1,10 +1,10 @@
 import assert from 'assert';
 import { sign } from 'jsonwebtoken';
 import { DashboardSettings } from '../../src/types/internal/dashboard';
-import reporterObjectFactory from '../../src/reporter-object-factory';
+import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { BuildId } from '../../src/types';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
-import { mockReadFile } from '../mocks';
+import { mockFileExists, mockReadFile } from '../mocks';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
 const AUTHENTICATION_TOKEN        = 'authentication_token';
@@ -34,7 +34,7 @@ describe('reportTaskStart', () => {
             return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
         };
 
-        const reporter = reporterObjectFactory(mockReadFile, fetchMock, settings, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+        const reporter = reporterObjectFactory(mockReadFile, mockFileExists, fetchMock, settings, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
         await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 

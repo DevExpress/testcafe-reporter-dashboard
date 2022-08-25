@@ -9,11 +9,11 @@ import {
     DashboardSettings,
     Logger,
     ReporterPluginObject,
-    LayoutTestingSettings
+    LayoutTestingSettings,
+    FileExistsMethod
 } from './types/internal/';
 import {
     ActionInfo,
-    BrowserInfo,
     BrowserRunInfo,
     BuildId,
     DashboardInfo,
@@ -35,32 +35,13 @@ import assignReporterMethods from './assign-reporter-methods';
 import { validateSettings } from './validate-settings';
 import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
-import { existsSync } from 'fs';
 import path from 'path';
 import { getLayoutTestingSettings } from './get-reporter-settings';
+import { addArrayValueByKey, getShouldUploadLayoutTestingData, makePathRelativeStartingWith, replaceLast } from './utils';
 
-function addArrayValueByKey<T> (collection: Record<string, T[]>, key: string, value: T) {
-    if (!collection[key])
-        collection[key] = [value];
-    else if (!collection[key].includes(value))
-        collection[key].push(value);
-};
-
-function getShouldUploadLayoutTestingData (layoutTestingEnabled: boolean | undefined, browsers: (BrowserInfo & { testRunId: string })[]): boolean {
-    return !!layoutTestingEnabled && browsers?.length <= 1;
-};
-
-async function uploadScreenshot (uploader: Uploader, basePath: string, postfix: string): Promise<string | undefined> {
-    const filePath = basePath.replace(/.png$/, `${postfix}.png`);
-
-    if (!existsSync(filePath))
-        return void 0;
-
-    return await uploader.uploadFile(filePath);
-};
-
-export default function reporterObjectFactory (
+export function reporterObjectFactory (
     readFile: ReadFileMethod,
+    fileExists: FileExistsMethod,
     fetch: FetchMethod,
     settings: DashboardSettings,
     logger: Logger,
@@ -85,7 +66,7 @@ export default function reporterObjectFactory (
     const id: string = runId || uuid();
 
     const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger, responseTimeout, requestRetryCount);
-    const uploader       = new Uploader(readFile, transport, logger);
+    const uploader       = new Uploader(readFile, fileExists, transport, logger);
     const reportCommands = reportCommandsFactory(id, transport);
 
     const testRunToWarningsMap: Record<string, Warning[]>         = {};
@@ -254,8 +235,8 @@ export default function reporterObjectFactory (
         async reportTestDone (name, testRunInfo): Promise<void> {
             if (rejectReport) return;
 
-            const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable, fixture }      = testRunInfo;
-            const { layoutTestingEnabled, screenshotsRelativePath, destinationRelativePath, comparerBasePath } = layoutTestingSettings;
+            const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable, fixture } = testRunInfo;
+            const { layoutTestingEnabled, screenshotsDir, destinationDir, comparerBaseDir }               = layoutTestingSettings;
 
             const testRunToScreenshotsMap: Record<string, ScreenshotMapItem[]> = {};
 
@@ -289,22 +270,21 @@ export default function reporterObjectFactory (
                     };
 
                     if (shouldUploadLayoutTestingData) {
-                        const comparisonArtifactsPath   = screenshotPath.replace(new RegExp(`(${screenshotsRelativePath})(?!.*\\1)`), destinationRelativePath);
-                        const testPath                  = fixture.path;
-                        const baselinePath              = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
-                        const relativeBaselinePathMatch = baselinePath.match(new RegExp(`\\/(${comparerBasePath.replace(/^\.\//, '')}.*)`)) ?? void 0;
-                        const baselineSourcePath        = relativeBaselinePathMatch && relativeBaselinePathMatch[1];
+                        const comparisonArtifactsPath        = replaceLast(screenshotPath, path.normalize(screenshotsDir), path.normalize(destinationDir));
+                        const testPath                       = fixture.path;
+                        const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
+                        const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir.replace(new RegExp(`^[\\.\\${path.sep}]+`), '')));
 
-                        screenshotMapItem.baselineSourcePath = baselineSourcePath;
-                        screenshotMapItem.maskSourcePath = baselineSourcePath?.replace(/.png$/, '_mask.png');
-                        screenshotMapItem.ids = {
+                        screenshotMapItem.baselineSourcePath = baselineScreenshotRelativePath;
+                        screenshotMapItem.maskSourcePath     = baselineScreenshotRelativePath?.replace(/.png$/, '_mask.png');
+                        screenshotMapItem.ids                = {
                             ...screenshotMapItem.ids,
 
-                            baseline: await uploadScreenshot(uploader, comparisonArtifactsPath, '_etalon'),
-                            diff:     await uploadScreenshot(uploader, comparisonArtifactsPath, '_diff'),
-                            mask:     await uploadScreenshot(uploader, comparisonArtifactsPath, '_mask'),
-                            text:     await uploadScreenshot(uploader, comparisonArtifactsPath, '_text'),
-                            textMask: await uploadScreenshot(uploader, comparisonArtifactsPath, '_text_mask')
+                            baseline: await uploader.uploadScreenshot(comparisonArtifactsPath, '_etalon'),
+                            diff:     await uploader.uploadScreenshot(comparisonArtifactsPath, '_diff'),
+                            mask:     await uploader.uploadScreenshot(comparisonArtifactsPath, '_mask'),
+                            text:     await uploader.uploadScreenshot(comparisonArtifactsPath, '_text'),
+                            textMask: await uploader.uploadScreenshot(comparisonArtifactsPath, '_text_mask')
                         };
                     }
 

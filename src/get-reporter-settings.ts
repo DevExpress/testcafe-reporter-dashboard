@@ -9,9 +9,9 @@ import {
     LAYOUT_TESTING_ENABLED,
     RESPONSE_TIMEOUT,
     REQUEST_RETRY_COUNT,
-    LT_SCREENSHOTS_RELATIVE_PATH,
-    LT_DESTINATION_RELATIVE_PATH,
-    LT_COMPARER_BASE_PATH
+    LT_SCREENSHOTS_DIR,
+    LT_DESTINATION_DIR,
+    LT_COMPARER_BASE_DIR
 } from './env';
 import { ReporterPluginOptions, TaskProperties } from './types';
 import { LayoutTestingSettings } from './types/internal';
@@ -45,9 +45,9 @@ export function getLayoutTestingSettings (taskProperties: TaskProperties): Layou
     const comparerProperties = taskProperties.configuration['screenshots-comparer'] ?? {};
 
     return {
-        layoutTestingEnabled:    LAYOUT_TESTING_ENABLED,
-        screenshotsRelativePath: LT_SCREENSHOTS_RELATIVE_PATH || comparerProperties['screenshotsRelativePath'] || '/screenshots',
-        destinationRelativePath: LT_DESTINATION_RELATIVE_PATH || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots',
-        comparerBasePath:        LT_COMPARER_BASE_PATH || comparerProperties['path'] || './testing'
+        layoutTestingEnabled: LAYOUT_TESTING_ENABLED,
+        screenshotsDir:       LT_SCREENSHOTS_DIR || comparerProperties['screenshotsRelativePath'] || '/screenshots',
+        destinationDir:       LT_DESTINATION_DIR || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots',
+        comparerBaseDir:      LT_COMPARER_BASE_DIR || comparerProperties['path'] || './testing'
     };
 }

@@ -5,9 +5,9 @@ import { AggregateCommandType, DashboardSettings } from '../../src/types/interna
 import { reportTestActionDoneCalls } from '../data/report-test-action-done-calls';
 import { CHROME, FIREFOX, CHROME_HEADLESS } from '../data/test-browser-info';
 import { testDoneInfo, twoErrorsTestActionDone, testId } from '../data';
-import reporterObjectFactory from '../../src/reporter-object-factory';
+import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { DashboardTestRunInfo } from '../../src/types';
-import { mockReadFile } from '../mocks';
+import { mockFileExists, mockReadFile } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 
 const TESTCAFE_DASHBOARD_URL      = 'http://localhost';
@@ -84,7 +84,7 @@ describe('reportTestActionDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, mockFileExists, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
 
         await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
@@ -144,7 +144,7 @@ describe('reportTestActionDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, mockFileExists, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
 
         await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });

@@ -1,10 +1,10 @@
 import { sign } from 'jsonwebtoken';
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
-import reporterObjectFactory from '../../src/reporter-object-factory';
+import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { DashboardSettings } from '../../src/types/internal';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
-import { mockReadFile } from '../mocks';
+import { mockFileExists, mockReadFile } from '../mocks';
 import { AUTHENTICATION_TOKEN_REJECTED } from '../../src/texts';
 import { testDoneInfo } from '../data';
 import { DashboardValidationResult, RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } from '../../src/types/common';
@@ -83,7 +83,7 @@ describe('initReporter', () => {
 
     function getReporter (fetchMock) {
         return buildReporterPlugin(() => reporterObjectFactory(
-            mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+            mockReadFile, mockFileExists, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
         ), process.stdout);
     }
 
