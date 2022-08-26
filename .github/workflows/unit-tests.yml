@@ -7,17 +7,19 @@ on:
 
 jobs:
   run:
-    name: Unit Tests (${{ matrix.oses }})
-    runs-on: farm
+    name: ${{ matrix.args.name }}
+    runs-on: ${{ matrix.args.machineName }}
+    timeout-minutes: 30
     strategy:
       matrix:
-        oses: [UBUNTU, WIN]
-    env:
-      VM_IMAGE: ${{ matrix.oses }}
+        args: [
+          { name: "Ubuntu", machineName: "ubuntu-latest" },
+          { name: "Windows", machineName: "windows-latest" }
+        ]
 
     steps:
       - name: Show ip
-        if: ${{ matrix.oses == 'UBUNTU' }}
+        if: ${{ matrix.name == 'Ubuntu' }}
         run: ip addr show
       - name: Checkout
         uses: actions/checkout@v2
