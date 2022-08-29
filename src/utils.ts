@@ -12,16 +12,21 @@ export function getShouldUploadLayoutTestingData (layoutTestingEnabled: boolean 
     return !!layoutTestingEnabled && browsers?.length <= 1;
 };
 
+// RegExp by MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+export function escapeForRegExp (inputStr: string): string {
+    return inputStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function makePathRelativeStartingWith (inputPath: string, startWith: string): string | undefined {
-    const relativePathMatch = inputPath.match(new RegExp(`\\${path.sep}(${startWith}.*)`)) ?? void 0;
+    const relativePathMatch = inputPath.match(new RegExp(`\\${path.sep}(${escapeForRegExp(startWith)}.*)`)) ?? void 0;
 
     return relativePathMatch && relativePathMatch[1];
 }
 
 export function replaceLast (string: string, search: string, replace: string): string {
-    return string.replace(new RegExp(`(${search})(?!.*\\1)`), replace);
+    return string.replace(new RegExp(`(${escapeForRegExp(search)})(?!.*\\1)`), replace);
 }
 
 export function getPostfixedPath (basePath: string, postfix: string): string {
-    return basePath.replace(/.png$/, `${postfix}.png`);
+    return basePath.replace(/\.png$/, `${postfix}.png`);
 }
