@@ -3,7 +3,7 @@ name: Audit
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ master ]
+    branches: [ master, layout-testing ]
 
 jobs:
   run:
