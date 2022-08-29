@@ -40,7 +40,8 @@ export const layoutTestingActionInfo2 = {
 export const layoutTestingTestStartInfo: TestStartInfo = {
     testId,
     testRunId:  [testRunId],
-    testRunIds: []
+    testRunIds: [],
+    skipped:    false
 };
 
 export const layoutTestingTestDoneInfo: TestRunInfo = {
