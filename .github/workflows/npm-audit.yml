@@ -7,12 +7,7 @@ on:
 
 jobs:
   run:
-    runs-on: farm
-    strategy:
-      matrix:
-        oses: [UBUNTU]
-    env:
-      VM_IMAGE: ${{ matrix.oses }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Show ip

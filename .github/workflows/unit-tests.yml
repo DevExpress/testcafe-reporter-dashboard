@@ -7,15 +7,18 @@ on:
 
 jobs:
   run:
-    runs-on: farm
+    name: ${{ matrix.args.name }}
+    runs-on: ${{ matrix.args.machineName }}
     strategy:
       matrix:
-        oses: [UBUNTU]
-    env:
-      VM_IMAGE: ${{ matrix.oses }}
+        args: [
+          { name: "Ubuntu", machineName: "ubuntu-latest" },
+          { name: "Windows", machineName: "windows-latest" }
+        ]
 
     steps:
       - name: Show ip
+        if: ${{ matrix.name == 'Ubuntu' }}
         run: ip addr show
       - name: Checkout
         uses: actions/checkout@v2
