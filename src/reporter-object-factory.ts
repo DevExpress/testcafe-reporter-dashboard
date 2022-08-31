@@ -275,9 +275,14 @@ export function reporterObjectFactory (
                         const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
                         const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir.replace(new RegExp(`^[\\.\\${path.sep}]+`), '')));
 
-                        screenshotMapItem.baselineSourcePath = baselineScreenshotRelativePath;
-                        screenshotMapItem.maskSourcePath     = baselineScreenshotRelativePath?.replace(/.png$/, '_mask.png');
-                        screenshotMapItem.ids                = {
+                        if (baselineScreenshotRelativePath) {
+                            const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);
+
+                            screenshotMapItem.baselineSourcePath = posixPath;
+                            screenshotMapItem.maskSourcePath     = posixPath.replace(/.png$/, '_mask.png');
+                        }
+
+                        screenshotMapItem.ids = {
                             ...screenshotMapItem.ids,
 
                             baseline: await uploader.uploadScreenshot(comparisonArtifactsPath, '_etalon'),

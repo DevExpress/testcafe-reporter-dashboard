@@ -299,17 +299,17 @@ describe('Uploads', () => {
             assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.mask, uploadInfos[3].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.text, uploadInfos[4].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.textMask, uploadInfos[5].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].baselineSourcePath, `testing${path.sep}tests${path.sep}suite1${path.sep}etalons${path.sep}1.png`);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].maskSourcePath, `testing${path.sep}tests${path.sep}suite1${path.sep}etalons${path.sep}1_mask.png`);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].baselineSourcePath, 'testing/tests/suite1/etalons/1.png');
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].maskSourcePath, 'testing/tests/suite1/etalons/1_mask.png');
             assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.current, uploadInfos[6].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.baseline, uploadInfos[7].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.diff, uploadInfos[8].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.text, uploadInfos[9].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].baselineSourcePath, `testing${path.sep}tests${path.sep}suite1${path.sep}etalons${path.sep}2.png`);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].maskSourcePath, `testing${path.sep}tests${path.sep}suite1${path.sep}etalons${path.sep}2_mask.png`);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].baselineSourcePath, 'testing/tests/suite1/etalons/2.png');
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].maskSourcePath, 'testing/tests/suite1/etalons/2_mask.png');
             assert.equal(browserRuns['chrome_headless'].screenshotMap[2].ids.current, uploadInfos[10].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].baselineSourcePath, `testing${path.sep}tests${path.sep}suite1${path.sep}etalons${path.sep}3.png`);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].maskSourcePath, `testing${path.sep}tests${path.sep}suite1${path.sep}etalons${path.sep}3_mask.png`);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].baselineSourcePath, 'testing/tests/suite1/etalons/3.png');
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].maskSourcePath, 'testing/tests/suite1/etalons/3_mask.png');
             assert.equal(runCommands[1].payload.uploadId, uploadInfos[11].uploadId);
 
             assert.equal(uploadInfos.length, 12);
