@@ -273,7 +273,7 @@ export function reporterObjectFactory (
                         const comparisonArtifactsPath        = replaceLast(screenshotPath, path.normalize(screenshotsDir), path.normalize(destinationDir));
                         const testPath                       = fixture.path;
                         const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
-                        const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir.replace(new RegExp(`^[\\.\\${path.sep}]+`), '')));
+                        const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir));
 
                         if (baselineScreenshotRelativePath) {
                             const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);
