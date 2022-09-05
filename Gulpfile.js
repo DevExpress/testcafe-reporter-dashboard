@@ -4,7 +4,7 @@ var del     = require('del');
 var gulpTypeScript = require('gulp-typescript');
 
 function clean (cb) {
-    del('lib', cb);
+    return del('lib', cb);
 }
 
 function lint () {
