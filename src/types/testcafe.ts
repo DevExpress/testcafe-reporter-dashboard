@@ -3,13 +3,12 @@ export type ScreenshotUploadIdSet = {
     baseline?: string;
     diff?: string;
     mask?: string;
-    text?: string;
-    textMask?: string;
 };
 
 export type ScreenshotMapItem = {
     path: string;
     ids: ScreenshotUploadIdSet;
+    comparisonFailed?: boolean;
     baselineSourcePath?: string;
     maskSourcePath?: string;
     actionId?: string;
