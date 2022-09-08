@@ -270,27 +270,33 @@ export function reporterObjectFactory (
                     };
 
                     if (shouldUploadLayoutTestingData) {
-                        const comparisonArtifactsPath        = replaceLast(screenshotPath, path.normalize(screenshotsDir), path.normalize(destinationDir));
-                        const testPath                       = fixture.path;
-                        const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
-                        const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir));
+                        const comparisonArtifactsPath = replaceLast(screenshotPath, path.normalize(screenshotsDir), path.normalize(destinationDir));
+                        const comparisonFailed        = await fileExists(comparisonArtifactsPath);
 
-                        if (baselineScreenshotRelativePath) {
-                            const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);
+                        if (comparisonFailed) {
+                            const testPath                       = fixture.path;
+                            const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
+                            const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir));
 
-                            screenshotMapItem.baselineSourcePath = posixPath;
-                            screenshotMapItem.maskSourcePath     = posixPath.replace(/.png$/, '_mask.png');
+
+                            if (baselineScreenshotRelativePath) {
+                                const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);
+
+                                screenshotMapItem.baselineSourcePath = posixPath;
+                                screenshotMapItem.maskSourcePath     = posixPath.replace(/.png$/, '_mask.png');
+                            }
+
+
+                            screenshotMapItem.ids = {
+                                ...screenshotMapItem.ids,
+
+                                baseline: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_etalon'),
+                                diff:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_diff'),
+                                mask:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_mask')
+                            };
                         }
 
-                        screenshotMapItem.ids = {
-                            ...screenshotMapItem.ids,
-
-                            baseline: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_etalon'),
-                            diff:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_diff'),
-                            mask:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_mask'),
-                            text:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_text'),
-                            textMask: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_text_mask')
-                        };
+                        screenshotMapItem.comparisonFailed = comparisonFailed;
                     }
 
                     addArrayValueByKey(testRunToScreenshotsMap, testRunId, screenshotMapItem);
