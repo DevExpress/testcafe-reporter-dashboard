@@ -285,11 +285,11 @@ export function reporterObjectFactory (
                         screenshotMapItem.ids = {
                             ...screenshotMapItem.ids,
 
-                            baseline: await uploader.uploadScreenshot(comparisonArtifactsPath, '_etalon'),
-                            diff:     await uploader.uploadScreenshot(comparisonArtifactsPath, '_diff'),
-                            mask:     await uploader.uploadScreenshot(comparisonArtifactsPath, '_mask'),
-                            text:     await uploader.uploadScreenshot(comparisonArtifactsPath, '_text'),
-                            textMask: await uploader.uploadScreenshot(comparisonArtifactsPath, '_text_mask')
+                            baseline: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_etalon'),
+                            diff:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_diff'),
+                            mask:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_mask'),
+                            text:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_text'),
+                            textMask: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_text_mask')
                         };
                     }
 

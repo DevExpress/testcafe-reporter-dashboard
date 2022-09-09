@@ -96,7 +96,7 @@ export class Uploader {
         await Promise.all(this._uploads);
     }
 
-    async uploadScreenshot (basePath: string, postfix: string): Promise<string | undefined> {
+    async uploadLayoutTestingArtifact (basePath: string, postfix: string): Promise<string | undefined> {
         const filePath = getPostfixedPath(basePath, postfix);
 
         if (await this._fileExists(filePath) === false)
