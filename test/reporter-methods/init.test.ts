@@ -1,10 +1,10 @@
 import { sign } from 'jsonwebtoken';
 import assert from 'assert';
 import { buildReporterPlugin } from 'testcafe/lib/embedding-utils';
-import reporterObjectFactory from '../../src/reporter-object-factory';
+import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { DashboardSettings } from '../../src/types/internal';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
-import { mockReadFile } from '../mocks';
+import { mockFileExists, mockReadFile } from '../mocks';
 import { AUTHENTICATION_TOKEN_REJECTED } from '../../src/texts';
 import { testDoneInfo } from '../data';
 import { DashboardValidationResult, RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } from '../../src/types/common';
@@ -30,8 +30,8 @@ async function runReporterLifecycleMethods (reporter: any, requests: { url: stri
 
     assert.strictEqual(requests.length, 1);
 
-    await reporter.reportTaskStart(new Date(), [], 1, []);
-    await reporter.reportTestStart('', {}, { testId: 'warningTestId', testRunId: [''], testRunIds: ['testRunId'] });
+    await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
+    await reporter.reportTestStart('', {}, { testId: 'testId', testRunId: [''], testRunIds: ['testRunId'] });
     await reporter.reportTestDone('Test 1', { ...testDoneInfo, testId: 'testId' }, {});
     await reporter.reportTaskDone(new Date(), 1, [''], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 }
@@ -83,7 +83,7 @@ describe('initReporter', () => {
 
     function getReporter (fetchMock) {
         return buildReporterPlugin(() => reporterObjectFactory(
-            mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+            mockReadFile, mockFileExists, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
         ), process.stdout);
     }
 
@@ -138,7 +138,7 @@ describe('initReporter', () => {
         const reporter = getReporter(fetchOkMock);
 
         await reporter.init();
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
 
         assert.strictEqual(errors.length, 0);
         assert.strictEqual(requests[0].url, 'http://localhost/api/validateReporter');

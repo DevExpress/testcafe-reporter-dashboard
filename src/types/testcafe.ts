@@ -1,3 +1,20 @@
+export type ScreenshotUploadIdSet = {
+    current: string;
+    baseline?: string;
+    diff?: string;
+    mask?: string;
+    text?: string;
+    textMask?: string;
+};
+
+export type ScreenshotMapItem = {
+    path: string;
+    ids: ScreenshotUploadIdSet;
+    baselineSourcePath?: string;
+    maskSourcePath?: string;
+    actionId?: string;
+};
+
 export type BrowserInfo = {
     alias: string;
     engine: { name: string; version: string };
@@ -37,6 +54,13 @@ export type Error = {
     id?: string;
 };
 
+export type FixtureInfo = {
+    id: string;
+    name: string | null;
+    path: string;
+    meta: Record<string, string>;
+};
+
 export type TestRunInfo = {
     browsers: (BrowserInfo & { testRunId: string })[];
     durationMs: number;
@@ -49,6 +73,7 @@ export type TestRunInfo = {
     unstable: boolean;
     videos: Video[];
     warnings: string[];
+    fixture: FixtureInfo;
 }
 
 export type DashboardTestRunInfo = {
@@ -75,6 +100,7 @@ export type Screenshot = Readonly<{
     quarantineAttempt: number;
     takenOnFail: boolean;
     screenshotData?: Buffer;
+    actionId?: string;
 }>;
 
 export type Video = Readonly<{
@@ -85,6 +111,7 @@ export type Video = Readonly<{
 
 export type BrowserRunInfo = {
     browser: BrowserInfo;
+    screenshotMap?: ScreenshotMapItem[];
     screenshotUploadIds?: string[];
     videoUploadIds?: string[];
     actions?: ActionInfo[];
@@ -99,6 +126,7 @@ export type ActionInfo = {
     testPhase: TestPhase;
     command: Record<string, any> & { type: CommandType };
     error?: TestError;
+    screenshotPath?: string;
 }
 
 export type Warning = {

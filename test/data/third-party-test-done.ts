@@ -88,7 +88,13 @@ export const thirdPartyTestDone: TestRunInfo = {
     testId,
     unstable:       false,
     videos:         [],
-    warnings:       []
+    warnings:       [],
+    fixture:        {
+        id:   '',
+        path: '',
+        name: '',
+        meta: {}
+    }
 };
 
 export const thirdPartyTestDone2: TestRunInfo = {
@@ -171,5 +177,11 @@ export const thirdPartyTestDone2: TestRunInfo = {
     testId:         testId2,
     unstable:       false,
     videos:         [],
-    warnings:       []
+    warnings:       [],
+    fixture:        {
+        id:   '',
+        path: '',
+        name: '',
+        meta: {}
+    }
 };

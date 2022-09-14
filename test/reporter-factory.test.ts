@@ -1,14 +1,14 @@
 import assert from 'assert';
 import { sign } from 'jsonwebtoken';
 import { DashboardSettings } from '../src/types/internal/dashboard';
-import reporterObjectFactory from '../src/reporter-object-factory';
+import { reporterObjectFactory } from '../src/reporter-object-factory';
 import logger from '../src/logger';
 import { AUTHENTICATION_TOKEN_INVALID, AUTHENTICATION_TOKEN_NOT_DEFINED, BUILD_ID_IS_NOT_A_STRING_ERROR, createLongBuildIdError, createTestCafeVersionIncompatibledError, createTestCafeVersionInvalidError, DASHBOARD_LOCATION_NOT_DEFINED } from '../src/texts';
 import BLANK_REPORTER from '../src/blank-reporter';
 import { BuildId } from '../src/types';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
 import { ReporterPluginObject } from '../src/types/internal';
-import { mockReadFile, SETTINGS } from './mocks';
+import { mockFileExists, mockReadFile, SETTINGS } from './mocks';
 
 describe('Reporter factory', () => {
     let errors: string[];
@@ -17,6 +17,7 @@ describe('Reporter factory', () => {
     const createReporter = (settings: Partial<DashboardSettings>, tcVersion = TC_OLDEST_COMPATIBLE_VERSION): ReporterPluginObject =>
         reporterObjectFactory(
             mockReadFile,
+            mockFileExists,
             mockFetch,
             { ...SETTINGS, ...settings },
             loggerMock,

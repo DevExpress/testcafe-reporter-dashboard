@@ -12,11 +12,12 @@ import {
     TEST_RUN_ID_2
 } from './../data';
 import { testActionInfos, quarantineTestDoneInfo, quarantiteTestStartInfo } from '../data/test-quarantine-mode-info';
-import reporterObjectFactory from '../../src/reporter-object-factory';
+import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { DashboardTestRunInfo, TaskDoneArgs, TestDoneArgs } from '../../src/types';
-import { mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL, UPLOAD_URL_PREFIX } from '../mocks';
+import { mockFileExists, mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL, UPLOAD_URL_PREFIX } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 import { WARNINGS_TEST_RUN_ID_1 } from '../data/test-warnings-info';
+import { layoutTestingActionInfo1, layoutTestingActionInfo2, layoutTestingTestDoneInfo, layoutTestingTestStartInfo } from '../data/test-layout-testing-info';
 
 describe('reportTestDone', () => {
     let testRunInfo           = {} as DashboardTestRunInfo;
@@ -53,11 +54,11 @@ describe('reportTestDone', () => {
 
     it('Should process errors originated not from actions', async () => {
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, mockFileExists, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestDone('Test 1', thirdPartyTestDone);
 
         const { thirdPartyError, actions, browser } = testRunInfo.browserRuns[thirdPartyTestDone.browsers[0].testRunId];
@@ -92,10 +93,10 @@ describe('reportTestDone', () => {
         }
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, mockFileExists, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout);
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestDone('Test 1', skippedTestDone);
 
         assert.ok(testDonePayload);
@@ -106,11 +107,11 @@ describe('reportTestDone', () => {
         const readFile = (path: string) => Promise.resolve(Buffer.from(path));
 
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                readFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+                readFile, mockFileExists, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestStart('Test 1', {}, quarantiteTestStartInfo);
 
         for (const actionInfo of testActionInfos)
@@ -122,28 +123,111 @@ describe('reportTestDone', () => {
 
         assert.equal(browserRuns.firefox_1.browser.alias, 'firefox');
         assert.equal(browserRuns.firefox_1.quarantineAttempt, void 0);
+        assert.deepEqual(browserRuns.firefox_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%firefox_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_1_1.browser.alias, 'chrome');
         assert.equal(browserRuns.chrome_1_1.quarantineAttempt, 2);
+        assert.deepEqual(browserRuns.chrome_1_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_1_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_1.browser.alias, 'chrome');
         assert.equal(browserRuns.chrome_1.quarantineAttempt, 1);
+        assert.deepEqual(browserRuns.chrome_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_headless_1.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless_1.quarantineAttempt, 2);
+        assert.deepEqual(browserRuns.chrome_headless_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_headless_1.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_headless_2.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless_2.quarantineAttempt, 3);
+        assert.deepEqual(browserRuns.chrome_headless_2.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_headless_2.png'
+            }
+        ]);
 
         assert.equal(browserRuns.chrome_headless.browser.alias, 'chrome:headless');
         assert.equal(browserRuns.chrome_headless.quarantineAttempt, 1);
+        assert.deepEqual(browserRuns.chrome_headless.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_headless.png'
+            }
+        ]);
 
         assert.equal(uploadPaths.length, 9);
 
-        for (const runInfo of Object.values(browserRuns)) {
-            assert.deepEqual(runInfo.screenshotUploadIds, ['upload_id']);
+        for (const runInfo of Object.values(browserRuns))
             assert.deepEqual(runInfo.videoUploadIds, ['upload_id']);
-        }
+    });
+
+    it('should match screenshots with originating actions', async () => {
+        const readFile = (path: string) => Promise.resolve(Buffer.from(path));
+
+        const reporter = buildReporterPlugin(() => reporterObjectFactory(
+                readFile, mockFileExists, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+            ), process.stdout
+        );
+
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
+        await reporter.reportTestStart('Test 1', {}, layoutTestingTestStartInfo);
+
+        await reporter.reportTestActionDone('takeScreenshot', layoutTestingActionInfo1);
+        await reporter.reportTestActionDone('click', layoutTestingActionInfo2);
+
+        await reporter.reportTestDone('Test 1', layoutTestingTestDoneInfo);
+
+        const { browserRuns } = testRunInfo;
+
+        assert.equal(browserRuns.chrome_1.actions?.length, 2);
+        assert.equal(browserRuns.chrome_1.actions![0].screenshotPath, '%filePath%chrome_1_1.png');
+        assert.equal(browserRuns.chrome_1.actions![1].screenshotPath, void 0);
+        assert.deepEqual(browserRuns.chrome_1.screenshotMap, [
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_1_1.png'
+            },
+            {
+                ids: {
+                    current: 'upload_id'
+                },
+                path: '%filePath%chrome_1_2.png'
+            }
+        ]);
     });
 
     it('warningsUploadId payload', async () => {
@@ -168,11 +252,11 @@ describe('reportTestDone', () => {
             return Promise.resolve({ ok: true, status: 200, statusText: 'OK' } as Response);
         }
 
-        const reporter = reporterObjectFactory(mockReadFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+        const reporter = reporterObjectFactory(mockReadFile, mockFileExists, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
         assert.deepStrictEqual(taskDonePayload, {});
 
-        await reporter.reportTaskStart(new Date(), [], 1, []);
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTaskDone(new Date(), 1, [], { failedCount: 2, passedCount: 1, skippedCount: 0 });
 
         assert.strictEqual(taskDonePayload.warningsUploadId, void 0);
@@ -186,7 +270,7 @@ describe('reportTestDone', () => {
 
     it('should not duplicate errors from action and test done (including case of concurrency)', async () => {
         const reporter = buildReporterPlugin(() => reporterObjectFactory(
-                mockReadFile, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
+                mockReadFile, mockFileExists, fetchRunInfoMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
             ), process.stdout
         );
 
@@ -204,6 +288,7 @@ describe('reportTestDone', () => {
         mockActionInfo2.test.id   = 'Test2';
         mockActionInfo2.testRunId = TEST_RUN_ID_2;
 
+        await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestActionDone('click', mockActionInfo);
         await reporter.reportTestActionDone('click', mockActionInfo2);
         await reporter.reportTestDone('Test 1', thirdPartyTestDone2);
