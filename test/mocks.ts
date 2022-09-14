@@ -1,7 +1,7 @@
 import { DashboardSettings, ReadFileMethod } from '../src/types/internal/dashboard';
 import { CI_DETECTION_VARIABLES, CI_INFO_VARIABLES } from './data/ci-variables';
 
-const originalVariables = {};
+const originalVariables: any = {};
 
 export const TESTCAFE_DASHBOARD_URL = 'http://localhost';
 
@@ -19,6 +19,7 @@ export const SETTINGS: DashboardSettings = {
 };
 
 export const mockReadFile = (() => void 0) as unknown as ReadFileMethod;
+export const mockFileExists = () => Promise.resolve(true);
 
 export const clearCIDetectionVariables = () => {
     for (const CIVariable of CI_DETECTION_VARIABLES) {
@@ -48,4 +49,32 @@ export const restoreCIInfoVariables = () => {
         for (const variable of Object.keys(CI.variables))
             process.env[variable] = originalVariables[variable];
     }
+};
+
+export const setLayoutSettingsVariables = (enabled: string, screenshotPath: string, destinationPath: string, comparerBasePath: string) => {
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LAYOUT_TESTING_ENABLED = enabled;
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_SCREENSHOTS_DIR     = screenshotPath;
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_DESTINATION_DIR     = destinationPath;
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_COMPARER_BASE_DIR   = comparerBasePath;
+};
+
+export const stashLayoutSettingsVariables = () => {
+    originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LAYOUT_TESTING_ENABLED = process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LAYOUT_TESTING_ENABLED;
+    originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LT_SCREENSHOTS_DIR     = process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_SCREENSHOTS_DIR;
+    originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LT_DESTINATION_DIR     = process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_DESTINATION_DIR;
+    originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LT_COMPARER_BASE_DIR   = process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_COMPARER_BASE_DIR;
+};
+
+export const restoreLayoutSettingsVariables = () => {
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LAYOUT_TESTING_ENABLED = originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LAYOUT_TESTING_ENABLED;
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_SCREENSHOTS_DIR     = originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LT_SCREENSHOTS_DIR;
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_DESTINATION_DIR     = originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LT_DESTINATION_DIR;
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_COMPARER_BASE_DIR   = originalVariables.TESTCAFE_DASHBOARD_DEVEXTREME_LT_COMPARER_BASE_DIR;
+};
+
+export const clearLayoutSettingsVariables = () => {
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LAYOUT_TESTING_ENABLED = '';
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_SCREENSHOTS_DIR     = '';
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_DESTINATION_DIR     = '';
+    process.env.TESTCAFE_DASHBOARD_DEVEXTREME_LT_COMPARER_BASE_DIR   = '';
 };

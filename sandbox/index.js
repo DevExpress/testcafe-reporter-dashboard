@@ -2,8 +2,8 @@ const fs             = require('fs');
 const mock           = require('mock-require');
 const createTestCafe = require('testcafe');
 
-process.env.TESTCAFE_DASHBOARD_URL   = 'http://localhost:3000';
-process.env.TESTCAFE_DASHBOARD_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiJjM2ZlMDg1OC0wYzNmLTQ5YzUtODNjMi1lOWE1NzZmMjZlOGEiLCJpYXQiOjE1ODgxNDk3NTJ9.9sxG0seXYTnLbJtrkM_20wudmNG0fzAVWHXqCiMCp6A';
+process.env.TESTCAFE_DASHBOARD_DEVEXTREME_URL   = 'http://localhost:3000';
+process.env.TESTCAFE_DASHBOARD_DEVEXTREME_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiJjM2ZlMDg1OC0wYzNmLTQ5YzUtODNjMi1lOWE1NzZmMjZlOGEiLCJpYXQiOjE1ODgxNDk3NTJ9.9sxG0seXYTnLbJtrkM_20wudmNG0fzAVWHXqCiMCp6A';
 
 const REPORTER_DIRECTORY = './node_modules/testcafe-reporter-dashboard-sandbox';
 

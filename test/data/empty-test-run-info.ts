@@ -11,5 +11,11 @@ export const EMPTY_TEST_RUN_INFO: TestRunInfo = {
     testId:         'test_1',
     unstable:       false,
     videos:         [],
-    warnings:       []
+    warnings:       [],
+    fixture:        {
+        id:   '',
+        name: '',
+        path: '',
+        meta: {}
+    }
 };
