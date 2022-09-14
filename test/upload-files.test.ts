@@ -156,6 +156,8 @@ describe('Uploads', () => {
         const screenshotPath3 = `${pathPrefix}testing${path.sep}screenshots${path.sep}errors${path.sep}3.png`;
         const artifactsPath3  = `${pathPrefix}testing${path.sep}artifacts${path.sep}compared-screenshots${path.sep}errors${path.sep}3.png`;
         const thumbnailPath3  = `${pathPrefix}testing${path.sep}screenshots${path.sep}errors${path.sep}thumbnails${path.sep}3.png`;
+        const screenshotPath4 = `${pathPrefix}testing${path.sep}my-screenshots-custom-folder${path.sep}4.png`;
+        const thumbnailPath4  = `${pathPrefix}testing${path.sep}my-screenshots-custom-folder${path.sep}thumbnails${path.sep}4.png`;
 
         function readFile (filePath: string): Promise<Buffer> {
             screenshotPaths.push(filePath);
@@ -187,6 +189,9 @@ describe('Uploads', () => {
                 case screenshotPath3:
                     fileContent = 'screenshot_on_fail';
                     break;
+                case screenshotPath4:
+                    fileContent = 'custom_folder_screenshot';
+                    break;
                 default:
                     throw new Error(`Unknown file path: ${filePath}`);
             }
@@ -211,7 +216,8 @@ describe('Uploads', () => {
                 artifactsPath2,
                 baselinePath2,
                 diffPath2,
-                screenshotPath3
+                screenshotPath3,
+                screenshotPath4
             ].includes(filePath))
                 return Promise.resolve(true);
 
@@ -269,6 +275,14 @@ describe('Uploads', () => {
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
                     takenOnFail:       true,
                     quarantineAttempt: 0
+                },
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    screenshotPath4,
+                    thumbnailPath:     thumbnailPath4,
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
                 }
             ];
 
@@ -288,7 +302,7 @@ describe('Uploads', () => {
                 }
             });
 
-            const { browserRuns } = JSON.parse(uploadedFiles[8].toString());
+            const { browserRuns } = JSON.parse(uploadedFiles[9].toString());
             const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
 
             assert.equal(runCommands.length, 2);
@@ -313,10 +327,13 @@ describe('Uploads', () => {
             assert.equal(browserRuns['chrome_headless'].screenshotMap[2].path, screenshotPath3);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[2].ids.current, uploadInfos[7].uploadId);
             assert.equal(browserRuns['chrome_headless'].screenshotMap[2].comparisonFailed, false);
-            assert.equal(runCommands[1].payload.uploadId, uploadInfos[8].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[3].path, screenshotPath4);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[3].ids.current, uploadInfos[8].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[3].comparisonFailed, false);
+            assert.equal(runCommands[1].payload.uploadId, uploadInfos[9].uploadId);
 
-            assert.equal(uploadInfos.length, 9);
-            assert.equal(uploadedUrls.length, 9);
+            assert.equal(uploadInfos.length, 10);
+            assert.equal(uploadedUrls.length, 10);
             assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
             assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
             assert.equal(uploadedUrls[2], uploadInfos[2].uploadUrl);
@@ -326,8 +343,9 @@ describe('Uploads', () => {
             assert.equal(uploadedUrls[6], uploadInfos[6].uploadUrl);
             assert.equal(uploadedUrls[7], uploadInfos[7].uploadUrl);
             assert.equal(uploadedUrls[8], uploadInfos[8].uploadUrl);
+            assert.equal(uploadedUrls[9], uploadInfos[9].uploadUrl);
 
-            assert.equal(uploadedFiles.length, 9);
+            assert.equal(uploadedFiles.length, 10);
             assert.equal(uploadedFiles[0], 'take_screenshot_action');
             assert.equal(uploadedFiles[1], 'take_screenshot_action_etalon');
             assert.equal(uploadedFiles[2], 'take_screenshot_action_diff');
@@ -336,8 +354,9 @@ describe('Uploads', () => {
             assert.equal(uploadedFiles[5], 'some_other_action_etalon');
             assert.equal(uploadedFiles[6], 'some_other_action_diff');
             assert.equal(uploadedFiles[7], 'screenshot_on_fail');
+            assert.equal(uploadedFiles[8], 'custom_folder_screenshot');
 
-            assert.equal(screenshotPaths.length, 8);
+            assert.equal(screenshotPaths.length, 9);
             assert.equal(screenshotPaths[0], screenshotPath1);
             assert.equal(screenshotPaths[1], baselinePath1);
             assert.equal(screenshotPaths[2], diffPath1);
@@ -346,10 +365,11 @@ describe('Uploads', () => {
             assert.equal(screenshotPaths[5], baselinePath2);
             assert.equal(screenshotPaths[6], diffPath2);
             assert.equal(screenshotPaths[7], screenshotPath3);
+            assert.equal(screenshotPaths[8], screenshotPath4);
 
             const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
 
-            assert.equal(uploadCommands.length, 9);
+            assert.equal(uploadCommands.length, 10);
             assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
             assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
@@ -385,11 +405,158 @@ describe('Uploads', () => {
             assert.equal(uploadCommands[8].type, AggregateCommandType.createUpload);
             assert.deepEqual(uploadCommands[8].aggregateId, uploadInfos[8].uploadId);
             assert.deepEqual(uploadCommands[8].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[9].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[9].aggregateId, uploadInfos[9].uploadId);
+            assert.deepEqual(uploadCommands[9].payload, { status: UploadStatus.Completed });
+        });
+
+        it('Should upload only layout testing failures if noScreenshotUpload is true', async () => {
+            setLayoutSettingsVariables('true', `${path.sep}screenshots`, `${path.sep}artifacts${path.sep}compared-screenshots`, `.${path.sep}testing`);
+
+            const reporterFactory = reRequireModules();
+
+            const screenshots: Screenshot[] = [
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    screenshotPath1,
+                    thumbnailPath:     thumbnailPath1,
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
+                },
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    screenshotPath2,
+                    thumbnailPath:     thumbnailPath2,
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
+                },
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    screenshotPath3,
+                    thumbnailPath:     thumbnailPath3,
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       true,
+                    quarantineAttempt: 0
+                },
+                {
+                    testRunId:         testRunIdChrome,
+                    screenshotPath:    screenshotPath4,
+                    thumbnailPath:     thumbnailPath4,
+                    userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                    takenOnFail:       false,
+                    quarantineAttempt: 0
+                }
+            ];
+
+            const reporter = reporterFactory(readFile, fileExists, fetch, { ...SETTINGS, noScreenshotUpload: true }, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
+
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                screenshots,
+                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ],
+                fixture:  {
+                    id:   'fixture1',
+                    name: 'My fixture',
+                    path: `${pathPrefix}testing${path.sep}tests${path.sep}suite1${path.sep}fixture1.js`,
+                    meta: {}
+                }
+            });
+
+            const { browserRuns } = JSON.parse(uploadedFiles[7].toString());
+            const runCommands     = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Run);
+
+            assert.equal(runCommands.length, 2);
+            assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
+            assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
+
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].path, screenshotPath1);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.current, uploadInfos[0].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.baseline, uploadInfos[1].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.diff, uploadInfos[2].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.mask, uploadInfos[3].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].baselineSourcePath, 'testing/tests/suite1/etalons/1.png');
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].maskSourcePath, 'testing/tests/suite1/etalons/1_mask.png');
+            assert.ok(browserRuns['chrome_headless'].screenshotMap[0].comparisonFailed);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].path, screenshotPath2);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.current, uploadInfos[4].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.baseline, uploadInfos[5].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.diff, uploadInfos[6].uploadId);
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].baselineSourcePath, 'testing/tests/suite1/etalons/2.png');
+            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].maskSourcePath, 'testing/tests/suite1/etalons/2_mask.png');
+            assert.ok(browserRuns['chrome_headless'].screenshotMap[1].comparisonFailed);
+            assert.equal(runCommands[1].payload.uploadId, uploadInfos[7].uploadId);
+
+            assert.equal(uploadInfos.length, 8);
+            assert.equal(uploadedUrls.length, 8);
+            assert.equal(uploadedUrls[0], uploadInfos[0].uploadUrl);
+            assert.equal(uploadedUrls[1], uploadInfos[1].uploadUrl);
+            assert.equal(uploadedUrls[2], uploadInfos[2].uploadUrl);
+            assert.equal(uploadedUrls[3], uploadInfos[3].uploadUrl);
+            assert.equal(uploadedUrls[4], uploadInfos[4].uploadUrl);
+            assert.equal(uploadedUrls[5], uploadInfos[5].uploadUrl);
+            assert.equal(uploadedUrls[6], uploadInfos[6].uploadUrl);
+            assert.equal(uploadedUrls[7], uploadInfos[7].uploadUrl);
+
+            assert.equal(uploadedFiles.length, 8);
+            assert.equal(uploadedFiles[0], 'take_screenshot_action');
+            assert.equal(uploadedFiles[1], 'take_screenshot_action_etalon');
+            assert.equal(uploadedFiles[2], 'take_screenshot_action_diff');
+            assert.equal(uploadedFiles[3], 'take_screenshot_action_mask');
+            assert.equal(uploadedFiles[4], 'some_other_action');
+            assert.equal(uploadedFiles[5], 'some_other_action_etalon');
+            assert.equal(uploadedFiles[6], 'some_other_action_diff');
+
+            assert.equal(screenshotPaths.length, 7);
+            assert.equal(screenshotPaths[0], screenshotPath1);
+            assert.equal(screenshotPaths[1], baselinePath1);
+            assert.equal(screenshotPaths[2], diffPath1);
+            assert.equal(screenshotPaths[3], maskPath1);
+            assert.equal(screenshotPaths[4], screenshotPath2);
+            assert.equal(screenshotPaths[5], baselinePath2);
+            assert.equal(screenshotPaths[6], diffPath2);
+
+            const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
+
+            assert.equal(uploadCommands.length, 8);
+            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
+            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
+            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
+            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[3].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[3].aggregateId, uploadInfos[3].uploadId);
+            assert.deepEqual(uploadCommands[3].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[4].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[4].aggregateId, uploadInfos[4].uploadId);
+            assert.deepEqual(uploadCommands[4].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[5].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[5].aggregateId, uploadInfos[5].uploadId);
+            assert.deepEqual(uploadCommands[5].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[6].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[6].aggregateId, uploadInfos[6].uploadId);
+            assert.deepEqual(uploadCommands[6].payload, { status: UploadStatus.Completed });
+
+            assert.equal(uploadCommands[7].type, AggregateCommandType.createUpload);
+            assert.deepEqual(uploadCommands[7].aggregateId, uploadInfos[7].uploadId);
+            assert.deepEqual(uploadCommands[7].payload, { status: UploadStatus.Completed });
         });
 
         it('Should upload screenshots from screenshotData', async () => {
-
-
             const screenshots: Screenshot[] = [
                 {
                     testRunId:         testRunIdChrome,

@@ -1,4 +1,4 @@
-import { MAX_BUILD_ID_LENGTH } from '../consts';
+import { MAX_BUILD_ID_LENGTH } from './consts';
 import * as t from 'io-ts';
 
 export interface MaxLengthString<N> {

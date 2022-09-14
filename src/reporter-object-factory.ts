@@ -37,7 +37,7 @@ import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
 import path from 'path';
 import { getLayoutTestingSettings } from './get-reporter-settings';
-import { addArrayValueByKey, getShouldUploadLayoutTestingData, makePathRelativeStartingWith, replaceLast } from './utils';
+import { addArrayValueByKey, getScreenshotComparerArtifactsPath, getShouldUploadLayoutTestingData, makePathRelativeStartingWith } from './utils';
 
 export function reporterObjectFactory (
     readFile: ReadFileMethod,
@@ -246,13 +246,20 @@ export function reporterObjectFactory (
             const testBrowserRuns               = browserToRunsMap[testId];
             const shouldUploadLayoutTestingData = getShouldUploadLayoutTestingData(layoutTestingEnabled, browsers);
 
-            if (!noScreenshotUpload) {
+            if (!noScreenshotUpload || shouldUploadLayoutTestingData) {
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath, screenshotData, testRunId, actionId } = screenshotInfo;
 
+                    const comparisonArtifactsPath = shouldUploadLayoutTestingData ? await getScreenshotComparerArtifactsPath(fileExists, screenshotPath, screenshotsDir, destinationDir) : void 0;
+                    const comparisonFailed        = !!comparisonArtifactsPath;
+
+                    if (noScreenshotUpload && !comparisonFailed)
+                        continue;
+
                     const currentUploadId = await uploader.uploadFile(screenshotPath, screenshotData);
 
-                    if (!currentUploadId) continue;
+                    if (!currentUploadId)
+                        continue;
 
                     if (actionId) {
                         const actions          = testRunToActionsMap[testRunId];
@@ -269,35 +276,28 @@ export function reporterObjectFactory (
                         }
                     };
 
-                    if (shouldUploadLayoutTestingData) {
-                        const comparisonArtifactsPath = replaceLast(screenshotPath, path.normalize(screenshotsDir), path.normalize(destinationDir));
-                        const comparisonFailed        = await fileExists(comparisonArtifactsPath);
+                    if (comparisonFailed) {
+                        const testPath                       = fixture.path;
+                        const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
+                        const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir));
 
-                        if (comparisonFailed) {
-                            const testPath                       = fixture.path;
-                            const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
-                            const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir));
+                        if (baselineScreenshotRelativePath) {
+                            const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);
 
-
-                            if (baselineScreenshotRelativePath) {
-                                const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);
-
-                                screenshotMapItem.baselineSourcePath = posixPath;
-                                screenshotMapItem.maskSourcePath     = posixPath.replace(/.png$/, '_mask.png');
-                            }
-
-
-                            screenshotMapItem.ids = {
-                                ...screenshotMapItem.ids,
-
-                                baseline: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_etalon'),
-                                diff:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_diff'),
-                                mask:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_mask')
-                            };
+                            screenshotMapItem.baselineSourcePath = posixPath;
+                            screenshotMapItem.maskSourcePath     = posixPath.replace(/.png$/, '_mask.png');
                         }
 
-                        screenshotMapItem.comparisonFailed = comparisonFailed;
+                        screenshotMapItem.ids = {
+                            ...screenshotMapItem.ids,
+
+                            baseline: await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_etalon'),
+                            diff:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_diff'),
+                            mask:     await uploader.uploadLayoutTestingArtifact(comparisonArtifactsPath, '_mask')
+                        };
                     }
+
+                    screenshotMapItem.comparisonFailed = comparisonFailed;
 
                     addArrayValueByKey(testRunToScreenshotsMap, testRunId, screenshotMapItem);
                 }

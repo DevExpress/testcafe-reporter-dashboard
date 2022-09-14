@@ -128,7 +128,8 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%firefox_1.png'
+                path:             '%filePath%firefox_1.png',
+                comparisonFailed: false
             }
         ]);
 
@@ -139,7 +140,8 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_1_1.png'
+                path:             '%filePath%chrome_1_1.png',
+                comparisonFailed: false
             }
         ]);
 
@@ -150,7 +152,8 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_1.png'
+                path:             '%filePath%chrome_1.png',
+                comparisonFailed: false
             }
         ]);
 
@@ -161,7 +164,8 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_headless_1.png'
+                path:             '%filePath%chrome_headless_1.png',
+                comparisonFailed: false
             }
         ]);
 
@@ -172,7 +176,8 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_headless_2.png'
+                path:             '%filePath%chrome_headless_2.png',
+                comparisonFailed: false
             }
         ]);
 
@@ -183,7 +188,8 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_headless.png'
+                path:             '%filePath%chrome_headless.png',
+                comparisonFailed: false
             }
         ]);
 
@@ -219,13 +225,15 @@ describe('reportTestDone', () => {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_1_1.png'
+                path:             '%filePath%chrome_1_1.png',
+                comparisonFailed: false
             },
             {
                 ids: {
                     current: 'upload_id'
                 },
-                path: '%filePath%chrome_1_2.png'
+                path:             '%filePath%chrome_1_2.png',
+                comparisonFailed: false
             }
         ]);
     });
