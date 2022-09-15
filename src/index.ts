@@ -1,6 +1,7 @@
 import fs from 'fs';
 import fetch from 'isomorphic-fetch';
 import { promisify } from 'util';
+import path from 'path';
 
 import {
     ENABLE_LOG,
@@ -31,5 +32,10 @@ module.exports = function pluginFactory (): ReporterPluginObject {
         ciInfo:              CI_INFO
     };
 
-    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, require('testcafe/package').version);
+    const rootPackageName = require(path.resolve('package')).name;
+    const tcVersion       = require(rootPackageName === 'testcafe'
+                                    ? path.resolve('package')
+                                    : 'testcafe/package').version;
+
+    return reporterObjectFactory(promisify(fs.readFile), fetch, settings, logger, tcVersion);
 };
