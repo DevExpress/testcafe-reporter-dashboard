@@ -1,4 +1,4 @@
-import { MAX_BUILD_ID_LENGTH } from './consts';
+import { MAX_BUILD_ID_LENGTH } from './types/consts';
 import {
     AUTHENTICATION_TOKEN_INVALID,
     AUTHENTICATION_TOKEN_NOT_DEFINED,

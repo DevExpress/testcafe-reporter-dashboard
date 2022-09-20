@@ -1,4 +1,3 @@
-export const MAX_BUILD_ID_LENGTH            = 100;
 export const CONCURRENT_ERROR_CODE          = 409;
 export const SERVICE_UNAVAILABLE_ERROR_CODE = 503;
 

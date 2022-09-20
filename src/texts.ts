@@ -1,4 +1,4 @@
-import { MAX_BUILD_ID_LENGTH } from './consts';
+import { MAX_BUILD_ID_LENGTH } from './types/consts';
 import createReportUrl from './create-report-url';
 
 export const DASHBOARD_LOCATION_NOT_DEFINED  = 'The \'TESTCAFE_DASHBOARD_URL\' environment variable is not defined.';
