@@ -9,6 +9,5 @@
   },
   "publishCommand": "npm publish --access=public",
   "confirm": false,
-  "publishTag": "rc",
   "prePublishScript": "npm test"
 }
