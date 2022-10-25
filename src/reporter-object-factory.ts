@@ -161,9 +161,6 @@ export function reporterObjectFactory (
         async reportWarnings (warning: Warning): Promise<void> {
             if (rejectReport) return;
 
-            if (warning.message.includes('It has just been rewritten with a recent screenshot.'))
-                return;
-
             if (warning.testRunId) {
                 if (!testRunToWarningsMap[warning.testRunId])
                     testRunToWarningsMap[warning.testRunId] = [];

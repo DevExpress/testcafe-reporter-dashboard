@@ -1,7 +1,7 @@
 {
-  "name": "@vasily.strelyaev/testcafe-reporter-dashboard-devextreme",
-  "version": "1.0.0",
-  "description": "Dashboard TestCafe reporter plugin fork, tailored to the DevExtreme team.",
+  "name": "testcafe-reporter-dashboard",
+  "version": "1.0.0-rc.4",
+  "description": "Dashboard TestCafe reporter plugin.",
   "author": {
     "name": "Developer Express Inc.",
     "url": "https://www.devexpress.com/"
