@@ -51,24 +51,4 @@ describe('ReportWarnings', () => {
         await reporter.reportWarnings({ message: 'warning', testRunId: WARNINGS_TEST_RUN_ID_1 });
         assert.deepStrictEqual(reportWarningsPayload, { testId: warningTestId });
     });
-
-    it('Temporary - reportWarnings should suppress screenshot rewrite warning', async () => {
-        const reporter = buildReporterPlugin(() => reporterObjectFactory(
-            mockReadFile, mockFileExists, fetch, SETTINGS, logger, TC_OLDEST_COMPATIBLE_VERSION
-        ), process.stdout);
-
-        const warningTestId = 'warningsTestId';
-
-        const testRunInfo: TestStartInfo = {
-            testId:     warningTestId,
-            testRunId:  [''],
-            testRunIds: [WARNINGS_TEST_RUN_ID_1],
-            skipped:    false
-        };
-
-        await reporter.reportTestStart('', {}, testRunInfo);
-
-        await reporter.reportWarnings({ message: 'Foo: It has just been rewritten with a recent screenshot. Bar!', testRunId: WARNINGS_TEST_RUN_ID_1 });
-        assert.deepStrictEqual(reportWarningsPayload, { });
-    });
 });
