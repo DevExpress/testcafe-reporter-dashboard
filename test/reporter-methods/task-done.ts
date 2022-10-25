@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import assert from 'assert';
 import { AggregateCommandType } from '../../src/types/internal/';
 import reporterObjectFactory from '../../src/reporter-object-factory';
