@@ -111,12 +111,15 @@ export type Video = Readonly<{
 export type BrowserRunInfo = {
     browser: BrowserInfo;
     screenshotMap?: ScreenshotMapItem[];
-    screenshotUploadIds?: string[];
     videoUploadIds?: string[];
     actions?: ActionInfo[];
     thirdPartyError?: TestError;
     quarantineAttempt?: number;
     warnings?: Warning[];
+
+    // Deprecated. Preserved for Dashboard's backward
+    // compatibility with older reporters.
+    screenshotUploadIds?: string[];
 }
 
 export type ActionInfo = {

@@ -67,8 +67,8 @@ export type DashboardSettings = {
 };
 
 export type LayoutTestingSettings = {
-    screenshotsDir: string;
-    destinationDir: string;
+    outputRelativeDir: string;
+    resultsRelativeDir: string;
     layoutTestingEnabled: boolean;
     comparerBaseDir: string;
 };

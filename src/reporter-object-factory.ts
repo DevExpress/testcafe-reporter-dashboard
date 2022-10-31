@@ -233,7 +233,7 @@ export function reporterObjectFactory (
             if (rejectReport) return;
 
             const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable, fixture } = testRunInfo;
-            const { layoutTestingEnabled, screenshotsDir, destinationDir, comparerBaseDir }               = layoutTestingSettings;
+            const { layoutTestingEnabled, outputRelativeDir, resultsRelativeDir, comparerBaseDir }        = layoutTestingSettings;
 
             const testRunToScreenshotsMap: Record<string, ScreenshotMapItem[]> = {};
 
@@ -247,7 +247,7 @@ export function reporterObjectFactory (
                 for (const screenshotInfo of screenshots) {
                     const { screenshotPath, screenshotData, testRunId, actionId } = screenshotInfo;
 
-                    const comparisonArtifactsPath = shouldUploadLayoutTestingData ? await getScreenshotComparerArtifactsPath(fileExists, screenshotPath, screenshotsDir, destinationDir) : void 0;
+                    const comparisonArtifactsPath = shouldUploadLayoutTestingData ? await getScreenshotComparerArtifactsPath(fileExists, screenshotPath, outputRelativeDir, resultsRelativeDir) : void 0;
                     const comparisonFailed        = !!comparisonArtifactsPath;
 
                     if (noScreenshotUpload && !comparisonFailed)

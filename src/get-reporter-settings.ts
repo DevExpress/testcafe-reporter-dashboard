@@ -46,8 +46,8 @@ export function getLayoutTestingSettings (taskProperties: TaskProperties): Layou
 
     return {
         layoutTestingEnabled: LAYOUT_TESTING_ENABLED,
-        screenshotsDir:       LT_SCREENSHOTS_DIR || comparerProperties['screenshotsRelativePath'] || '/screenshots',
-        destinationDir:       LT_DESTINATION_DIR || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots',
+        outputRelativeDir:    LT_SCREENSHOTS_DIR || comparerProperties['screenshotsRelativePath'] || '/screenshots',
+        resultsRelativeDir:   LT_DESTINATION_DIR || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots',
         comparerBaseDir:      LT_COMPARER_BASE_DIR || comparerProperties['path'] || './testing'
     };
 }

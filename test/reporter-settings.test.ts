@@ -71,8 +71,8 @@ describe('getReporterSettings()', () => {
 
             const expectedSettings = {
                 layoutTestingEnabled: true,
-                screenshotsDir:       'env/screenshot/relative/path',
-                destinationDir:       'env/destination/relative/path',
+                outputRelativeDir:    'env/screenshot/relative/path',
+                resultsRelativeDir:   'env/destination/relative/path',
                 comparerBaseDir:      'env/base/path'
             };
 
@@ -95,8 +95,8 @@ describe('getReporterSettings()', () => {
 
             const expectedSettings = {
                 layoutTestingEnabled: false,
-                screenshotsDir:       'config/screenshot/relative/path',
-                destinationDir:       'config/destination/relative/path',
+                outputRelativeDir:    'config/screenshot/relative/path',
+                resultsRelativeDir:   'config/destination/relative/path',
                 comparerBaseDir:      'config/base/path'
             };
 
@@ -113,8 +113,8 @@ describe('getReporterSettings()', () => {
 
             const expectedSettings = {
                 layoutTestingEnabled: false,
-                screenshotsDir:       '/screenshots',
-                destinationDir:       '/artifacts/compared-screenshots',
+                outputRelativeDir:    '/screenshots',
+                resultsRelativeDir:   '/artifacts/compared-screenshots',
                 comparerBaseDir:      './testing'
             };
 
