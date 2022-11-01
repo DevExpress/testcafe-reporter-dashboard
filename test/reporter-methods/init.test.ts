@@ -5,7 +5,6 @@ import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { DashboardSettings } from '../../src/types/internal';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 import { mockFileExists, mockReadFile } from '../mocks';
-import { AUTHENTICATION_TOKEN_REJECTED } from '../../src/texts';
 import { testDoneInfo } from '../data';
 import { DashboardValidationResult, RUNS_LIMIT_EXCEEDED_ERROR_MESSAGE } from '../../src/types/common';
 import { DashboardInfo } from '../../src/types';
@@ -37,8 +36,6 @@ async function runReporterLifecycleMethods (reporter: any, requests: { url: stri
 }
 
 describe('initReporter', () => {
-    const errorText = 'not good';
-
     let requests: { url: string; method: string; body: string }[] = [];
 
     let logs: string[]   = [];
@@ -63,42 +60,10 @@ describe('initReporter', () => {
             json:       () => Promise.resolve('okMock') } as Response);
     };
 
-    function fetchFailMock (url, { method, body }) {
-        requests.push({ url, method, body });
-
-        const error =  { message: errorText } as DashboardInfo;
-
-        return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
-            json:       () => Promise.resolve(error)
-        });
-    }
-
-    function fetchFailSilentMock () {
-        const silentError =  { message: '' } as DashboardInfo;
-
-        return Promise.resolve({ ok:         false, status:     401, statusText: 'Unauthorized',
-            json:       () => Promise.resolve(silentError)
-        });
-    }
-
     function getReporter (fetchMock) {
         return buildReporterPlugin(() => reporterObjectFactory(
             mockReadFile, mockFileExists, fetchMock, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION
         ), process.stdout);
-    }
-
-    async function assertInitError (reporter, expectedError) {
-        let errorMessage;
-
-        try {
-            await reporter.init();
-        }
-        catch (e) {
-            errorMessage = e.message;
-        }
-        finally {
-            assert.strictEqual(errorMessage, expectedError);
-        }
     }
 
     function fetchOutOfLimits (url, { method, body }) {
@@ -151,22 +116,5 @@ describe('initReporter', () => {
         assert.match(reporterVersion, /[0-1]\.[0-9]*\.[0-9]/);
         assert.strictEqual(logs.length, 1);
         assert.strictEqual(logs[0], 'Task execution report: http://localhost/runs/project_1/buildId');
-    });
-
-    it('Should throw on error', async () => {
-        const reporter = getReporter(fetchFailMock) as any;
-
-        await assertInitError(reporter, errorText);
-        assert.strictEqual(errors.length, 1);
-        assert.strictEqual(errors[0], errorText);
-        assert.strictEqual(requests.length, 1);
-    });
-
-    it('Should use default error text', async () => {
-        const reporter = getReporter(fetchFailSilentMock);
-
-        await assertInitError(reporter, AUTHENTICATION_TOKEN_REJECTED);
-        assert.strictEqual(errors.length, 1);
-        assert.strictEqual(errors[0], AUTHENTICATION_TOKEN_REJECTED);
     });
 });
