@@ -91,34 +91,6 @@ export function reporterObjectFactory (
         ...BLANK_REPORTER,
         createErrorDecorator: errorDecorator,
 
-        async init (): Promise<void> {
-            const validationResponse = await transport.fetchFromDashboard(
-                'api/validateReporter',
-                {
-                    method: 'POST',
-                    body:   JSON.stringify({
-                        reportId:        id,
-                        reporterVersion: require('../package.json').version,
-                        tcVersion
-                    })
-                }
-            );
-
-            const responseJson = await validationResponse.json() as DashboardInfo;
-
-            if (!responseJson)
-                throw new Error('Expected json DashboardInfo response');
-
-            if (!validationResponse.ok) {
-                const errorMessage = responseJson.message ? responseJson.message : AUTHENTICATION_TOKEN_REJECTED;
-
-                logger.error(errorMessage);
-                throw new Error(errorMessage);
-            }
-
-            processDashboardWarnings(responseJson);
-        },
-
         getReportUrl (): string {
             return createReportUrl(buildId || id, dashboardUrl, authenticationToken);
         }
@@ -142,6 +114,33 @@ export function reporterObjectFactory (
     }
 
     assignReporterMethods(reporterPluginObject, {
+        async init (): Promise<void> {
+            const validationResponse = await transport.fetchFromDashboard(
+                'api/validateReporter',
+                {
+                    method: 'POST',
+                    body:   JSON.stringify({
+                        reportId:        id,
+                        reporterVersion: require('../package.json').version,
+                        tcVersion
+                    })
+                }
+            );
+
+            const responseJson = await validationResponse.json() as DashboardInfo;
+
+            if (!responseJson)
+                logger.error('Expected json DashboardInfo response');
+
+            if (!validationResponse.ok) {
+                const errorMessage = responseJson.message ? responseJson.message : AUTHENTICATION_TOKEN_REJECTED;
+
+                logger.error(errorMessage);
+            }
+
+            processDashboardWarnings(responseJson);
+        },
+
         async reportTaskStart (startTime, userAgents, testCount, taskStructure: ReportedTestStructureItem[], taskProperties: TaskProperties): Promise<void> {
             if (rejectReport) return;
 
