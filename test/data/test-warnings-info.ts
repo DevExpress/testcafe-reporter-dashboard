@@ -22,5 +22,11 @@ export const testWarningsInfo: TestRunInfo = {
     testId,
     unstable:       false,
     videos:         [],
-    warnings:       []
+    warnings:       [],
+    fixture:        {
+        id:   '',
+        path: '',
+        name: '',
+        meta: {}
+    }
 };

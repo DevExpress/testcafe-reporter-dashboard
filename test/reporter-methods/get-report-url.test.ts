@@ -1,8 +1,8 @@
 import assert from 'assert';
 import { sign } from 'jsonwebtoken';
-import reporterObjectFactory from '../../src/reporter-object-factory';
+import { reporterObjectFactory } from '../../src/reporter-object-factory';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
-import { mockReadFile } from '../mocks';
+import { mockFileExists, mockReadFile } from '../mocks';
 
 
 const TESTCAFE_DASHBOARD_URL = 'http://localhost';
@@ -44,7 +44,7 @@ describe('getReportUrl', () => {
             runId: reportId
         };
 
-        const reporter = reporterObjectFactory(mockReadFile, fetchMock, settings, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+        const reporter = reporterObjectFactory(mockReadFile, mockFileExists, fetchMock, settings, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
         const reportUrl = reporter.getReportUrl();
 

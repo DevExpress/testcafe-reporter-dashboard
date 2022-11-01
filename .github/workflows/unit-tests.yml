@@ -3,7 +3,7 @@ name: Unit tests
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ master, layout-testing ]
+    branches: [ master ]
 
 jobs:
   run:
