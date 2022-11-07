@@ -16,7 +16,7 @@ describe('Run state builder tests', () => {
         assert.deepStrictEqual(actualState, EXPECTED_TASK_STARTED_RUN_STATE_DATA);
     });
 
-    it.only('reportTestStarted', async () => {
+    it('reportTestStarted', async () => {
         // arrange
         const runStateBuilder = new RunStateBuilder('run_1');
 
