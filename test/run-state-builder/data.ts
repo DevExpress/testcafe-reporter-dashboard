@@ -1,4 +1,4 @@
-import { TaskStartArgs, TestStartArgs } from '../../src/types';
+import { TaskDoneArgs, TaskStartArgs, TestDoneArgs, TestStartArgs } from '../../src/types';
 import { RunState } from '../../src/types/run';
 
 export const REPORT_TASK_START_ARGS_DATA: TaskStartArgs = {
@@ -69,9 +69,29 @@ export const REPORT_TEST_START_ARGS_DATA: TestStartArgs = {
     skipped: false
 };
 
-export const REPORT_TEST_DONE_ARGS_DATA: TestStartArgs = {
-    testId:  'bDpy4xc' as any,
-    skipped: false
+export const REPORT_TEST_DONE_ARGS_DATA: TestDoneArgs = {
+    duration:   12088,
+    errorCount: 1,
+    skipped:    false,
+    testId:     'bDpy4xc' as any,
+    unstable:   true,
+    uploadId:   'upload_bDpy4xc'
+};
+
+export const REPORT_TASK_DONE_ARGS_DATA: TaskDoneArgs = {
+    endTime:  new Date('2022-11-07T11:02:40.051Z'),
+    passed:   3,
+    warnings: [
+        'The "src" and "browsers" options from the configuration file will be ignored.',
+        'The "tsConfigPath" option is deprecated and will be removed in the next major release. Use the "compilerOptions.typescript.configPath" option instead.'
+    ],
+    warningsUploadId: 'warning_upload_bDpy4xc',
+    result:           {
+        passedCount:  3,
+        failedCount:  2,
+        skippedCount: 1
+    },
+    buildId: 'build_1' as any
 };
 
 export const EXPECTED_TASK_STARTED_RUN_STATE_DATA: Partial<RunState> = {
@@ -153,4 +173,36 @@ export const EXPECTED_TEST_STARTED_RUN_STATE_DATA: Partial<RunState> = {
             inProgress: true
         }
     }
+};
+
+export const EXPECTED_TEST_DONE_RUN_STATE_DATA: Partial<RunState> = {
+    ...EXPECTED_TASK_STARTED_RUN_STATE_DATA,
+    tests: {
+        ...EXPECTED_TASK_STARTED_RUN_STATE_DATA.tests,
+        ['bDpy4xc']: {
+            id:         'bDpy4xc' as any,
+            name:       'Test 1' as any,
+            skipped:    false,
+            inProgress: false,
+
+            duration:   12088,
+            errorCount: 1,
+            unstable:   true,
+            uploadId:   'upload_bDpy4xc'
+        }
+    }
+};
+
+export const EXPECTED_TASK_DONE_RUN_STATE_DATA: Partial<RunState> = {
+    ...EXPECTED_TASK_STARTED_RUN_STATE_DATA,
+
+    endTime:  new Date('2022-11-07T11:02:40.051Z'),
+    passed:   3,
+    failed:   2,
+    skipped:  1,
+    warnings: [
+        'The "src" and "browsers" options from the configuration file will be ignored.',
+        'The "tsConfigPath" option is deprecated and will be removed in the next major release. Use the "compilerOptions.typescript.configPath" option instead.'
+    ],
+    warningsUploadId: 'warning_upload_bDpy4xc'
 };

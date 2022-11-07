@@ -60,7 +60,7 @@ export class RunStateBuilder {
     reportTestStarted (payload: TestStartArgs) {
         const test = this._getTestByID(payload.testId);
 
-        test.skipped = payload.skipped;
+        test.skipped    = payload.skipped;
         test.inProgress = true;
     }
 
