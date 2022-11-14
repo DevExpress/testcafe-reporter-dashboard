@@ -32,8 +32,6 @@ export class RunStateUploader {
     }
 
     async _timeoutCallback () {
-        clearTimeout(this._timeoutId);
-
         try {
             await this._uploadRunState();
         }
@@ -43,6 +41,8 @@ export class RunStateUploader {
     }
 
     _setupUploadTimeout () {
+        clearTimeout(this._timeoutId);
+
         this._timeoutId = setTimeout(this._timeoutCallback, this._runStateUploadPeriod);
     }
 
