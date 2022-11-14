@@ -19,7 +19,7 @@ function skipEmptyValues (key, value) {
 export class RunStateUploader {
     private _runStateProvider: RunStateProvider;
     private _uploader: Uploader;
-    private _intervalId: NodeJS.Timeout;
+    private _timeoutId: NodeJS.Timeout;
     private _uploadInfo: UploadInfo;
     private _runStateUploadPeriod: number;
 
@@ -28,7 +28,22 @@ export class RunStateUploader {
 
         const buffer = Buffer.from(JSON.stringify(runState, skipEmptyValues));
 
-        this._uploader.upload(this._uploadInfo.uploadUrl, buffer);
+        await this._uploader.upload(this._uploadInfo.uploadUrl, buffer);
+    }
+
+    async _timeoutCallback () {
+        clearTimeout(this._timeoutId);
+
+        try {
+            await this._uploadRunState();
+        }
+        finally {
+            this._setupUploadTimeout();
+        }
+    }
+
+    _setupUploadTimeout () {
+        this._timeoutId = setTimeout(this._timeoutCallback, this._runStateUploadPeriod);
     }
 
     constructor (uploader: Uploader, runStateProvider: RunStateProvider, runStateUploadPeriod = RUN_STATE_UPLOAD_PERIOD) {
@@ -36,21 +51,20 @@ export class RunStateUploader {
         this._runStateProvider = runStateProvider;
         this._runStateUploadPeriod = runStateUploadPeriod;
 
-        this._uploadRunState = this._uploadRunState.bind(this);
+        this._timeoutCallback = this._timeoutCallback.bind(this);
     }
 
     async start (runId: string) {
         this._uploadInfo = await this._uploader.getUploadInfo(runId);
 
         this._uploadRunState();
-
-        this._intervalId = setInterval(this._uploadRunState, this._runStateUploadPeriod);
+        this._setupUploadTimeout();
 
         return this._uploadInfo.uploadId;
     }
 
     async end () {
-        clearInterval(this._intervalId);
+        clearTimeout(this._timeoutId);
 
         await this._uploadRunState();
     }
