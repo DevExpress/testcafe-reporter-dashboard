@@ -5,7 +5,7 @@ import { UploaderCore } from './uploader-core';
 import { RunStateBuilder } from './run-state-builder';
 import { RunStateUploader } from './run-state-uploader';
 
-export default function reportCommandsFactory (reportId: string, transport: Transport, logger: Logger) {
+export function s3ReportCommandsFactory (reportId: string, transport: Transport, logger: Logger) {
     async function sendReportCommand (
         type: AggregateCommandType,
         payload: Record<string, unknown>

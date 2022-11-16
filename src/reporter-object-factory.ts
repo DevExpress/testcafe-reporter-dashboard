@@ -38,6 +38,8 @@ import BLANK_REPORTER from './blank-reporter';
 import path from 'path';
 import { getLayoutTestingSettings } from './get-reporter-settings';
 import { addArrayValueByKey, getScreenshotComparerArtifactsPath, getShouldUploadLayoutTestingData, makePathRelativeStartingWith } from './utils';
+import { S3_OPTIMIZATION_ENABLED } from './env';
+import { s3ReportCommandsFactory } from './s3-report-commands-factory';
 
 export function reporterObjectFactory (
     readFile: ReadFileMethod,
@@ -67,7 +69,7 @@ export function reporterObjectFactory (
 
     const transport      = new Transport(fetch, dashboardUrl, authenticationToken, isLogEnabled, logger, responseTimeout, requestRetryCount);
     const uploader       = new Uploader(readFile, fileExists, transport, logger);
-    const reportCommands = reportCommandsFactory(id, transport);
+    const reportCommands = S3_OPTIMIZATION_ENABLED ? s3ReportCommandsFactory(id, transport, logger) : reportCommandsFactory(id, transport);
 
     const testRunToWarningsMap: Record<string, Warning[]>         = {};
     const runWarnings: Warning[] = [];
