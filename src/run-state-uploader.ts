@@ -1,11 +1,12 @@
 import { RunState } from './types/run';
 import { UploadInfo } from './types/internal';
+import FetchResponse from './transport/fetch-response';
 
 export const RUN_STATE_UPLOAD_PERIOD = 10000;
 
 export interface Uploader {
-    getUploadInfo (uploadEntityId: string): Promise<UploadInfo>;
-    upload (uploadUrl: string, uploadEntity: Buffer): Promise<void>;
+    getUploadInfo (uploadEntityId: string): Promise<UploadInfo | null>;
+    upload (uploadUrl: string, uploadEntity: Buffer): Promise<FetchResponse>;
 }
 
 export interface RunStateProvider {
@@ -55,7 +56,12 @@ export class RunStateUploader {
     }
 
     async start (runId: string) {
-        this._uploadInfo = await this._uploader.getUploadInfo(runId);
+        const uploadInfo = await this._uploader.getUploadInfo(runId);
+
+        if (!uploadInfo)
+            throw new Error('Unable to get upload info');
+
+        this._uploadInfo = uploadInfo;
 
         this._uploadRunState();
         this._setupUploadTimeout();
