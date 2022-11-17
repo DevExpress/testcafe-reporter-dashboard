@@ -1,4 +1,4 @@
-import { AggregateCommandType, AggregateNames, FileExistsMethod, Logger, ReadFileMethod, UploadStatus } from './types/internal';
+import { FileExistsMethod, Logger, ReadFileMethod } from './types/internal';
 import { UploadInfo } from './types/internal/resolve';
 import { createGetUploadInfoError, createFileUploadError, createTestUploadError, createWarningUploadError } from './texts';
 import Transport from './transport';
@@ -34,7 +34,7 @@ export class Uploader {
     }
 
     private async _upload (uploadInfo: UploadInfo, uploadEntity: Buffer, uploadError: string): Promise<void> {
-        const { uploadUrl, uploadId } = uploadInfo;
+        const { uploadUrl } = uploadInfo;
 
         const response = await this._transport.fetch(uploadUrl, {
             method:  'PUT',
@@ -42,16 +42,6 @@ export class Uploader {
                 'Content-Length': uploadEntity.length
             },
             body: uploadEntity
-        });
-
-        await this._transport.sendResolveCommand({
-            aggregateId:   uploadId,
-            aggregateName: AggregateNames.Upload,
-            type:          AggregateCommandType.createUpload,
-
-            payload: {
-                status: response.ok ? UploadStatus.Completed : UploadStatus.Failed
-            }
         });
 
         if (!response.ok)

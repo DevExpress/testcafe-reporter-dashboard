@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import assert from 'assert';
 import { Screenshot, DashboardTestRunInfo, WarningsInfo } from '../src/types/testcafe';
 import { CHROME_HEADLESS, CHROME, FIREFOX } from './data/test-browser-info';
-import { AggregateCommandType, UploadStatus, AggregateNames } from '../src/types/internal';
+import { AggregateCommandType, AggregateNames } from '../src/types/internal';
 import { EMPTY_TEST_RUN_INFO } from './data/empty-test-run-info';
 import { reporterObjectFactory } from '../src/reporter-object-factory';
 import logger from '../src/logger';
@@ -369,46 +369,7 @@ describe('Uploads', () => {
 
             const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
 
-            assert.equal(uploadCommands.length, 10);
-            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
-            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
-            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[3].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[3].aggregateId, uploadInfos[3].uploadId);
-            assert.deepEqual(uploadCommands[3].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[4].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[4].aggregateId, uploadInfos[4].uploadId);
-            assert.deepEqual(uploadCommands[4].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[5].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[5].aggregateId, uploadInfos[5].uploadId);
-            assert.deepEqual(uploadCommands[5].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[6].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[6].aggregateId, uploadInfos[6].uploadId);
-            assert.deepEqual(uploadCommands[6].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[7].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[7].aggregateId, uploadInfos[7].uploadId);
-            assert.deepEqual(uploadCommands[7].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[8].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[8].aggregateId, uploadInfos[8].uploadId);
-            assert.deepEqual(uploadCommands[8].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[9].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[9].aggregateId, uploadInfos[9].uploadId);
-            assert.deepEqual(uploadCommands[9].payload, { status: UploadStatus.Completed });
+            assert.equal(uploadCommands.length, 0);
         });
 
         it('Should upload only layout testing failures if noScreenshotUpload is true', async () => {
@@ -522,38 +483,7 @@ describe('Uploads', () => {
 
             const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
 
-            assert.equal(uploadCommands.length, 8);
-            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
-            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
-            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[3].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[3].aggregateId, uploadInfos[3].uploadId);
-            assert.deepEqual(uploadCommands[3].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[4].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[4].aggregateId, uploadInfos[4].uploadId);
-            assert.deepEqual(uploadCommands[4].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[5].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[5].aggregateId, uploadInfos[5].uploadId);
-            assert.deepEqual(uploadCommands[5].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[6].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[6].aggregateId, uploadInfos[6].uploadId);
-            assert.deepEqual(uploadCommands[6].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[7].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[7].aggregateId, uploadInfos[7].uploadId);
-            assert.deepEqual(uploadCommands[7].payload, { status: UploadStatus.Completed });
+            assert.equal(uploadCommands.length, 0);
         });
 
         it('Should upload screenshots from screenshotData', async () => {
@@ -611,17 +541,7 @@ describe('Uploads', () => {
 
             const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
 
-            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
-            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
-            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
+            assert.equal(uploadCommands.length, 0);
         });
 
         it('Should not send screenshots info to dashboard if NO_SCREENSHOT_UPLOAD is true', async () => {
@@ -663,15 +583,11 @@ describe('Uploads', () => {
 
             assert.equal(browserRuns['chrome_headless'].screenshotMap, void 0);
 
-            assert.equal(aggregateCommands.length, 3);
+            assert.equal(aggregateCommands.length, 2);
             assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTaskStart);
 
             assert.equal(aggregateCommands[1].payload.uploadId, uploadInfos[0].uploadId);
             assert.equal(aggregateCommands[1].type, AggregateCommandType.reportTestDone);
-
-            assert.equal(aggregateCommands[2].type, AggregateCommandType.createUpload);
-            assert.deepEqual(aggregateCommands[2].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(aggregateCommands[2].payload, { status: UploadStatus.Completed });
         });
     });
 
@@ -733,17 +649,7 @@ describe('Uploads', () => {
 
             const uploadCommands = aggregateCommands.filter(command => command.aggregateName === AggregateNames.Upload);
 
-            assert.equal(uploadCommands[0].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[0].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(uploadCommands[0].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[1].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[1].aggregateId, uploadInfos[1].uploadId);
-            assert.deepEqual(uploadCommands[1].payload, { status: UploadStatus.Completed });
-
-            assert.equal(uploadCommands[2].type, AggregateCommandType.createUpload);
-            assert.deepEqual(uploadCommands[2].aggregateId, uploadInfos[2].uploadId);
-            assert.deepEqual(uploadCommands[2].payload, { status: UploadStatus.Completed });
+            assert.equal(uploadCommands.length, 0);
         });
 
         it('Should not send videos info to dashboard if NO_VIDEO_UPLOAD enabled', async () => {
@@ -776,15 +682,11 @@ describe('Uploads', () => {
             assert.deepEqual(browserRuns['testRun_1'].videoUploadIds, []);
             assert.deepEqual(browserRuns['testRun_2'].videoUploadIds, []);
 
-            assert.equal(aggregateCommands.length, 3);
+            assert.equal(aggregateCommands.length, 2);
             assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTaskStart);
 
             assert.equal(aggregateCommands[1].payload.uploadId, uploadInfos[0].uploadId);
             assert.equal(aggregateCommands[1].type, AggregateCommandType.reportTestDone);
-
-            assert.equal(aggregateCommands[2].type, AggregateCommandType.createUpload);
-            assert.deepEqual(aggregateCommands[2].aggregateId, uploadInfos[0].uploadId);
-            assert.deepEqual(aggregateCommands[2].payload, { status: UploadStatus.Completed });
         });
     });
 });
