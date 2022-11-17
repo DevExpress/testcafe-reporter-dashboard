@@ -1,5 +1,5 @@
 {
-  "name": "@vasily.strelyaev/testcafe-reporter-dashboard-devextreme",
+  "name": "testcafe-reporter-dashboard-devextreme",
   "version": "1.2.0",
   "description": "Dashboard TestCafe reporter plugin fork, tailored to the DevExtreme team.",
   "author": {
