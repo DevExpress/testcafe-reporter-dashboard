@@ -19,8 +19,8 @@ export default function reportCommandsFactory (reportId: string, transport: Tran
         sendTaskStartCommand (payload: TaskStartArgs): Promise<void> {
             return sendReportCommand(AggregateCommandType.reportTaskStart, payload);
         },
-        sendTestStartCommand (payload: TestStartArgs): Promise<void> {
-            return sendReportCommand(AggregateCommandType.reportTestStart, payload);
+        sendTestStartCommand (payload: TestStartArgs) {
+            return Promise.resolve(payload);
         },
         sendTestDoneCommand (payload: TestDoneArgs): Promise<void> {
             return sendReportCommand(AggregateCommandType.reportTestDone, payload);
