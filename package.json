@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Dashboard TestCafe reporter plugin.",
   "author": {
     "name": "Developer Express Inc.",
@@ -65,7 +65,7 @@
     "monocle-ts": "^2.3.5",
     "newtype-ts": "^0.3.4",
     "semver": "^5.6.0",
-    "uuid": "3.3.3"
+    "uuid": "^9.0.0"
   },
   "resolutions": {
     "lodash": "4.17.21",
