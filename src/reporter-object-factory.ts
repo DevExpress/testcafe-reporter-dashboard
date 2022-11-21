@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { AUTHENTICATION_TOKEN_REJECTED, createReportUrlMessage } from './texts';
 import {
