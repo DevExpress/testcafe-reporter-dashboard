@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { RunStateUploader, Uploader, RunStateProvider, } from '../src/run-state-uploader';
+import FetchResponse from '../src/transport/fetch-response';
 
 describe('Run state uploader tests', () => {
     let runStateUploader: RunStateUploader | null = null;
@@ -18,6 +19,8 @@ describe('Run state uploader tests', () => {
         },
         upload: async function upload (uploadUrl: string, uploadEntity: Buffer) {
             uploadedRunState = JSON.parse(uploadEntity.toString());
+
+            return new FetchResponse({ ok: true });
         }
     };
 

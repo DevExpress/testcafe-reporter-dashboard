@@ -21,3 +21,5 @@ export const REQUEST_RETRY_COUNT = parseNumber(env.TESTCAFE_DASHBOARD_REQUEST_RE
 export const RESPONSE_TIMEOUT    = parseNumber(env.TESTCAFE_DASHBOARD_RESPONSE_TIMEOUT) || 30 * 1000;
 
 export const CI_INFO = getCIInfo();
+
+export const S3_OPTIMIZATION_ENABLED = parseBooleanVariable(env.S3_OPTIMIZATION_ENABLED);
