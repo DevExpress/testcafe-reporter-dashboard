@@ -10,8 +10,7 @@ import {
     RESPONSE_TIMEOUT,
     REQUEST_RETRY_COUNT,
     LT_SCREENSHOTS_DIR,
-    LT_DESTINATION_DIR,
-    LT_COMPARER_BASE_DIR
+    LT_DESTINATION_DIR
 } from './env';
 import { ReporterPluginOptions, TaskProperties } from './types';
 import { LayoutTestingSettings } from './types/internal';
@@ -47,7 +46,6 @@ export function getLayoutTestingSettings (taskProperties: TaskProperties): Layou
     return {
         layoutTestingEnabled: LAYOUT_TESTING_ENABLED,
         outputRelativeDir:    LT_SCREENSHOTS_DIR || comparerProperties['screenshotsRelativePath'] || '/screenshots',
-        resultsRelativeDir:   LT_DESTINATION_DIR || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots',
-        comparerBaseDir:      LT_COMPARER_BASE_DIR || comparerProperties['path'] || './testing'
+        resultsRelativeDir:   LT_DESTINATION_DIR || comparerProperties['destinationRelativePath'] || '/artifacts/compared-screenshots'
     };
 }

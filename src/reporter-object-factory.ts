@@ -37,7 +37,7 @@ import createReportUrl from './create-report-url';
 import BLANK_REPORTER from './blank-reporter';
 import path from 'path';
 import { getLayoutTestingSettings } from './get-reporter-settings';
-import { addArrayValueByKey, getScreenshotComparerArtifactsPath, getShouldUploadLayoutTestingData, makePathRelativeStartingWith } from './utils';
+import { addArrayValueByKey, getScreenshotComparerArtifactsPath, getShouldUploadLayoutTestingData } from './utils';
 import { S3_OPTIMIZATION_ENABLED } from './env';
 import { s3ReportCommandsFactory } from './s3-report-commands-factory';
 
@@ -235,7 +235,7 @@ export function reporterObjectFactory (
             if (rejectReport) return;
 
             const { screenshots, videos, errs, durationMs, testId, browsers, skipped, unstable, fixture } = testRunInfo;
-            const { layoutTestingEnabled, outputRelativeDir, resultsRelativeDir, comparerBaseDir }        = layoutTestingSettings;
+            const { layoutTestingEnabled, outputRelativeDir, resultsRelativeDir }                         = layoutTestingSettings;
 
             const testRunToScreenshotsMap: Record<string, ScreenshotMapItem[]> = {};
 
@@ -278,7 +278,7 @@ export function reporterObjectFactory (
                     if (comparisonFailed) {
                         const testPath                       = fixture.path;
                         const baselineScreenshotPath         = path.join(path.dirname(testPath), 'etalons', path.basename(screenshotPath));
-                        const baselineScreenshotRelativePath = makePathRelativeStartingWith(baselineScreenshotPath, path.normalize(comparerBaseDir));
+                        const baselineScreenshotRelativePath = path.relative(process.cwd(), baselineScreenshotPath);
 
                         if (baselineScreenshotRelativePath) {
                             const posixPath = baselineScreenshotRelativePath.split(path.sep).join(path.posix.sep);

@@ -247,7 +247,7 @@ describe('Uploads', () => {
         });
 
         it('Smoke test', async () => {
-            setLayoutSettingsVariables('true', `${path.sep}screenshots`, `${path.sep}artifacts${path.sep}compared-screenshots`, `.${path.sep}testing`);
+            setLayoutSettingsVariables('true', `${path.sep}screenshots`, `${path.sep}artifacts${path.sep}compared-screenshots`);
 
             const reporterFactory = reRequireModules();
 
@@ -297,7 +297,7 @@ describe('Uploads', () => {
                 fixture:  {
                     id:   'fixture1',
                     name: 'My fixture',
-                    path: `${pathPrefix}testing${path.sep}tests${path.sep}suite1${path.sep}fixture1.js`,
+                    path: `${process.cwd()}${path.sep}testing${path.sep}tests${path.sep}suite1${path.sep}fixture1.js`,
                     meta: {}
                 }
             });
@@ -373,7 +373,7 @@ describe('Uploads', () => {
         });
 
         it('Should upload only layout testing failures if noScreenshotUpload is true', async () => {
-            setLayoutSettingsVariables('true', `${path.sep}screenshots`, `${path.sep}artifacts${path.sep}compared-screenshots`, `.${path.sep}testing`);
+            setLayoutSettingsVariables('true', `${path.sep}screenshots`, `${path.sep}artifacts${path.sep}compared-screenshots`);
 
             const reporterFactory = reRequireModules();
 
@@ -423,7 +423,7 @@ describe('Uploads', () => {
                 fixture:  {
                     id:   'fixture1',
                     name: 'My fixture',
-                    path: `${pathPrefix}testing${path.sep}tests${path.sep}suite1${path.sep}fixture1.js`,
+                    path: `${process.cwd()}${path.sep}testing${path.sep}tests${path.sep}suite1${path.sep}fixture1.js`,
                     meta: {}
                 }
             });

@@ -51,30 +51,26 @@ export const restoreCIInfoVariables = () => {
     }
 };
 
-export const setLayoutSettingsVariables = (enabled: string, screenshotPath: string, destinationPath: string, comparerBasePath: string) => {
+export const setLayoutSettingsVariables = (enabled: string, screenshotPath: string, destinationPath: string) => {
     process.env.TESTCAFE_DASHBOARD_LAYOUT_TESTING_ENABLED = enabled;
     process.env.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR     = screenshotPath;
     process.env.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR     = destinationPath;
-    process.env.TESTCAFE_DASHBOARD_LT_COMPARER_BASE_DIR   = comparerBasePath;
 };
 
 export const stashLayoutSettingsVariables = () => {
     originalVariables.TESTCAFE_DASHBOARD_LAYOUT_TESTING_ENABLED = process.env.TESTCAFE_DASHBOARD_LAYOUT_TESTING_ENABLED;
     originalVariables.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR     = process.env.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR;
     originalVariables.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR     = process.env.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR;
-    originalVariables.TESTCAFE_DASHBOARD_LT_COMPARER_BASE_DIR   = process.env.TESTCAFE_DASHBOARD_LT_COMPARER_BASE_DIR;
 };
 
 export const restoreLayoutSettingsVariables = () => {
     process.env.TESTCAFE_DASHBOARD_LAYOUT_TESTING_ENABLED = originalVariables.TESTCAFE_DASHBOARD_LAYOUT_TESTING_ENABLED;
     process.env.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR     = originalVariables.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR;
     process.env.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR     = originalVariables.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR;
-    process.env.TESTCAFE_DASHBOARD_LT_COMPARER_BASE_DIR   = originalVariables.TESTCAFE_DASHBOARD_LT_COMPARER_BASE_DIR;
 };
 
 export const clearLayoutSettingsVariables = () => {
     process.env.TESTCAFE_DASHBOARD_LAYOUT_TESTING_ENABLED = '';
     process.env.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR     = '';
     process.env.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR     = '';
-    process.env.TESTCAFE_DASHBOARD_LT_COMPARER_BASE_DIR   = '';
 };
