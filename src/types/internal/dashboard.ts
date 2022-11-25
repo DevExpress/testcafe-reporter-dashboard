@@ -70,7 +70,6 @@ export type LayoutTestingSettings = {
     outputRelativeDir: string;
     resultsRelativeDir: string;
     layoutTestingEnabled: boolean;
-    comparerBaseDir: string;
 };
 
 export type Logger = {

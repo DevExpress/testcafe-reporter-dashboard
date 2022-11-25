@@ -18,12 +18,6 @@ function escapeForRegExp (inputStr: string): string {
     return inputStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function makePathRelativeStartingWith (inputPath: string, startWith: string): string | undefined {
-    const relativePathMatch = inputPath.match(new RegExp(`\\${path.sep}(${escapeForRegExp(startWith)}.*)`)) ?? void 0;
-
-    return relativePathMatch && relativePathMatch[1];
-}
-
 function replaceLast (string: string, search: string, replace: string): string {
     return string.replace(new RegExp(`(${escapeForRegExp(search)})(?!.*\\1)`), replace);
 }
