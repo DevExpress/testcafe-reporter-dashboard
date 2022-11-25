@@ -8,6 +8,5 @@
     "branch": false
   },
   "confirm": false,
-  "publishTag": "rc",
   "prePublishScript": "npm test"
 }
