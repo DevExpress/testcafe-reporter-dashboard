@@ -3,8 +3,11 @@ import { getCIInfo } from './get-ci-info';
 
 const { env } = process;
 
+// TESTCAFE_DASHBOARD_DEVEXTREME_URL and TESTCAFE_DASHBOARD_DEVEXTREME_TOKEN contain a middle part '_DEVEXTREME_'
+// in 'testcafe-reporter-dashboard-devextreme' to avoid triggering 'testcafe-reporter-dashboard' built in TestCafe.
+
 export const ENABLE_LOG             = parseBooleanVariable(env.TESTCAFE_DASHBOARD_ENABLE_LOG);
-export const TESTCAFE_DASHBOARD_URL = env.TESTCAFE_DASHBOARD_URL || 'https://dashboard.testcafe.io';
+export const TESTCAFE_DASHBOARD_URL = env.TESTCAFE_DASHBOARD_DEVEXTREME_URL || 'https://dashboard.testcafe.io';
 
 export const NO_SCREENSHOT_UPLOAD = parseBooleanVariable(env.TESTCAFE_DASHBOARD_NO_SCREENSHOT_UPLOAD);
 export const NO_VIDEO_UPLOAD      = parseBooleanVariable(env.TESTCAFE_DASHBOARD_NO_VIDEO_UPLOAD);
@@ -13,7 +16,7 @@ export const LAYOUT_TESTING_ENABLED = parseBooleanVariable(env.TESTCAFE_DASHBOAR
 export const LT_SCREENSHOTS_DIR     = env.TESTCAFE_DASHBOARD_LT_SCREENSHOTS_DIR;
 export const LT_DESTINATION_DIR     = env.TESTCAFE_DASHBOARD_LT_DESTINATION_DIR;
 
-export const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = env.TESTCAFE_DASHBOARD_TOKEN;
+export const TESTCAFE_DASHBOARD_AUTHENTICATION_TOKEN = env.TESTCAFE_DASHBOARD_DEVEXTREME_TOKEN;
 export const TESTCAFE_DASHBOARD_BUILD_ID: string | undefined = env.TESTCAFE_DASHBOARD_BUILD_ID;
 
 export const REQUEST_RETRY_COUNT = parseNumber(env.TESTCAFE_DASHBOARD_REQUEST_RETRY_COUNT) || 20;
