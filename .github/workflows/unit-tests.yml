@@ -1,9 +1,8 @@
 name: Unit tests
 
 on:
-  workflow_dispatch:
   pull_request:
-    branches: [ master, alpha ]
+    branches: [ alpha ]
 
 env:
   VM_MEMORY: 2600
