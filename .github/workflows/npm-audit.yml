@@ -2,8 +2,9 @@
 name: Npm audit
 
 on:
-  pull_request_target:
-    branches: [ master ]
+  workflow_dispatch:
+  pull_request:
+    branches: [ master, alpha ]
 
 env:
   VM_MEMORY: 2600
