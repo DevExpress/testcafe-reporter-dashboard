@@ -1,8 +1,8 @@
 name: Unit tests
 
 on:
-  pull_request_target:
-    branches: [ master ]
+  pull_request:
+    branches: [ alpha ]
 
 env:
   VM_MEMORY: 2600
