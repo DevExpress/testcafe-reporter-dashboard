@@ -4,31 +4,27 @@ on:
   pull_request:
     branches: [ alpha ]
 
-env:
-  VM_MEMORY: 2600
-  VM_CPU: 1
-
 jobs:
   run:
-    runs-on: farm
+    name: ${{ matrix.args.name }}
+    runs-on: ${{ matrix.args.machineName }}
     strategy:
       matrix:
-        oses: [UBUNTU]
-    env:
-      VM_IMAGE: ${{ matrix.oses }}
+        args: [
+          { name: "Ubuntu", machineName: "ubuntu-latest" },
+          { name: "Windows", machineName: "windows-latest" }
+        ]
 
     steps:
       - name: Show ip
+        if: ${{ matrix.name == 'Ubuntu' }}
         run: ip addr show
-      - name: Clone
-        uses: ./../../checkout
-        with:
-          ref: ${{github.event.pull_request.head.sha}}
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '12.x'
-          registry-url: 'http://npmproxy:4873'
       - name: npm install
         run: npm install
       - name: Run Tests
