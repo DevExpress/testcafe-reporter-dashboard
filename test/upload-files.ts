@@ -241,7 +241,6 @@ describe('Uploads', () => {
             assert.equal(uploadInfos.length, 1);
             assert.equal(uploadedUrls.length, 1);
             assert.equal(uploadedFiles.length, 1);
-            assert.equal(uploadedFiles.length, 1);
 
             const { browserRuns } = JSON.parse(uploadedFiles[0].toString()) as DashboardTestRunInfo;
 
@@ -254,6 +253,49 @@ describe('Uploads', () => {
             assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
             assert.deepEqual(aggregateCommands[1].aggregateId, uploadInfos[0].uploadId);
             assert.deepEqual(aggregateCommands[1].payload, { status: UploadStatus.Completed });
+        });
+
+        it('Should send reportTestDone command if readFile method throws exception', async () => {
+            const screenshots: Screenshot[] = [{
+                testRunId:         testRunIdChrome,
+                screenshotPath:    'C:\\path_without_screenshot\\1.png',
+                thumbnailPath:     'C:\\path_without_screenshot\\thumbnails\\1.png',
+                userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
+                takenOnFail:       false,
+                quarantineAttempt: 0
+            }];
+
+            function readFile (): Promise<Buffer> {
+                throw new Error('Unknown file path');
+            }
+
+            const errors: string[] = [];
+            const loggerMock       = {
+                ...logger,
+                error: msg => {
+                    errors.push(msg);
+                }
+            };
+
+            const reporter = reporterObjectFactory(readFile, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
+
+            await reporter.reportTestDone('Test 1', {
+                ...EMPTY_TEST_RUN_INFO,
+                screenshots,
+                browsers: [ { ...CHROME, testRunId: testRunIdChrome } ]
+            });
+
+            assert.equal(uploadInfos.length, 2);
+            assert.equal(uploadedUrls.length, 1);
+            assert.equal(uploadedFiles.length, 1);
+
+            assert.equal(errors.length, 1);
+            assert.equal(errors[0], 'Unknown file path');
+
+            assert.equal(aggregateCommands.length, 2);
+            assert.equal(aggregateCommands[0].type, AggregateCommandType.reportTestDone);
+            assert.equal(aggregateCommands[1].type, AggregateCommandType.createUpload);
+            assert.equal(aggregateCommands[0].payload.uploadId, aggregateCommands[1].aggregateId);
         });
     });
 

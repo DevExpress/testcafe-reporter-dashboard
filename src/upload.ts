@@ -60,7 +60,16 @@ export class Uploader {
 
         if (!uploadInfo) return void 0;
 
-        const file = await this._readFile(filePath);
+        let file: Buffer | null = null;
+
+        try {
+            file = await this._readFile(filePath);
+        }
+        catch (e) {
+            this._logger.error(e.message);
+
+            return void 0;
+        }
 
         this._uploads.push(this._upload(uploadInfo, file, createFileUploadError(uploadInfo.uploadId, filePath)));
 
