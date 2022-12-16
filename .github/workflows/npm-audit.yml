@@ -1,4 +1,4 @@
-name: Npm audit
+name: Yarn audit
 
 on:
   pull_request:
@@ -17,5 +17,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-      - name: npm audit
-        run: npm audit
+      - name: Install Yarn
+        run: npm install -g yarn
+      - name: Yarn audit
+        run: yarn audit
