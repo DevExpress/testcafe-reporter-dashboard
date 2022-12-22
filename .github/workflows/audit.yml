@@ -1,8 +1,9 @@
 name: Audit
 
 on:
+  workflow_dispatch:
   pull_request:
-    branches: [ alpha ]
+    branches: [ master, devextreme-reporter-latest ]
 
 jobs:
   devDependencies:
