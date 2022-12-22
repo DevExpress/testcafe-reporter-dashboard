@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-dashboard",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0-rc.6",
   "description": "Dashboard TestCafe reporter plugin.",
   "author": {
     "name": "Developer Express Inc.",
@@ -58,7 +58,7 @@
     "io-ts": "^2.2.14",
     "io-ts-types": "^0.5.15",
     "isomorphic-fetch": "^3.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "monocle-ts": "^2.3.5",
     "newtype-ts": "^0.3.4",
     "semver": "^5.6.0",
@@ -66,6 +66,7 @@
   },
   "resolutions": {
     "lodash": "4.17.21",
-    "glob-parent": "5.1.2"
+    "glob-parent": "5.1.2",
+    "jsonwebtoken": "9.0.0"
   }
 }
