@@ -11,6 +11,7 @@ import { TC_OLDEST_COMPATIBLE_VERSION } from '../src/validate-settings';
 import { testWarningsInfo, WARNINGS_TEST_RUN_ID_1, WARNINGS_TEST_RUN_ID_2 } from './data/test-warnings-info';
 import path from 'path';
 import mock from 'mock-require';
+import { layoutTestingScreenshotActionInfo1, layoutTestingScreenshotActionInfo2, layoutTestingScreenshotActionInfo3, layoutTestingScreenshotActionInfo4, layoutTestingTestStartInfo } from './data/test-layout-testing-info';
 
 const testRunIdChrome = 'chrome_headless';
 const testRunId1 = 'testRun_1';
@@ -253,47 +254,56 @@ describe('Uploads', () => {
 
             const screenshots: Screenshot[] = [
                 {
-                    testRunId:         testRunIdChrome,
+                    testRunId:         'chrome_1',
                     screenshotPath:    screenshotPath1,
                     thumbnailPath:     thumbnailPath1,
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
                     takenOnFail:       false,
-                    quarantineAttempt: 0
+                    quarantineAttempt: 0,
+                    actionId:          'action1'
                 },
                 {
-                    testRunId:         testRunIdChrome,
+                    testRunId:         'chrome_1',
                     screenshotPath:    screenshotPath2,
                     thumbnailPath:     thumbnailPath2,
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
                     takenOnFail:       false,
-                    quarantineAttempt: 0
+                    quarantineAttempt: 0,
+                    actionId:          'action2'
                 },
                 {
-                    testRunId:         testRunIdChrome,
+                    testRunId:         'chrome_1',
                     screenshotPath:    screenshotPath3,
                     thumbnailPath:     thumbnailPath3,
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
                     takenOnFail:       true,
-                    quarantineAttempt: 0
+                    quarantineAttempt: 0,
+                    actionId:          'action3'
                 },
                 {
-                    testRunId:         testRunIdChrome,
+                    testRunId:         'chrome_1',
                     screenshotPath:    screenshotPath4,
                     thumbnailPath:     thumbnailPath4,
                     userAgent:         'Chrome_79.0.3945.88_Windows_8.1',
                     takenOnFail:       false,
-                    quarantineAttempt: 0
+                    quarantineAttempt: 0,
+                    actionId:          'action4'
                 }
             ];
 
             const reporter = reporterFactory(readFile, fileExists, fetch, SETTINGS, loggerMock, TC_OLDEST_COMPATIBLE_VERSION);
 
             await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
+            await reporter.reportTestStart('Test 1', {}, layoutTestingTestStartInfo);
+            await reporter.reportTestActionDone('takeScreenshot', layoutTestingScreenshotActionInfo1);
+            await reporter.reportTestActionDone('takeScreenshot', layoutTestingScreenshotActionInfo2);
+            await reporter.reportTestActionDone('takeScreenshot', layoutTestingScreenshotActionInfo3);
+            await reporter.reportTestActionDone('takeScreenshot', layoutTestingScreenshotActionInfo4);
 
             await reporter.reportTestDone('Test 1', {
                 ...EMPTY_TEST_RUN_INFO,
                 screenshots,
-                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_headless' } ],
+                browsers: [ { ...CHROME_HEADLESS, testRunId: 'chrome_1' } ],
                 fixture:  {
                     id:   'fixture1',
                     name: 'My fixture',
@@ -309,27 +319,31 @@ describe('Uploads', () => {
             assert.equal(runCommands[0].type, AggregateCommandType.reportTaskStart);
             assert.equal(runCommands[1].type, AggregateCommandType.reportTestDone);
 
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].path, screenshotPath1);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.current, uploadInfos[0].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.baseline, uploadInfos[1].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.diff, uploadInfos[2].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].ids.mask, uploadInfos[3].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].baselineSourcePath, 'testing/tests/suite1/etalons/1.png');
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[0].maskSourcePath, 'testing/tests/suite1/etalons/1_mask.png');
-            assert.ok(browserRuns['chrome_headless'].screenshotMap[0].comparisonFailed);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].path, screenshotPath2);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.current, uploadInfos[4].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.baseline, uploadInfos[5].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].ids.diff, uploadInfos[6].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].baselineSourcePath, 'testing/tests/suite1/etalons/2.png');
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[1].maskSourcePath, 'testing/tests/suite1/etalons/2_mask.png');
-            assert.ok(browserRuns['chrome_headless'].screenshotMap[1].comparisonFailed);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].path, screenshotPath3);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].ids.current, uploadInfos[7].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[2].comparisonFailed, false);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[3].path, screenshotPath4);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[3].ids.current, uploadInfos[8].uploadId);
-            assert.equal(browserRuns['chrome_headless'].screenshotMap[3].comparisonFailed, false);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].path, screenshotPath1);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].actionId, 'action1');
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].ids.current, uploadInfos[0].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].ids.baseline, uploadInfos[1].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].ids.diff, uploadInfos[2].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].ids.mask, uploadInfos[3].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].baselineSourcePath, 'testing/tests/suite1/etalons/1.png');
+            assert.equal(browserRuns['chrome_1'].screenshotMap[0].maskSourcePath, 'testing/tests/suite1/etalons/1_mask.png');
+            assert.ok(browserRuns['chrome_1'].screenshotMap[0].comparisonFailed);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].path, screenshotPath2);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].actionId, 'action2');
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].ids.current, uploadInfos[4].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].ids.baseline, uploadInfos[5].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].ids.diff, uploadInfos[6].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].baselineSourcePath, 'testing/tests/suite1/etalons/2.png');
+            assert.equal(browserRuns['chrome_1'].screenshotMap[1].maskSourcePath, 'testing/tests/suite1/etalons/2_mask.png');
+            assert.ok(browserRuns['chrome_1'].screenshotMap[1].comparisonFailed);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[2].path, screenshotPath3);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[2].actionId, 'action3');
+            assert.equal(browserRuns['chrome_1'].screenshotMap[2].ids.current, uploadInfos[7].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[2].comparisonFailed, false);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[3].path, screenshotPath4);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[3].actionId, 'action4');
+            assert.equal(browserRuns['chrome_1'].screenshotMap[3].ids.current, uploadInfos[8].uploadId);
+            assert.equal(browserRuns['chrome_1'].screenshotMap[3].comparisonFailed, false);
             assert.equal(runCommands[1].payload.uploadId, uploadInfos[9].uploadId);
 
             assert.equal(uploadInfos.length, 10);

@@ -17,7 +17,7 @@ import { DashboardTestRunInfo, TaskDoneArgs, TestDoneArgs } from '../../src/type
 import { mockFileExists, mockReadFile, SETTINGS, TESTCAFE_DASHBOARD_URL, UPLOAD_URL_PREFIX } from '../mocks';
 import { TC_OLDEST_COMPATIBLE_VERSION } from '../../src/validate-settings';
 import { WARNINGS_TEST_RUN_ID_1 } from '../data/test-warnings-info';
-import { layoutTestingActionInfo1, layoutTestingActionInfo2, layoutTestingTestDoneInfo, layoutTestingTestStartInfo } from '../data/test-layout-testing-info';
+import { layoutTestingScreenshotActionInfo1, layoutTestingClickActionInfo, layoutTestingTestDoneInfo, layoutTestingTestStartInfo } from '../data/test-layout-testing-info';
 
 describe('reportTestDone', () => {
     let testRunInfo           = {} as DashboardTestRunInfo;
@@ -210,8 +210,8 @@ describe('reportTestDone', () => {
         await reporter.reportTaskStart(new Date(), [], 1, [], { configuration: {}, dashboardUrl: '' });
         await reporter.reportTestStart('Test 1', {}, layoutTestingTestStartInfo);
 
-        await reporter.reportTestActionDone('takeScreenshot', layoutTestingActionInfo1);
-        await reporter.reportTestActionDone('click', layoutTestingActionInfo2);
+        await reporter.reportTestActionDone('takeScreenshot', layoutTestingScreenshotActionInfo1);
+        await reporter.reportTestActionDone('click', layoutTestingClickActionInfo);
 
         await reporter.reportTestDone('Test 1', layoutTestingTestDoneInfo);
 
@@ -226,7 +226,8 @@ describe('reportTestDone', () => {
                     current: 'upload_id'
                 },
                 path:             '%filePath%chrome_1_1.png',
-                comparisonFailed: false
+                comparisonFailed: false,
+                actionId:         'action1'
             },
             {
                 ids: {
