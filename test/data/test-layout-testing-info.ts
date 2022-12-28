@@ -5,7 +5,7 @@ import { CHROME } from './test-browser-info';
 const testRunId = 'chrome_1';
 const testId    = 'test1';
 
-export const layoutTestingActionInfo1 = {
+export const layoutTestingScreenshotActionInfo1 = {
     duration:  1000,
     browser:   CHROME,
     testRunId: testRunId,
@@ -21,7 +21,55 @@ export const layoutTestingActionInfo1 = {
     }
 };
 
-export const layoutTestingActionInfo2 = {
+export const layoutTestingScreenshotActionInfo2 = {
+    duration:  1000,
+    browser:   CHROME,
+    testRunId: testRunId,
+    test:      {
+        name:  'Test 1',
+        phase: TestPhase.inTest,
+        id:    testId
+    },
+    command: {
+        actionId: 'action2',
+        type:     CommandType.takeScreenshot,
+        selector: 'Selector(\'body\')'
+    }
+};
+
+export const layoutTestingScreenshotActionInfo3 = {
+    duration:  1000,
+    browser:   CHROME,
+    testRunId: testRunId,
+    test:      {
+        name:  'Test 1',
+        phase: TestPhase.inTest,
+        id:    testId
+    },
+    command: {
+        actionId: 'action3',
+        type:     CommandType.takeScreenshot,
+        selector: 'Selector(\'body\')'
+    }
+};
+
+export const layoutTestingScreenshotActionInfo4 = {
+    duration:  1000,
+    browser:   CHROME,
+    testRunId: testRunId,
+    test:      {
+        name:  'Test 1',
+        phase: TestPhase.inTest,
+        id:    testId
+    },
+    command: {
+        actionId: 'action4',
+        type:     CommandType.takeScreenshot,
+        selector: 'Selector(\'body\')'
+    }
+};
+
+export const layoutTestingClickActionInfo = {
     duration:  1000,
     browser:   CHROME,
     testRunId: testRunId,
@@ -60,7 +108,7 @@ export const layoutTestingTestDoneInfo: TestRunInfo = {
             userAgent:         '',
             quarantineAttempt: 1,
             takenOnFail:       true,
-            actionId:          layoutTestingActionInfo1.command.actionId
+            actionId:          layoutTestingScreenshotActionInfo1.command.actionId
         },
         {
             testRunId,

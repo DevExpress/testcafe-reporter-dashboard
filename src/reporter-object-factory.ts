@@ -259,20 +259,22 @@ export function reporterObjectFactory (
                     if (!currentUploadId)
                         continue;
 
-                    if (actionId) {
-                        const actions          = testRunToActionsMap[testRunId];
-                        const screenshotAction = actions?.find(action => action.command.actionId === actionId);
-
-                        if (screenshotAction)
-                            screenshotAction.screenshotPath = screenshotPath;
-                    }
-
                     const screenshotMapItem: ScreenshotMapItem = {
                         path: screenshotPath,
                         ids:  {
                             current: currentUploadId
                         }
                     };
+
+                    if (actionId) {
+                        const actions          = testRunToActionsMap[testRunId];
+                        const screenshotAction = actions?.find(action => action.command.actionId === actionId);
+
+                        if (screenshotAction) {
+                            screenshotAction.screenshotPath = screenshotPath;
+                            screenshotMapItem.actionId      = actionId;
+                        }
+                    }
 
                     if (comparisonFailed) {
                         const testPath                       = fixture.path;
