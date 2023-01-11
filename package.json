@@ -11,6 +11,10 @@
   "files": [
     "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevExpress/testcafe-reporter-dashboard"
+  },
   "scripts": {
     "lint": "eslint --ext .ts src test",
     "build": "gulp build",
