@@ -1,3 +1,6 @@
+## Discontinued
+This package is no longer actively maintained.
+
 # testcafe-reporter-dashboard
 This is the **dashboard** reporter plugin for [TestCafe](http://devexpress.github.io/testcafe).
 
